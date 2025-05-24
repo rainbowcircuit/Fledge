@@ -19,13 +19,16 @@ public:
     void stopNote();
     
     void setEnvelope(float attack, float decay, float sustain, float release, bool isLooping);
-    void setOperator(float frequency, float ratio, float fmAmount);
+    void setNoteNumber(float noteNumber);
+    void setOperator(float ratio, float fixed, bool isFixed, float modIndex);
     float processOperator(float modulatorPhase);
     
 private:
     double sampleRate;
     double operatorPhase = 0.0, operatorAngle = 0.0;
     float modulationIndex = 1.0f;
+    float noteFrequency, frequency, ratio, fixed;
+    bool isFixed = false;
     
     juce::ADSR ampEnvelope;
     juce::ADSR::Parameters envParameters;
@@ -48,9 +51,8 @@ public:
     {
         for (int i = 0; i < 4; i++)
         {
-            float freqInHz = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
             op[i].startNote();
-            op[i].setOperator(freqInHz, 1.0f, 10.0f);
+            op[i].setNoteNumber(midiNoteNumber);
         }
     }
     void stopNote(float velocity, bool allowTailOff) override
@@ -60,6 +62,17 @@ public:
             op[i].stopNote();
         }
     }
+    
+    void setEnvelope(int index, float attack, float decay, float sustain, float release)
+    {
+        op[index].setEnvelope(attack, decay, sustain, release, false);
+    }
+    
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float modIndex)
+    {
+        op[index].setOperator(ratio, fixed, isFixed, modIndex);
+    }
+    
     
     void pitchWheelMoved(int newPitchWheelValue) override {}
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
@@ -71,13 +84,14 @@ public:
             
             for(int sample = 0; sample < numSamples; ++sample)
             {
-                float operator2 = op[1].processOperator(0.0);
+                float operator4 = op[3].processOperator(0.0);
+                float operator3 = op[2].processOperator(operator4);
+                float operator2 = op[1].processOperator(operator3);
                 float operator1 = op[0].processOperator(operator2);
                 
                 channelData[sample] = operator1 * 0.5f;
             }
         }
-            
     }
 
 private:
