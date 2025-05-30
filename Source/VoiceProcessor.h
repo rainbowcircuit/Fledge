@@ -22,10 +22,12 @@ public:
     void setNoteNumber(float noteNumber);
     void setOperator(float ratio, float fixed, bool isFixed, float modIndex);
     float processOperator(float modulatorPhase);
+    void setFMInputs(float phaseIn1, float phaseIn2, float phaseIn3, float phaseInAmplitude1, float phaseInAmplitude2, float phaseInAmplitude3);
     
 private:
     double sampleRate;
     double operatorPhase = 0.0, operatorAngle = 0.0;
+    double prevInputSum = 0.0;
     float modulationIndex = 1.0f;
     float noteFrequency, frequency, ratio, fixed;
     bool isFixed = false;

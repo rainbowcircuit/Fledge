@@ -78,3 +78,11 @@ float FMOperator::processOperator(float modulatorPhase)
     return waveform;
 }
 
+void FMOperator::setFMInputs(float phaseIn1, float phaseIn2, float phaseIn3, float phaseInAmplitude1, float phaseInAmplitude2, float phaseInAmplitude3)
+{
+    float scaled1 = phaseIn1 * phaseInAmplitude1;
+    float scaled2 = phaseIn2 * phaseInAmplitude2;
+    float scaled3 = phaseIn3 * phaseInAmplitude3;
+
+    float fmOutput = scaled1 + scaled2 + scaled3 + frequency;
+}

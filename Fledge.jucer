@@ -19,7 +19,14 @@
       <FILE id="cqmG04" name="VoiceProcessor.h" compile="0" resource="0"
             file="Source/VoiceProcessor.h"/>
     </GROUP>
-    <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics"/>
+    <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics">
+      <FILE id="IvNHch" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
+      <FILE id="KfEJO5" name="Graphics.cpp" compile="1" resource="0" file="Source/Graphics.cpp"/>
+      <FILE id="OU6QA3" name="Graphics.h" compile="0" resource="0" file="Source/Graphics.h"/>
+      <FILE id="AzkLJo" name="UserInterface.h" compile="0" resource="0" file="Source/UserInterface.h"/>
+      <FILE id="aKJbwQ" name="UserInterface.cpp" compile="1" resource="0"
+            file="Source/UserInterface.cpp"/>
+    </GROUP>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

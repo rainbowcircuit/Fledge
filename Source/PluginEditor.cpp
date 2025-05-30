@@ -13,9 +13,11 @@
 FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (200, 200);
+    for (int oper = 0; oper < 4; oper++)
+    {
+        addAndMakeVisible(opInterface[oper]);
+    }
+    setSize (800, 800);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
@@ -32,6 +34,8 @@ void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 
 void FledgeAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    for (int oper = 0; oper < 4; oper++)
+    {
+        opInterface[oper].setBounds(300, oper * 100 + 200, 500, 100);
+    }
 }

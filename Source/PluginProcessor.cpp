@@ -137,8 +137,8 @@ bool FledgeAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+//    auto totalNumInputChannels  = getTotalNumInputChannels();
+  //  auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     for (int oper = 0; oper < 4; oper++){
         juce::String attackID = "attack" + juce::String(oper);
@@ -242,6 +242,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { fixedID, 1 }, fixedName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
         
+        juce::String opModeID = "opMode" + juce::String(oper);
+        juce::String opModeName = "Mode " + juce::String(oper);
+        
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { opModeID, 1 }, opModeName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
+
         juce::String modIndexID = "modIndex" + juce::String(oper);
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);
         
