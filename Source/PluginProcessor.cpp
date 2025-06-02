@@ -214,12 +214,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String attackID = "attack" + juce::String(oper);
         juce::String attackName = "Attack " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { attackID, 1 }, attackName, juce::NormalisableRange<float>(0.0f, 20.0f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { attackID, 1 }, attackName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
         
         juce::String decayID = "decay" + juce::String(oper);
         juce::String decayName = "Decay " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { decayID, 1 }, decayName, juce::NormalisableRange<float>(0.0f, 20.0f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { decayID, 1 }, decayName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
 
         juce::String sustainID = "sustain" + juce::String(oper);
         juce::String sustainName = "Sustain " + juce::String(oper);
@@ -229,13 +229,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String releaseID = "release" + juce::String(oper);
         juce::String releaseName = "Release " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { releaseID, 1 }, releaseName, juce::NormalisableRange<float>(0.0f, 20.0f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { releaseID, 1 }, releaseName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
         
         //******** Ratio and FM Amount ********//
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String ratioName = "Ratio " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { ratioID, 1 }, ratioName, juce::NormalisableRange<float>(0.0f, 20.0f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { ratioID, 1 }, ratioName, juce::NormalisableRange<float>(0.25f, 20.0f, 0.25f), 1.0f));
 
         juce::String fixedID = "fixed" + juce::String(oper);
         juce::String fixedName = "Fixed " + juce::String(oper);

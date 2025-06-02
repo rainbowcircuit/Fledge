@@ -9,6 +9,7 @@
 */
 
 #include "Graphics.h"
+/*
 void OperatorControlGraphics::paint(juce::Graphics &g)
 {
     auto bounds = getLocalBounds().toFloat();
@@ -101,3 +102,4 @@ void OperatorControlGraphics::mouseUp(const juce::MouseEvent &m)
     
     
 }
+*/

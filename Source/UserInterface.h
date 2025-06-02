@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "Graphics.h"
+#include "PluginProcessor.h"
 
 class MainInterface : public juce::Component
 {
@@ -26,7 +27,8 @@ private:
 class OperatorInterface : public juce::Component
 {
 public:
-    OperatorInterface();
+    OperatorInterface(FledgeAudioProcessor& p, int index);
+    
     void paint(juce::Graphics &g) override;
     void resized() override;
     void setSlider(juce::Slider &s, juce::Label &l, juce::String labelText);
@@ -39,8 +41,9 @@ private:
     juce::Label ratioLabel, fixedLabel, modIndexLabel, attackLabel, decayLabel, sustainLabel, releaseLabel;
     
     juce::Slider ratioSlider, fixedSlider, modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
-    
-    OperatorControlGraphics operGraphic;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, modIndexAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
+
+    FledgeAudioProcessor& audioProcessor;
 };
 
 

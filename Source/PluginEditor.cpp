@@ -15,20 +15,32 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        addAndMakeVisible(opInterface[oper]);
+        opInterface[oper] = std::make_unique<OperatorInterface>(audioProcessor, oper);
+        addAndMakeVisible(*opInterface[oper]);
     }
+    addAndMakeVisible(waveformDisplay);
+    
+    const auto params = audioProcessor.getParameters();
+    for (auto param : params){
+        param->addListener(this);
+    }
+
     setSize (800, 800);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params){
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
 void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(juce::Colour(140, 159, 149));
 
 }
 
@@ -36,6 +48,8 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper].setBounds(300, oper * 100 + 200, 500, 100);
+        opInterface[oper]->setBounds(300, oper * 100 + 200, 500, 100);
     }
+    waveformDisplay.setBounds(20, 20, 280, 500);
+
 }
