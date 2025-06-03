@@ -80,6 +80,22 @@ public:
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override
     {
+        for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
+            float operator4 = op[3].processOperator(0.0);
+            float operator3 = op[2].processOperator(operator4);
+            float operator2 = op[1].processOperator(operator3);
+            float operator1 = op[0].processOperator(operator2);
+            
+            float output = operator1 * 0.5f;
+
+            for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
+                outputBuffer.setSample(channel, sample, output);
+                
+            }
+        }
+/*
+        
+        
         for(int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
         {
             auto* channelData = outputBuffer.getWritePointer(channel);
@@ -94,7 +110,8 @@ public:
                 channelData[sample] = operator1 * 0.5f;
             }
         }
-    }
+ */
+}
 
 private:
     std::array<FMOperator, 4> op;

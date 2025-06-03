@@ -73,13 +73,13 @@ public:
             {
                 
 
-                float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
-                float sin1 = amp1 * op[0].modIndex * fastSin.sin(((i/40.7f) * op[1].ratio) + sin2);
+                float sin2 = amp2 * op[1].modIndex * 10.0f * fastSin.sin((i/40.7f) * op[2].ratio);
+                float sin1 = amp1 * op[0].modIndex * 10.0f * fastSin.sin(((i/40.7f) * op[1].ratio) + sin2);
                 float sin = amp0 * fastSin.sin(((i/40.7f) * op[0].ratio) + sin1);
                 
                 
                 graphicLines.lineTo(bounds.getX() + widthIncrement * i,
-                                    (height + bounds.getHeight()/envelopeSegments) + sin * bounds.getHeight()/envelopeSegments);
+                                    (height + bounds.getHeight()/envelopeSegments) + sin * bounds.getHeight()/(envelopeSegments * 0.5f));
                 
             }
         }
@@ -133,29 +133,35 @@ private:
         float ratio, fixed, modIndex;
         bool isRatio;
         float attack = 3000.0f, decay = 1000.0f, sustain = 1.0f, release = 5000.0f;
-        int attackSegment, decaySegment, releaseSegment;
+        float attackSegment, decaySegment, releaseSegment;
         
-        float generateAmplitude(int segmentIndex)
+        float generateAmplitude(float segmentIndex)
         {
-            float amplitude;
-            for (int i = 0; i < 72; i++)
+            float amplitude = 0.0f;
+
+            if (segmentIndex <= attackSegment && attackSegment > 0)
             {
-                if (segmentIndex <= attackSegment){
-                    float attackIncr = 1.0f/attackSegment;
-                    amplitude = attackIncr * segmentIndex;
-                    
-                } else if (segmentIndex > attackSegment && segmentIndex <= attackSegment + decaySegment){
-                    float decayIncr = 1.0f/decaySegment;
-                    
-                    segmentIndex = (decaySegment - segmentIndex) + attackSegment; // offset out the attacksegment
-                    amplitude = decayIncr * segmentIndex;
-                    
-                } else if (segmentIndex > attackSegment + decaySegment) {
-                    float releaseIncr = sustain/releaseSegment;
-                    
-                    segmentIndex = (releaseSegment - segmentIndex) + attackSegment + decaySegment;
-                    amplitude = releaseIncr * segmentIndex;
-                }
+                amplitude = segmentIndex / attackSegment;
+            }
+            else if (segmentIndex > attackSegment && segmentIndex <= attackSegment + decaySegment && decaySegment > 0)
+            {
+                int decayIndex = segmentIndex - attackSegment;
+                float decayProgress = decayIndex / decaySegment;
+                amplitude = 1.0f + decayProgress * (sustain - 1.0f); // linear interpolation from 1 to sustain
+            }
+            else if (segmentIndex > attackSegment + decaySegment && segmentIndex <= attackSegment + decaySegment + releaseSegment && releaseSegment > 0)
+            {
+                int releaseIndex = segmentIndex - attackSegment - decaySegment;
+                float releaseProgress = releaseIndex / releaseSegment;
+                amplitude = sustain * (1.0f - releaseProgress);
+            }
+            else if (segmentIndex > attackSegment + decaySegment + releaseSegment)
+            {
+                amplitude = 0.0f;
+            }
+            else
+            {
+                amplitude = sustain;
             }
             return amplitude;
         }
