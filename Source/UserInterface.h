@@ -55,3 +55,45 @@ public:
 private:
     
 };
+
+
+
+
+
+
+
+
+
+
+class PracticeDialGraphics : public juce::LookAndFeel_V4
+{
+public:
+    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override
+    {
+        g.fillAll(juce::Colour(255, 255, 255));
+        
+        for (int i = 0 ; i < 6; i++)
+        {
+            float lineIncr = (height/6) * sliderPosProportional * i;
+            
+            juce::Point<float> leftCoords = { (float)x, (float)y + lineIncr };
+            juce::Point<float> rightCoords = { (float)x + width, (float)y + lineIncr };
+            
+            juce::Path linePath;
+            linePath.startNewSubPath(leftCoords);
+            linePath.lineTo(rightCoords);
+            
+            g.setColour(juce::Colour(155, 155, 155));
+            
+            if (slider.isMouseOverOrDragging())
+            {
+                g.setColour(juce::Colour(200, 200, 200));
+            }
+            
+            g.strokePath(linePath, juce::PathStrokeType(1.0f));
+        }
+    }
+
+private:
+    
+};

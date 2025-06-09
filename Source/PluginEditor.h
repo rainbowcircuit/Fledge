@@ -53,9 +53,14 @@ public:
 
 
 private:
+    PracticeDialGraphics practiceLookAndFeel;
+    juce::Slider practiceSlider;
+    
+        
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     WaveformDisplayGraphics waveformDisplay;
     FledgeAudioProcessor& audioProcessor;
 
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessorEditor)
 };

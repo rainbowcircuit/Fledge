@@ -12,27 +12,6 @@
 #include <JuceHeader.h>
 #include <cmath>
 
-/*
-class OperatorControlGraphics : public juce::Component
-{
-public:
-    void paint(juce::Graphics &g) override;
-    void resized() override;
-    
-    void setParameters(bool isRatio, float ratio, float fixed, float modIndex);
-    
-    void mouseDown(const juce::MouseEvent &m) override;
-    void mouseDrag(const juce::MouseEvent &m) override;
-    void mouseUp(const juce::MouseEvent &m) override;
-    
-private:
-    bool isRatio;
-    float freq = 1.0f, amount = 1.0f; // testVariables
-    
-    float ratio, fixed, modIndex;
-};
-*/
-
 
 class WaveformDisplayGraphics : public juce::Component
 {
@@ -73,8 +52,8 @@ public:
             {
                 
 
-                float sin2 = amp2 * op[1].modIndex * 10.0f * fastSin.sin((i/40.7f) * op[2].ratio);
-                float sin1 = amp1 * op[0].modIndex * 10.0f * fastSin.sin(((i/40.7f) * op[1].ratio) + sin2);
+                float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
+                float sin1 = amp1 * op[0].modIndex * fastSin.sin(((i/40.7f) * op[1].ratio) + sin2);
                 float sin = amp0 * fastSin.sin(((i/40.7f) * op[0].ratio) + sin1);
                 
                 
@@ -104,7 +83,7 @@ public:
     {
         op[index].attack = attack * 1000.0f;
         op[index].decay = decay * 1000.0f;
-        op[index].sustain = sustain / 100.0f;
+        op[index].sustain = sustain / 10.0f;
         op[index].release = release * 1000.0f;
         
         calculateEnvelopeSegments();
