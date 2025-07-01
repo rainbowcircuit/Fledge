@@ -43,6 +43,7 @@ private:
     juce::Slider ratioSlider, fixedSlider, modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, modIndexAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
 
+    EnvelopeDisplayGraphics envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 

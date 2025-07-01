@@ -12,6 +12,92 @@
 #include <JuceHeader.h>
 #include <cmath>
 
+class EnvelopeDisplayGraphics : public juce::Component
+{
+public:
+    EnvelopeDisplayGraphics()
+    {
+        
+    }
+    
+    void paint(juce::Graphics &g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        float x = bounds.getX();
+        float y = bounds.getY();
+        float width = bounds.getWidth() * 0.9f;
+        float height = bounds.getHeight() * 0.9f;
+        float widthMargin = bounds.getWidth() * 0.05f;
+        float heightMargin = bounds.getHeight() * 0.05f;
+        
+        handles[0].coords = { x, y + height }; // initial
+        handles[1].coords = { x + width * 0.1f, y + height * 0.5f }; // attack
+        handles[2].coords = { x + width * 0.2f, y };
+        handles[3].coords = { x + width * 0.3f, y + height * 0.25f }; // sustain start
+        handles[4].coords = { x + width * 0.4f, y + height * 0.5f }; // sustain start
+        handles[5].coords = { x + width * 0.8f, y + height * 0.5f }; // // sustain end
+        handles[6].coords = { x + width * 0.9f, y + height * 0.75f }; // // sustain end
+        handles[7].coords = { x + width, y + height };
+
+        drawSegment(g, x + widthMargin, y + heightMargin, width, height);
+        
+        for (int i = 0; i < 8; i++)
+        {
+            if (i != 5)
+            handles[i].drawHandles(g);
+        }
+    }
+    
+    void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
+    {
+
+        juce::Path envelopePath;
+        envelopePath.startNewSubPath(handles[0].coords);
+        envelopePath.cubicTo(handles[1].coords, handles[1].coords, handles[2].coords);
+
+        
+        envelopePath.lineTo(handles[4].coords);
+        envelopePath.lineTo(handles[5].coords);
+        envelopePath.lineTo(handles[7].coords);
+        g.setColour(juce::Colour(255, 255, 255));
+        g.strokePath(envelopePath, juce::PathStrokeType(2.0f));
+
+        
+        
+        
+        
+        
+    }
+    
+    
+private:
+    float attack, decay, sustain, release;
+
+    struct Handle
+    {
+        juce::Point<float> coords;
+        bool isMouseOver;
+        
+        bool isOver(juce::Point<float>& m)
+        {
+            juce::Rectangle handle(coords.x - 5.0f, coords.y - 5.0f, 10.0f, 10.0f);
+            return (handle.contains(m));
+        }
+        
+        void drawHandles(juce::Graphics &g)
+        {
+            juce::Path handlePath;
+            handlePath.addRoundedRectangle(coords.x - 3.0f, coords.y - 3.0f, 6.0f, 6.0f, 1.5f);
+            g.setColour(juce::Colour(255, 255, 255)); // change via hover
+            g.strokePath(handlePath, juce::PathStrokeType(1.0f));
+        }
+    };
+    
+    std::array<Handle, 8> handles;
+    // initial, attack, peak, decay, sustain start, sustain end, release, final
+
+};
+
 
 class WaveformDisplayGraphics : public juce::Component
 {

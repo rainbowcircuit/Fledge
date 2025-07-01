@@ -264,7 +264,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String modIndexID = "modIndex" + juce::String(oper);
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f), 0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f), 0.0f));
     }
 
     return layout;

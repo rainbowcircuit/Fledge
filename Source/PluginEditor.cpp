@@ -55,10 +55,10 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(300, oper * 100 + 200, 500, 100);
+        opInterface[oper]->setBounds(300, oper * 150 + 100, 500, 150);
     }
     practiceSlider.setBounds(300, 650, 100, 100);
     
-    waveformDisplay.setBounds(20, 20, 280, 500);
+    waveformDisplay.setBounds(20, 100, 280, 600);
 
 }
