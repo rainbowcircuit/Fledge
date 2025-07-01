@@ -32,7 +32,8 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "release" + juce::String(index), releaseSlider);
 
     addAndMakeVisible(envGraphics);
-    
+    addAndMakeVisible(opGraphics);
+
 }
 
 
@@ -75,7 +76,8 @@ void OperatorInterface::resized()
     releaseSlider.setBounds(x + sliderSize * 5, y + labelHeight, sliderSize, sliderSize);
     */
     
-    envGraphics.setBounds(x + sliderSize * 2, y + labelHeight, sliderSize * 2, sliderSize);
+    envGraphics.setBounds(x + sliderSize * 4, y + labelHeight, sliderSize * 2, sliderSize);
+    opGraphics.setBounds(x + sliderSize * 2, y + labelHeight, sliderSize * 2, sliderSize);
 }
 
 void OperatorInterface::setSlider(juce::Slider &s, juce::Label &l, juce::String labelText)
