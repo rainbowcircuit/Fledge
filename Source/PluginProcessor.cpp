@@ -140,6 +140,11 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 //    auto totalNumInputChannels  = getTotalNumInputChannels();
   //  auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    float globalAttack = apvts.getRawParameterValue("globalAttack")->load();
+    float globalDecay = apvts.getRawParameterValue("globalDecay")->load();
+    float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
+    float globalRelease = apvts.getRawParameterValue("globalRelease")->load();
+    
     for (int oper = 0; oper < 4; oper++){
         juce::String attackID = "attack" + juce::String(oper);
         juce::String decayID = "decay" + juce::String(oper);
@@ -163,7 +168,8 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         {
             if(auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(v)))
             {
-                voice->setEnvelope(oper, attack, decay, sustain/100.0f, release);
+                voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
+                                   globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
             }
         }
@@ -208,6 +214,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+
     for (int oper = 0; oper < 4; oper++)
     {
         //******** Envelope Controls ********//

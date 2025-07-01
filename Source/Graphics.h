@@ -46,20 +46,23 @@ public:
 
             
             float height = bounds.getY() + heightIncrement * j;
-            graphicLines.startNewSubPath(bounds.getX(), height + bounds.getHeight()/envelopeSegments);
+            graphicLines.startNewSubPath(bounds.getX(), height + bounds.getHeight() * 0.005f);
 
             for (int i = 0; i < domainResolution; i++)
             {
+             //   float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
                 
-
-                float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
-                float sin1 = amp1 * op[0].modIndex * fastSin.sin(((i/40.7f) * op[1].ratio) + sin2);
-                float sin = amp0 * fastSin.sin(((i/40.7f) * op[0].ratio) + sin1);
+                float sin2Phase = fmodf(((i/40.7f) * op[1].ratio) + 0.0f, 6.28318f);
+                float sin2 = amp2 * op[1].modIndex * fastSin.sin(sin2Phase);
                 
+                float sin1Phase = fmodf(((i/40.7f) * op[1].ratio) + sin2, 6.28318f);
+                float sin1 = amp1 * op[0].modIndex * fastSin.sin(sin1Phase);
+                
+                float sin0Phase = fmodf(((i/40.7f) * op[0].ratio) + sin1, 6.28318f);
+                float sin = amp0 * fastSin.sin(sin0Phase);
                 
                 graphicLines.lineTo(bounds.getX() + widthIncrement * i,
-                                    (height + bounds.getHeight()/envelopeSegments) + sin * bounds.getHeight()/(envelopeSegments * 0.5f));
-                
+                                    (height + bounds.getHeight()/envelopeSegments) + sin * bounds.getHeight() * 0.005f);
             }
         }
         graphicLines = graphicLines.createPathWithRoundedCorners(4.0f);
@@ -67,7 +70,6 @@ public:
         g.strokePath(graphicLines, juce::PathStrokeType(1));
     }
     
-
     
     void resized() override {};
     

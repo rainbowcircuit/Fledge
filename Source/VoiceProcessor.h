@@ -21,7 +21,7 @@ public:
     void setEnvelope(float attack, float decay, float sustain, float release, bool isLooping);
     void setNoteNumber(float noteNumber);
     void setOperator(float ratio, float fixed, bool isFixed, float modIndex);
-    float processOperator(float modulatorPhase);
+    float processOperator(float modulatorPhase1, float modulatorPhase2, float modulatorPhase3, float modulatorPhase4);
     void setFMInputs(float phaseIn1, float phaseIn2, float phaseIn3, float phaseInAmplitude1, float phaseInAmplitude2, float phaseInAmplitude3);
     
 private:
@@ -42,6 +42,7 @@ class SynthVoice : public juce::SynthesiserVoice
 public:
     void prepareToPlay(double sampleRate, float samplesPerBlock, int numChannels)
     {
+        this->sampleRate = sampleRate;
         for (int i = 0; i < 4; i++)
         {
             op[i].prepareToPlay(sampleRate, samplesPerBlock, numChannels);
@@ -49,6 +50,7 @@ public:
     }
     
     bool canPlaySound(juce::SynthesiserSound *) override { return 1; }
+
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) override
     {
         for (int i = 0; i < 4; i++)
@@ -56,7 +58,12 @@ public:
             op[i].startNote();
             op[i].setNoteNumber(midiNoteNumber);
         }
+        float frequency = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
+        
+        auto tableSizeOverSampleRate = (float)outputWavetable.getNumSamples()/sampleRate;
+        tableDelta = frequency * tableSizeOverSampleRate;
     }
+    
     void stopNote(float velocity, bool allowTailOff) override
     {
         for (int i = 0; i < 4; i++)
@@ -65,9 +72,18 @@ public:
         }
     }
     
-    void setEnvelope(int index, float attack, float decay, float sustain, float release)
+    void setEnvelope(int index, float attack, float decay, float sustain, float release, float globalAttack, float globalDecay, float globalSustain, float globalRelease)
     {
-        op[index].setEnvelope(attack, decay, sustain, release, false);
+        float attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
+        float decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
+        float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * sustain;
+        sustainScaled = juce::jlimit(0.0f, 1.0f, sustainScaled);
+        float releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
+
+        op[index].setEnvelope(attackScaled,
+                              decayScaled,
+                              sustainScaled,
+                              releaseScaled, false);
     }
     
     void setFMParameters(int index, float ratio, float fixed, bool isFixed, float modIndex)
@@ -81,41 +97,65 @@ public:
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override
     {
         for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
-            float operator4 = op[3].processOperator(0.0);
-            float operator3 = op[2].processOperator(operator4);
-            float operator2 = op[1].processOperator(operator3);
-            float operator1 = op[0].processOperator(operator2);
+            op4 = op[3].processOperator(op1, op2, op3, op4);
+            op3 = op[2].processOperator(op1, op2, op3, op4);
+            op2 = op[1].processOperator(op1, op2, op3, op4);
+            op1 = op[0].processOperator(op1, op2, op3, op4);
             
-            float output = operator1 * 0.5f;
+            float output = op1 * 0.5f;
 
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
                 outputBuffer.setSample(channel, sample, output);
                 
             }
         }
-/*
+    }
+    
+    void createWavetable()
+    {
+        outputWavetable.setSize(1, (int) tableSize);
+        auto* samples = outputWavetable.getWritePointer(0);
         
-        
-        for(int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
+        for (unsigned int i = 0; i < tableSize; ++i)
         {
-            auto* channelData = outputBuffer.getWritePointer(channel);
+            op4 = op[3].processOperator(op1, op2, op3, op4);
+            op3 = op[2].processOperator(op1, op2, op3, op4);
+            op2 = op[1].processOperator(op1, op2, op3, op4);
+            op1 = op[0].processOperator(op1, op2, op3, op4);
             
-            for(int sample = 0; sample < numSamples; ++sample)
-            {
-                float operator4 = op[3].processOperator(0.0);
-                float operator3 = op[2].processOperator(operator4);
-                float operator2 = op[1].processOperator(operator3);
-                float operator1 = op[0].processOperator(operator2);
-                
-                channelData[sample] = operator1 * 0.5f;
-            }
+            float output = op1 * 0.5f;
+
+            samples[i] = output;
         }
- */
-}
+    }
+    
+    forcedinline float getNextSample()
+    {
+        auto tableSize = (unsigned int)outputWavetable.getNumSamples();
+        auto index0 = (unsigned int) currentIndex;
+        auto index1 = index0 == (tableSize - 1) ? 0 : index0 + 1;
+        auto frac = currentIndex - (float) index0;
+        
+        auto* table = outputWavetable.getReadPointer(0);
+        auto value0 = table[index0];
+        auto value1 = table[index1];
+
+        auto currentSample = value0 + frac * (value1 - value0);
+        if ((currentIndex += tableDelta) > (float)tableSize)
+        {
+            currentIndex -= (float)tableSize;
+        }
+        
+        return currentSample;
+    }
 
 private:
+    double sampleRate;
+    float op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, op4 = 0.0f; // unit delays for algorithm
     std::array<FMOperator, 4> op;
-    
+    juce::AudioSampleBuffer outputWavetable;
+    int tableSize = 128;
+    float tableDelta, currentIndex, tableSizeOverSampleRate;
 };
 
 class SynthSound : public juce::SynthesiserSound
