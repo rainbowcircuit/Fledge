@@ -4,6 +4,10 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyName="Rainbow Circuit"
               version="1.0.0" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="HjcJ18" name="Fledge">
+    <GROUP id="{E95012C8-BA53-E04B-38D3-3734F17061CD}" name="Utility">
+      <FILE id="UZk6lh" name="Presets.cpp" compile="1" resource="0" file="Source/Presets.cpp"/>
+      <FILE id="DEaSpT" name="Presets.h" compile="0" resource="0" file="Source/Presets.h"/>
+    </GROUP>
     <GROUP id="{5D77C634-74F4-E6F7-5EEB-0A252B295FE3}" name="Source">
       <FILE id="R5Cc33" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
@@ -14,12 +18,18 @@
       <FILE id="ulrSI4" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
     <GROUP id="{A05BF710-3583-6F29-F5BF-FA1E55BAD1A2}" name="DSP">
+      <FILE id="ZfUABZ" name="Operator.cpp" compile="1" resource="0" file="Source/Operator.cpp"/>
+      <FILE id="oZXitA" name="Operator.h" compile="0" resource="0" file="Source/Operator.h"/>
       <FILE id="Nh7pGO" name="VoiceProcessor.cpp" compile="1" resource="0"
             file="Source/VoiceProcessor.cpp"/>
       <FILE id="cqmG04" name="VoiceProcessor.h" compile="0" resource="0"
             file="Source/VoiceProcessor.h"/>
     </GROUP>
     <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics">
+      <FILE id="A1BgkZ" name="DialLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/DialLookAndFeel.cpp"/>
+      <FILE id="cjB0Nl" name="DialLookAndFeel.h" compile="0" resource="0"
+            file="Source/DialLookAndFeel.h"/>
       <FILE id="IvNHch" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
       <FILE id="KfEJO5" name="Graphics.cpp" compile="1" resource="0" file="Source/Graphics.cpp"/>
       <FILE id="OU6QA3" name="Graphics.h" compile="0" resource="0" file="Source/Graphics.h"/>
@@ -67,5 +77,26 @@
         <MODULEPATH id="juce_gui_extra" path="../../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="~/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="~/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
   </EXPORTFORMATS>
 </JUCERPROJECT>

@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include <cmath>
+#include "LookAndFeel.h"
 
 class OperatorDisplayGraphics : public juce::Component
 {
@@ -19,12 +20,30 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
+        
+        juce::Path bgFill;
+        bgFill.addRoundedRectangle(bounds, 5.0f);
+        g.setColour(juce::Colour(36, 35, 34));
+        g.fillPath(bgFill);
+
         float x = bounds.getX();
         float y = bounds.getY();
-        float width = bounds.getWidth() * 0.9f;
-        float height = bounds.getHeight() * 0.9f;
+        float width = bounds.getWidth();
+        float height = bounds.getHeight();
 
+        juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + width * 0.2f, width * 0.9f, height * 0.75f, 1.0f, 1.0f);
+        g.setColour(juce::Colour(200, 200, 200));
+        g.strokePath(bgWaveform, strokeType);
         
+        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + width * 0.2f, width * 0.9f, height * 0.75f, ratio, modIndex/10.0f);
+        g.setColour(juce::Colour(255, 255, 255));
+        g.strokePath(fgWaveform, strokeType);
+
+    }
+    
+    juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp)
+    {
         juce::Path graphicPath;
         graphicPath.startNewSubPath(x, y + height/2);
         int domainResolution = 128;
@@ -32,27 +51,28 @@ public:
         for (int i = 0; i < domainResolution; i++)
         {
             
-            float sin = 1.0f * std::sin((i/40.7f) * 2);
-            graphicPath.lineTo(x + widthIncrement * i, (y + height/2) + (height * sin/2));
+            float sin = 1.0f * std::sin((i/40.7f) * freq * 2.0f);
+            graphicPath.lineTo(x + widthIncrement * i, (y + height/2) + (height * sin/2) * amp);
         }
     
         graphicPath = graphicPath.createPathWithRoundedCorners(4.0f);
-        g.setColour(juce::Colour(255, 255, 255));
-        g.strokePath(graphicPath, juce::PathStrokeType(2));
+        return graphicPath;
     }
     
     void resized() override
     {
     }
     
-    void setRatioAndAmplitude(float ratio, float amplitude)
+    void setRatioAndAmplitude(float ratio, float fixed, float modIndex, bool isRatio)
     {
         this->ratio = ratio;
-        this->amplitude = amplitude;
+        this->fixed = fixed;
+        this->modIndex = modIndex;
+        repaint();
     }
     
 private:
-    float ratio, amplitude;
+    float ratio, fixed, modIndex;
 };
 
 
@@ -70,6 +90,12 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
+        
+        juce::Path bgFill;
+        bgFill.addRoundedRectangle(bounds, 5.0f);
+        g.setColour(juce::Colour(36, 35, 34));
+        g.fillPath(bgFill);
+
         float x = bounds.getX();
         float y = bounds.getY();
         float width = bounds.getWidth() * 0.9f;
@@ -77,7 +103,6 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.05f;
         
-
         drawSegment(g, x + widthMargin, y + heightMargin, width, height);
         
         for (int i = 0; i < 8; i++)
@@ -124,7 +149,8 @@ public:
         envelopePath.lineTo(handles[5].coords.x, handles[4].coords.y);
         envelopePath.cubicTo(handles[6].coords, handles[6].coords, handles[7].coords);
         g.setColour(juce::Colour(255, 255, 255));
-        g.strokePath(envelopePath, juce::PathStrokeType(2.0f));
+        juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        g.strokePath(envelopePath, strokeType);
     }
 
     void mouseDown(const juce::MouseEvent &m) override
@@ -178,7 +204,7 @@ private:
         {
             juce::Path handlePath;
             handlePath.addRoundedRectangle(coords.x - 3.0f, coords.y - 3.0f, 6.0f, 6.0f, 1.5f);
-            g.setColour(juce::Colour(255, 255, 255));  // change via hover
+            g.setColour(juce::Colour(200, 200, 200));  // change via hover
             g.strokePath(handlePath, juce::PathStrokeType(1.0f));
         }
     };
@@ -200,7 +226,15 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
-                
+
+        juce::Path bgFill;
+        bgFill.addRoundedRectangle(bounds, 5.0f);
+        g.setColour(juce::Colour(36, 159, 208));
+        g.fillPath(bgFill);
+        
+        float x = bounds.getX();
+        float y = bounds.getY();
+        float height = bounds.getHeight();
         float graphicWidth = bounds.getWidth() * 0.9f;
         float graphicHeight = bounds.getHeight() * 0.9f;
         float widthMargin = bounds.getWidth() * 0.05f;
@@ -221,8 +255,8 @@ public:
             float amp0 = op[0].generateAmplitude(k);
 
             
-            float height = bounds.getY() + heightIncrement * j;
-            graphicLines.startNewSubPath(bounds.getX(), height + bounds.getHeight() * 0.005f);
+            float heightScaled = y + heightMargin + heightIncrement * j;
+            graphicLines.startNewSubPath(x + widthMargin, heightScaled + height * 0.005f);
 
             for (int i = 0; i < domainResolution; i++)
             {
@@ -237,13 +271,15 @@ public:
                 float sin0Phase = fmodf(((i/40.7f) * op[0].ratio) + sin1, 6.28318f);
                 float sin = amp0 * fastSin.sin(sin0Phase);
                 
-                graphicLines.lineTo(bounds.getX() + widthIncrement * i,
-                                    (height + bounds.getHeight()/envelopeSegments) + sin * bounds.getHeight() * 0.005f);
+                graphicLines.lineTo(x + widthMargin + widthIncrement * i,
+                                    (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
             }
         }
-        graphicLines = graphicLines.createPathWithRoundedCorners(4.0f);
+        
+        graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
         g.setColour(juce::Colour(255, 255, 255));
-        g.strokePath(graphicLines, juce::PathStrokeType(1));
+        juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        g.strokePath(graphicLines, strokeType);
     }
     
     

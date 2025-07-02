@@ -47,7 +47,7 @@ FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
 void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(juce::Colour(140, 159, 149));
+    g.fillAll(juce::Colour(235, 235, 235));
 
 }
 

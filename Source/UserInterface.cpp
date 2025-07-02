@@ -9,6 +9,7 @@
 */
 
 #include "UserInterface.h"
+
 OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audioProcessor(p)
 {
     this->index = index;
@@ -33,7 +34,7 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
 
     addAndMakeVisible(envGraphics);
     addAndMakeVisible(opGraphics);
-
+    startTimerHz(30);
 }
 
 
@@ -43,8 +44,11 @@ void OperatorInterface::paint(juce::Graphics &g)
     auto bounds = getLocalBounds().toFloat();
     bounds.reduce(5, 5);
     
-    g.setColour(juce::Colour(120, 120, 120));
-    g.fillRoundedRectangle(bounds, 10);
+    juce::Path boundsPath;
+    boundsPath.addRoundedRectangle(bounds, 5, 5);
+    
+    g.setColour(juce::Colour(36, 159, 208));
+    g.fillPath(boundsPath);
 }
 
 void OperatorInterface::resized()
@@ -62,11 +66,13 @@ void OperatorInterface::resized()
     
     ratioLabel.setBounds(x, y, sliderSize, labelHeight);
     modIndexLabel.setBounds(x + sliderSize, y, sliderSize, labelHeight);
+    /*
     attackLabel.setBounds(x + sliderSize * 2, y, sliderSize, labelHeight);
     decayLabel.setBounds(x + sliderSize * 3, y, sliderSize, labelHeight);
     sustainLabel.setBounds(x + sliderSize * 4, y, sliderSize, labelHeight);
     releaseLabel.setBounds(x + sliderSize * 5, y, sliderSize, labelHeight);
-
+*/
+    
     ratioSlider.setBounds(x, y + labelHeight, sliderSize, sliderSize);
     modIndexSlider.setBounds(x + sliderSize, y + labelHeight, sliderSize, sliderSize);
     /*
@@ -76,8 +82,8 @@ void OperatorInterface::resized()
     releaseSlider.setBounds(x + sliderSize * 5, y + labelHeight, sliderSize, sliderSize);
     */
     
-    envGraphics.setBounds(x + sliderSize * 4, y + labelHeight, sliderSize * 2, sliderSize);
-    opGraphics.setBounds(x + sliderSize * 2, y + labelHeight, sliderSize * 2, sliderSize);
+    envGraphics.setBounds(x + sliderSize * 4 + 20, y + labelHeight, sliderSize * 2, sliderSize * 1.5f);
+    opGraphics.setBounds(x + sliderSize * 2, y + labelHeight, sliderSize * 2, sliderSize * 1.5f);
 }
 
 void OperatorInterface::setSlider(juce::Slider &s, juce::Label &l, juce::String labelText)
@@ -85,13 +91,24 @@ void OperatorInterface::setSlider(juce::Slider &s, juce::Label &l, juce::String 
     addAndMakeVisible(s);
     s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50.0f, 10.0f); // for now
-  // slider.setLookAndFeel(nullptr);
+    s.setLookAndFeel(&dialLAF);
     
     addAndMakeVisible(l);
     l.setText(labelText, juce::NotificationType::dontSendNotification);
 }
 
+
 void OperatorInterface::setIndex(int index)
 {
     this->index = index;
+}
+
+void OperatorInterface::timerCallback()
+{
+    float ratio = audioProcessor.apvts.getRawParameterValue("ratio" + juce::String(index))->load();
+    float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
+    float modIndex = audioProcessor.apvts.getRawParameterValue("modIndex" + juce::String(index))->load();
+    bool opMode = audioProcessor.apvts.getRawParameterValue("opMode" + juce::String(index))->load();
+    
+    opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
 }

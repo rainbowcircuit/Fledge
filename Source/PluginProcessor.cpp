@@ -96,6 +96,7 @@ void FledgeAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 {
     synth.addSound(new SynthSound());
     synth.addVoice(new SynthVoice());
+    synth.setNoteStealingEnabled(true);
     synth.setCurrentPlaybackSampleRate(sampleRate);
     
     for (int v = 0; v < synth.getNumVoices(); v++)

@@ -1,14 +1,11 @@
 /*
   ==============================================================================
 
-    VoiceProcessor.cpp
-    Created: 19 May 2025 2:49:25pm
+    Presets.h
+    Created: 2 Jul 2025 9:15:05am
     Author:  Takuma Matsui
 
   ==============================================================================
 */
 
-#include "VoiceProcessor.h"
-#include <JuceHeader.h>
-
-
+#pragma once

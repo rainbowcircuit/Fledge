@@ -12,6 +12,8 @@
 #include <JuceHeader.h>
 #include "Graphics.h"
 #include "PluginProcessor.h"
+#include "LookAndFeel.h"
+#include "DialLookAndFeel.h"
 
 class MainInterface : public juce::Component
 {
@@ -24,7 +26,7 @@ private:
 };
 
 
-class OperatorInterface : public juce::Component
+class OperatorInterface : public juce::Component, juce::Timer
 {
 public:
     OperatorInterface(FledgeAudioProcessor& p, int index);
@@ -35,9 +37,12 @@ public:
     
     void setIndex(int index);
     
+    void timerCallback() override;
+    
 private:
     int index;
     
+    DialLookAndFeel dialLAF;
     juce::Label ratioLabel, fixedLabel, modIndexLabel, attackLabel, decayLabel, sustainLabel, releaseLabel;
     
     juce::Slider ratioSlider, fixedSlider, modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
@@ -97,5 +102,6 @@ public:
     }
 
 private:
+    
     
 };
