@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "UserInterface.h"
+#include "AlgorithmGraphics.h"
 #include "LookAndFeel.h"
 
 //==============================================================================
@@ -40,6 +41,7 @@ public:
             float release = audioProcessor.apvts.getRawParameterValue(releaseID)->load();
             
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
+
             
             juce::String ratioID = "ratio" + juce::String(oper);
             juce::String modIndexID = "modIndex" + juce::String(oper);
@@ -60,6 +62,7 @@ private:
         
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     WaveformDisplayGraphics waveformDisplay;
+    AlgorithmGraphics algorithmGraphics;
     FledgeAudioProcessor& audioProcessor;
 
     

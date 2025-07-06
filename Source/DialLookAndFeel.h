@@ -20,11 +20,22 @@ public:
         auto bounds = slider.getLocalBounds().toFloat();
         float xPos = bounds.getX();
         float yPos = bounds.getY();
-        float size = bounds.getWidth();
+        float graphicWidth = bounds.getWidth();
+        float graphicHeight = bounds.getHeight();
+
+    //    drawRoundDial(g, xPos, yPos, size, sliderPosProportional);
         
-        drawRoundDial(g, xPos, yPos, size, sliderPosProportional);
+        
+        displayText(g, xPos, yPos, graphicWidth, graphicHeight, juce::String(slider.getValue()));
+
     }
     
+    void displayText(juce::Graphics &g, float x, float y, float width, float height, juce::String value)
+    {
+        g.setFont(juce::FontOptions(40.0f, juce::Font::plain));
+        g.setColour(juce::Colour(255, 255, 255));
+        g.drawText(value, x, y, width, height, juce::Justification::centredLeft);
+    }
 
     void drawRoundDial(juce::Graphics &g, float x, float y, float size, float position)
     {

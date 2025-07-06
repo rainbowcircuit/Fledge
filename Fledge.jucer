@@ -26,6 +26,10 @@
             file="Source/VoiceProcessor.h"/>
     </GROUP>
     <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics">
+      <FILE id="fQlZcJ" name="AlgorithmGraphics.cpp" compile="1" resource="0"
+            file="Source/AlgorithmGraphics.cpp"/>
+      <FILE id="DyMJCt" name="AlgorithmGraphics.h" compile="0" resource="0"
+            file="Source/AlgorithmGraphics.h"/>
       <FILE id="A1BgkZ" name="DialLookAndFeel.cpp" compile="1" resource="0"
             file="Source/DialLookAndFeel.cpp"/>
       <FILE id="cjB0Nl" name="DialLookAndFeel.h" compile="0" resource="0"

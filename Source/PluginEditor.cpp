@@ -25,13 +25,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
         param->addListener(this);
     }
 
-    //
-    addAndMakeVisible(practiceSlider);
-    practiceSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    practiceSlider.setLookAndFeel(&practiceLookAndFeel);
-    practiceSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    
-    
+    addAndMakeVisible(algorithmGraphics);
     setSize (800, 800);
 }
 
@@ -55,10 +49,11 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(300, oper * 150 + 100, 500, 150);
+        opInterface[oper]->setBounds(300, oper * 150 + 50, 500, 150);
     }
     practiceSlider.setBounds(300, 650, 100, 100);
+    algorithmGraphics.setBounds(300, 650, 200, 200);
     
-    waveformDisplay.setBounds(20, 100, 280, 600);
+    waveformDisplay.setBounds(20, 50, 280, 600);
 
 }
