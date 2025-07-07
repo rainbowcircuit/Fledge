@@ -47,11 +47,12 @@ private:
     
     
     
-    juce::Slider ratioSlider, fixedSlider, amplitudeSlider, phaseSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
+    juce::Slider ratioSlider, fixedSlider, amplitudeSlider, phaseSlider;
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, amplitudeAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
 
-    std::unique_ptr<EditableTextBoxSlider> textBox;
+    std::unique_ptr<EditableTextBoxSlider> attackSlider, decaySlider, sustainSlider, releaseSlider;
+;
     
     OperatorDisplayGraphics opGraphics;
     EnvelopeDisplayGraphics envGraphics;

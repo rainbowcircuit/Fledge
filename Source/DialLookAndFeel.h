@@ -23,9 +23,6 @@ public:
         float yPos = bounds.getY();
         float graphicWidth = bounds.getWidth();
         float graphicHeight = bounds.getHeight();
-
-    //    drawRoundDial(g, xPos, yPos, size, sliderPosProportional);
-        
         
         displayText(g, xPos, yPos, graphicWidth, graphicHeight, juce::String(slider.getValue()));
     }
@@ -89,7 +86,11 @@ private:
 };
 
 
-class EditableTextBoxSlider : public juce::Component //, juce::AudioProcessorListener
+
+
+
+
+class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
 public:
     EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID) : audioProcessor(p)
@@ -97,10 +98,18 @@ public:
         this->parameterID = parameterID;
         
         addAndMakeVisible(textBox);
-        textBox.setEditable(false, true, true);
-        textBox.setText("default text", juce::dontSendNotification);
-        textBox.setInterceptsMouseClicks(false, false); // figure this one out
-
+        textBox.setEditable(false, false, false);
+        textBox.setInterceptsMouseClicks(false, false);
+        
+        // initialize displayed value
+        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
+        textBox.setText(juce::String(value, 2), juce::dontSendNotification);
+        textBox.addListener(this);
+        
+        // initialize parameter ranges
+        juce::NormalisableRange range = audioProcessor.apvts.getParameterRange(parameterID);
+        rangeStart = range.start;
+        rangeEnd = range.end;
     }
     
     void paint(juce::Graphics& g) override
@@ -127,9 +136,8 @@ public:
         auto mousePoint = m.getPosition().toFloat();
         float deltaY = std::abs(mousePoint.y - dragStartPoint.y);
         
-        float value = deltaY/100.0f; // clamp this
+        float value = juce::jlimit(0.0f, 1.0f, deltaY/100.0f); // clamp this
         textValueToParamValue(value);
-        
     }
     
     void mouseUp(const juce::MouseEvent& m) override
@@ -137,33 +145,63 @@ public:
         auto mousePoint = m.getPosition().toFloat();
         dragStartPoint.y = mousePoint.y;
     }
+    
+    void mouseDoubleClick(const juce::MouseEvent& m) override
+    {
+        textBox.setInterceptsMouseClicks(true, true);
+        textBox.setEditable(true, true, false);
+        textBox.showEditor();
+        textBox.grabKeyboardFocus();
+    }
+    
+    void labelTextChanged(juce::Label* l) override
+    {
+        auto value = l->getText().getFloatValue();
+        float valueLimited = juce::jlimit(rangeStart, rangeEnd, value);
+        
+        l->setText(juce::String(valueLimited, 2), juce::dontSendNotification);
+        textBox.setInterceptsMouseClicks(false, false);
+        
+        float normalized = (valueLimited - rangeStart) / (rangeEnd - rangeStart);
+        textValueToParamValue(normalized);
+        repaint();
+    }
+
 
     void textValueToParamValue(float value)
     {
-        if (value <= 0.0f) { value = 0.0f; }
-        else if (value >= 1.0f) { value = 1.0f; }
-        
+        value = juce::jlimit(0.0f, 1.0f, value);
         audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(value);
     }
-    
-    void paramValueToTextValue()
+        
+    void parameterValueChanged (int parameterIndex, float newValue) override
     {
-        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
-        juce::String formattedValue = juce::String(value) + parameterSuffix;
-        textBox.setText(formattedValue, juce::dontSendNotification);
+        triggerAsyncUpdate();
     }
+    
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override{}
+    
     
     void setSuffix(juce::String suffix)
     {
         parameterSuffix = suffix;
     }
     
+    void handleAsyncUpdate() override
+    {
+        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
+        juce::String formattedValue = juce::String(value, 2) + parameterSuffix;
+        textBox.setText(formattedValue, juce::dontSendNotification);
+    }
+
     void setFontSize(float size)
     {
         textBox.setFont(juce::FontOptions(size, juce::Font::plain));
     }
     
 private:
+    float rangeStart, rangeEnd;
+    std::atomic<float> newValueAtomic;
     juce::Point<float> dragStartPoint;
     juce::Label textBox;
     juce::String parameterID, parameterSuffix = "";

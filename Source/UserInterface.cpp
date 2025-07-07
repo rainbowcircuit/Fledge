@@ -14,10 +14,23 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
 {
     this->index = index;
     
-    textBox = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio0");
-    addAndMakeVisible(*textBox);
-    textBox->setFontSize(12.0f);
+    attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index));
+    addAndMakeVisible(*attackSlider);
+    attackSlider->setFontSize(12.0f);
+    
+    decaySlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "decay" + juce::String(index));
+    addAndMakeVisible(*decaySlider);
+    decaySlider->setFontSize(12.0f);
+    
+    sustainSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "sustain" + juce::String(index));
+    addAndMakeVisible(*sustainSlider);
+    sustainSlider->setFontSize(12.0f);
+    
+    releaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "release" + juce::String(index));
+    addAndMakeVisible(*releaseSlider);
+    releaseSlider->setFontSize(12.0f);
 
+    
     setSlider(ratioSlider, ratioLabel, "Ratio");
     ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "ratio" + juce::String(index), ratioSlider);
     
@@ -27,28 +40,11 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     setSlider(amplitudeSlider, amplitudeLabel, "Amplitude");
     amplitudeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "modIndex" + juce::String(index), amplitudeSlider);
     
-//    setSlider(phaseSlider, phaseLabel, "Phase");
-  //  phaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "phase" + juce::String(index), phaseSlider);
-
-
-    setSlider(attackSlider, attackLabel, "Attack");
-    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "attack" + juce::String(index), attackSlider);
-
-    setSlider(decaySlider, decayLabel, "Decay");
-    decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "decay" + juce::String(index), decaySlider);
-
-    setSlider(sustainSlider, sustainLabel, "Sustain");
-    sustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "sustain" + juce::String(index), sustainSlider);
-
-    setSlider(releaseSlider, releaseLabel, "Release");
-    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "release" + juce::String(index), releaseSlider);
 
     addAndMakeVisible(envGraphics);
     addAndMakeVisible(opGraphics);
     startTimerHz(30);
 }
-
-
 
 void OperatorInterface::paint(juce::Graphics &g)
 {
@@ -85,19 +81,16 @@ void OperatorInterface::resized()
 
     opGraphics.setBounds(x + 100, y + labelHeight, sliderSize * 2, sliderSize * 1.5f);
 
-    /*
     attackLabel.setBounds(x + sliderSize * 2, y, sliderSize, labelHeight);
     decayLabel.setBounds(x + sliderSize * 3, y, sliderSize, labelHeight);
     sustainLabel.setBounds(x + sliderSize * 4, y, sliderSize, labelHeight);
     releaseLabel.setBounds(x + sliderSize * 5, y, sliderSize, labelHeight);
     
-    attackSlider.setBounds(x + sliderSize * 2, y + labelHeight, sliderSize, sliderSize);
-    decaySlider.setBounds(x + sliderSize * 3, y + labelHeight, sliderSize, sliderSize);
-    sustainSlider.setBounds(x + sliderSize * 4, y + labelHeight, sliderSize, sliderSize);
-    releaseSlider.setBounds(x + sliderSize * 5, y + labelHeight, sliderSize, sliderSize);
-    */
+    attackSlider->setBounds(x + sliderSize * 5.5, y + 0, 50, 25);
+    decaySlider->setBounds(x + sliderSize * 5.5, y + 25, 50, 25);
+    sustainSlider->setBounds(x + sliderSize * 5.5, y + 50, 50, 25);
+    releaseSlider->setBounds(x + sliderSize * 5.5, y + 75, 50, 25);
 
-    textBox->setBounds(x + sliderSize * 5.5, y + 50, 50, 30);
     envGraphics.setBounds(x + sliderSize * 3.5 , y + labelHeight, sliderSize * 2, sliderSize * 1.5f);
 }
 

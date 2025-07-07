@@ -292,13 +292,13 @@ public:
             {
              //   float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
                 
-                float sin2Phase = fmodf(((i/40.7f) * op[1].ratio) + 0.0f, 6.28318f);
+                float sin2Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + 0.0f, 6.28318f);
                 float sin2 = amp2 * op[1].modIndex * fastSin.sin(sin2Phase);
                 
-                float sin1Phase = fmodf(((i/40.7f) * op[1].ratio) + sin2, 6.28318f);
+                float sin1Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + sin2, 6.28318f);
                 float sin1 = amp1 * op[0].modIndex * fastSin.sin(sin1Phase);
                 
-                float sin0Phase = fmodf(((i/40.7f) * op[0].ratio) + sin1, 6.28318f);
+                float sin0Phase = fmodf(((i/40.7f) * op[0].ratio * 2.0f) + sin1, 6.28318f);
                 float sin = amp0 * fastSin.sin(sin0Phase);
                 
                 graphicLines.lineTo(x + widthMargin + widthIncrement * i,
