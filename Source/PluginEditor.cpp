@@ -26,6 +26,10 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     }
 
     addAndMakeVisible(algorithmGraphics);
+    
+    addAndMakeVisible(practiceSlider);
+  //  practiceSlider.setLookAndFeel(&laf);
+    
     setSize (800, 800);
 }
 
@@ -41,7 +45,7 @@ FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
 void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(juce::Colour(235, 235, 235));
+    g.fillAll(juce::Colour(242, 240, 241));
 
 }
 
@@ -49,9 +53,9 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(300, oper * 150 + 50, 500, 150);
+        opInterface[oper]->setBounds(300, oper * 125 + 50, 500, 125);
     }
-    practiceSlider.setBounds(300, 650, 100, 100);
+    practiceSlider.setBounds(500, 650, 100, 100);
     algorithmGraphics.setBounds(300, 650, 200, 200);
     
     waveformDisplay.setBounds(20, 50, 280, 600);

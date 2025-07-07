@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "PluginProcessor.h"
 
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -27,7 +28,6 @@ public:
         
         
         displayText(g, xPos, yPos, graphicWidth, graphicHeight, juce::String(slider.getValue()));
-
     }
     
     void displayText(juce::Graphics &g, float x, float y, float width, float height, juce::String value)
@@ -86,4 +86,87 @@ public:
     
 private:
 
+};
+
+
+class EditableTextBoxSlider : public juce::Component //, juce::AudioProcessorListener
+{
+public:
+    EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID) : audioProcessor(p)
+    {
+        this->parameterID = parameterID;
+        
+        addAndMakeVisible(textBox);
+        textBox.setEditable(false, true, true);
+        textBox.setText("default text", juce::dontSendNotification);
+        textBox.setInterceptsMouseClicks(false, false); // figure this one out
+
+    }
+    
+    void paint(juce::Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        g.setColour(juce::Colour(100, 100, 100));
+        // this  makes the box uneditable so do something else
+    }
+    
+    void resized() override {
+        auto bounds = getLocalBounds();
+        textBox.setBounds(bounds);
+        
+    }
+    
+    void mouseDown(const juce::MouseEvent& m) override
+    {
+        auto mousePoint = m.getPosition().toFloat();
+        dragStartPoint.y = mousePoint.y;
+    }
+
+    void mouseDrag(const juce::MouseEvent& m) override
+    {
+        auto mousePoint = m.getPosition().toFloat();
+        float deltaY = std::abs(mousePoint.y - dragStartPoint.y);
+        
+        float value = deltaY/100.0f; // clamp this
+        textValueToParamValue(value);
+        
+    }
+    
+    void mouseUp(const juce::MouseEvent& m) override
+    {
+        auto mousePoint = m.getPosition().toFloat();
+        dragStartPoint.y = mousePoint.y;
+    }
+
+    void textValueToParamValue(float value)
+    {
+        if (value <= 0.0f) { value = 0.0f; }
+        else if (value >= 1.0f) { value = 1.0f; }
+        
+        audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(value);
+    }
+    
+    void paramValueToTextValue()
+    {
+        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
+        juce::String formattedValue = juce::String(value) + parameterSuffix;
+        textBox.setText(formattedValue, juce::dontSendNotification);
+    }
+    
+    void setSuffix(juce::String suffix)
+    {
+        parameterSuffix = suffix;
+    }
+    
+    void setFontSize(float size)
+    {
+        textBox.setFont(juce::FontOptions(size, juce::Font::plain));
+    }
+    
+private:
+    juce::Point<float> dragStartPoint;
+    juce::Label textBox;
+    juce::String parameterID, parameterSuffix = "";
+    
+    FledgeAudioProcessor& audioProcessor;
 };

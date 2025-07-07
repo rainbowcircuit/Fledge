@@ -23,8 +23,8 @@ public:
         
         juce::Path bgFill;
         bgFill.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(36, 35, 34));
-        g.fillPath(bgFill);
+        g.setColour(juce::Colour(12, 10, 11));
+      //  g.fillPath(bgFill);
 
         float x = bounds.getX();
         float y = bounds.getY();
@@ -41,13 +41,13 @@ public:
             fgAmpScale = 1.0f;
         }
         
-        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + width * 0.2f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
-        g.setColour(juce::Colour(125, 125, 125));
+        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.2f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
+        g.setColour(juce::Colour(200, 200, 200));
         g.strokePath(bgWaveform, strokeType);
         
         
-        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + width * 0.2f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
-        g.setColour(juce::Colour(255, 255, 255));
+        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.2f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
+        g.setColour(juce::Colour(90, 224, 184));
         g.strokePath(fgWaveform, strokeType);
 
     }
@@ -93,11 +93,6 @@ public:
     {
         auto bounds = getLocalBounds().toFloat();
         
-        juce::Path bgFill;
-        bgFill.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(36, 35, 34));
-        g.fillPath(bgFill);
-
         float x = bounds.getX();
         float y = bounds.getY();
         float width = bounds.getWidth() * 0.9f;
@@ -110,7 +105,6 @@ public:
         
         for (int i = 0; i < 8; i++)
         {
-            if (i != 5)
             points[i].drawHandles(g);
         }
     }
@@ -182,7 +176,7 @@ public:
         envelopePath.lineTo(points[7].coords);
 
 
-        g.setColour(juce::Colour(255, 255, 255));
+        g.setColour(juce::Colour(90, 224, 184));
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
         
@@ -265,8 +259,8 @@ public:
 
         juce::Path bgFill;
         bgFill.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(36, 159, 208));
-        g.fillPath(bgFill);
+        g.setColour(juce::Colour(12, 10, 11));
+        g.strokePath(bgFill, juce::PathStrokeType(2.0f));
         
         float x = bounds.getX();
         float y = bounds.getY();
@@ -313,7 +307,7 @@ public:
         }
         
         graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
-        g.setColour(juce::Colour(255, 255, 255));
+        g.setColour(juce::Colour(90, 224, 184));
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
     }

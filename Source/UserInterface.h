@@ -43,11 +43,16 @@ private:
     int index;
     
     DialLookAndFeel dialLAF;
-    juce::Label ratioLabel, fixedLabel, modIndexLabel, attackLabel, decayLabel, sustainLabel, releaseLabel;
+    juce::Label ratioLabel, fixedLabel, amplitudeLabel, phaseLabel, attackLabel, decayLabel, sustainLabel, releaseLabel;
     
-    juce::Slider ratioSlider, fixedSlider, modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, modIndexAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
+    
+    
+    juce::Slider ratioSlider, fixedSlider, amplitudeSlider, phaseSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, amplitudeAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
 
+    std::unique_ptr<EditableTextBoxSlider> textBox;
+    
     OperatorDisplayGraphics opGraphics;
     EnvelopeDisplayGraphics envGraphics;
     FledgeAudioProcessor& audioProcessor;

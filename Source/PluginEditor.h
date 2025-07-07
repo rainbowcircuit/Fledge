@@ -42,7 +42,6 @@ public:
             
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
 
-            
             juce::String ratioID = "ratio" + juce::String(oper);
             juce::String modIndexID = "modIndex" + juce::String(oper);
             float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
@@ -56,6 +55,7 @@ public:
 
 
 private:
+ //   TextBoxSlider laf;
     PracticeDialGraphics practiceLookAndFeel;
     juce::Slider practiceSlider;
     
