@@ -93,9 +93,10 @@ private:
 class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
 public:
-    EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID) : audioProcessor(p)
+    EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID, juce::String parameterSuffix) : audioProcessor(p)
     {
         this->parameterID = parameterID;
+        this->parameterSuffix = parameterSuffix;
         
         addAndMakeVisible(textBox);
         textBox.setEditable(false, false, false);
@@ -103,21 +104,31 @@ public:
         
         // initialize displayed value
         auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
-        textBox.setText(juce::String(value, 2), juce::dontSendNotification);
+        juce::String formattedValue = juce::String(value, 2) + parameterSuffix;
+        textBox.setText(formattedValue, juce::dontSendNotification);
         textBox.addListener(this);
         
         // initialize parameter ranges
         juce::NormalisableRange range = audioProcessor.apvts.getParameterRange(parameterID);
         rangeStart = range.start;
         rangeEnd = range.end;
+        
+        // add listener
+        const auto params = audioProcessor.getParameters();
+        for (auto param : params){
+            param->addListener(this);
+        }
     }
     
-    void paint(juce::Graphics& g) override
+    ~EditableTextBoxSlider()
     {
-        auto bounds = getLocalBounds().toFloat();
-        g.setColour(juce::Colour(100, 100, 100));
-        // this  makes the box uneditable so do something else
+        const auto params = audioProcessor.getParameters();
+        for (auto param : params){
+            param->removeListener(this);
+        }
     }
+    
+    void paint(juce::Graphics& g) override {}
     
     void resized() override {
         auto bounds = getLocalBounds();
@@ -135,7 +146,7 @@ public:
     {
         auto mousePoint = m.getPosition().toFloat();
         float deltaY = std::abs(mousePoint.y - dragStartPoint.y);
-        
+
         float value = juce::jlimit(0.0f, 1.0f, deltaY/100.0f); // clamp this
         textValueToParamValue(value);
     }
@@ -176,22 +187,34 @@ public:
         
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
+        newValueAtomic.store(newValue);
+        parameterIndexAtomic.store(parameterIndex);
         triggerAsyncUpdate();
     }
     
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override{}
     
-    
-    void setSuffix(juce::String suffix)
-    {
-        parameterSuffix = suffix;
-    }
-    
     void handleAsyncUpdate() override
     {
-        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
-        juce::String formattedValue = juce::String(value, 2) + parameterSuffix;
-        textBox.setText(formattedValue, juce::dontSendNotification);
+        float newValue = newValueAtomic.load();
+        int parameterIndex = parameterIndexAtomic.load();
+        juce::String newParameterID;
+        float scaledValue;
+        
+        if (auto* param = dynamic_cast<juce::AudioProcessorParameterWithID*>(audioProcessor.getParameters()[parameterIndex]))
+        {
+            if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(param))
+            {
+                scaledValue = rangedParam->convertFrom0to1(newValue);
+                newParameterID = param->paramID;
+            }
+        }
+        
+        if (newParameterID == parameterID)
+        {
+            juce::String formattedValue = juce::String(scaledValue, 2) + parameterSuffix;
+            textBox.setText(formattedValue, juce::dontSendNotification);
+        }
     }
 
     void setFontSize(float size)
@@ -202,6 +225,8 @@ public:
 private:
     float rangeStart, rangeEnd;
     std::atomic<float> newValueAtomic;
+    std::atomic<int> parameterIndexAtomic;
+    
     juce::Point<float> dragStartPoint;
     juce::Label textBox;
     juce::String parameterID, parameterSuffix = "";

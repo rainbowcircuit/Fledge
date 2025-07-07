@@ -159,7 +159,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String fixedID = "fixed" + juce::String(oper);
-        juce::String modIndexID = "modIndex" + juce::String(oper);
+        juce::String modIndexID = "amplitude" + juce::String(oper);
 
         float ratio = apvts.getRawParameterValue(ratioID)->load();
         float fixed = apvts.getRawParameterValue(fixedID)->load();
@@ -262,7 +262,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { opModeID, 1 }, opModeName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
 
-        juce::String modIndexID = "modIndex" + juce::String(oper);
+        juce::String modIndexID = "amplitude" + juce::String(oper);
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f, 0.5f), 0.0f));

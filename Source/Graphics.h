@@ -41,12 +41,12 @@ public:
             fgAmpScale = 1.0f;
         }
         
-        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.2f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
-        g.setColour(juce::Colour(200, 200, 200));
+        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
+        g.setColour(juce::Colour(80, 82, 81));
         g.strokePath(bgWaveform, strokeType);
         
         
-        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.2f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
+        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
         g.setColour(juce::Colour(90, 224, 184));
         g.strokePath(fgWaveform, strokeType);
 
@@ -257,11 +257,13 @@ public:
     {
         auto bounds = getLocalBounds().toFloat();
 
-        juce::Path bgFill;
-        bgFill.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(12, 10, 11));
-        g.strokePath(bgFill, juce::PathStrokeType(2.0f));
-        
+        juce::Path boundsPath;
+        boundsPath.addRoundedRectangle(bounds, 10, 10);
+        g.setColour(juce::Colour(40, 42, 41));
+        g.fillPath(boundsPath);
+        g.setColour(juce::Colour(30, 32, 31));
+        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
+
         float x = bounds.getX();
         float y = bounds.getY();
         float height = bounds.getHeight();

@@ -33,7 +33,7 @@ public:
     
     void paint(juce::Graphics &g) override;
     void resized() override;
-    void setSlider(juce::Slider &s, juce::Label &l, juce::String labelText);
+    void setLabel(juce::Label &l, juce::String labelText, float size);
     
     void setIndex(int index);
     
@@ -42,18 +42,24 @@ public:
 private:
     int index;
     
-    DialLookAndFeel dialLAF;
-    juce::Label ratioLabel, fixedLabel, amplitudeLabel, phaseLabel, attackLabel, decayLabel, sustainLabel, releaseLabel;
+    juce::Label ratioLabel,
+    fixedLabel,
+    amplitudeLabel,
+    phaseLabel,
+    attackLabel,
+    decayLabel,
+    sustainLabel,
+    releaseLabel;
     
-    
-    
-    juce::Slider ratioSlider, fixedSlider, amplitudeSlider, phaseSlider;
-    
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment, fixedAttachment, amplitudeAttachment, attackAttachment, decayAttachment, sustainAttachment, releaseAttachment;
+    std::unique_ptr<EditableTextBoxSlider> ratioSlider,
+    fixedSlider,
+    amplitudeSlider,
+    phaseSlider,
+    attackSlider,
+    decaySlider,
+    sustainSlider,
+    releaseSlider;
 
-    std::unique_ptr<EditableTextBoxSlider> attackSlider, decaySlider, sustainSlider, releaseSlider;
-;
-    
     OperatorDisplayGraphics opGraphics;
     EnvelopeDisplayGraphics envGraphics;
     FledgeAudioProcessor& audioProcessor;

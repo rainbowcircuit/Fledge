@@ -43,9 +43,9 @@ public:
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
 
             juce::String ratioID = "ratio" + juce::String(oper);
-            juce::String modIndexID = "modIndex" + juce::String(oper);
+            juce::String amplitudeID = "amplitude" + juce::String(oper);
             float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
-            float modIndex = audioProcessor.apvts.getRawParameterValue(modIndexID)->load();
+            float modIndex = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
 
             waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, modIndex);
         }
