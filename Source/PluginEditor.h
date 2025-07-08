@@ -61,6 +61,8 @@ private:
     
         
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
+    std::unique_ptr<PresetInterface>  presetInterface;
+
     WaveformDisplayGraphics waveformDisplay;
     AlgorithmGraphics algorithmGraphics;
     FledgeAudioProcessor& audioProcessor;

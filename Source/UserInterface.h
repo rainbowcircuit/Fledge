@@ -14,6 +14,7 @@
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
 #include "DialLookAndFeel.h"
+#include "Presets.h"
 
 class MainInterface : public juce::Component
 {
@@ -76,6 +77,35 @@ private:
 };
 
 
+class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
+{
+public:
+    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
+    ~PresetInterface();
+    
+    void paint(juce::Graphics& g) override {}
+    
+    void resized() override;
+    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void buttonClicked(juce::Button* buttonClicked) override;
+    void loadPresetList();
+    
+private:
+    
+    /*
+    ButtonGraphics saveLAF { 0 }, nextLAF { 1 }, prevLAF { 2 };
+    ComboBoxGraphics comboBoxLAF;
+    */
+     
+    juce::TextButton saveButton, nextButton, prevButton;
+    juce::ComboBox presetComboBox;
+    juce::Label rateLabel, rateValueLabel;
+    
+    std::unique_ptr<juce::FileChooser> fileChooser;
+
+    PresetManager presetManager;
+    FledgeAudioProcessor& audioProcessor;
+};
 
 
 
@@ -117,3 +147,5 @@ private:
     
     
 };
+
+

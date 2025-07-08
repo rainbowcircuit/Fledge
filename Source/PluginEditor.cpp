@@ -18,6 +18,10 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
         opInterface[oper] = std::make_unique<OperatorInterface>(audioProcessor, oper);
         addAndMakeVisible(*opInterface[oper]);
     }
+    presetInterface = std::make_unique<PresetInterface>(audioProcessor, audioProcessor.apvts);
+    addAndMakeVisible(*presetInterface);
+
+    
     addAndMakeVisible(waveformDisplay);
     
     const auto params = audioProcessor.getParameters();
@@ -52,10 +56,11 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(300, oper * 125 + 50, 500, 125);
+        opInterface[oper]->setBounds(300, oper * 125 + 70, 500, 125);
     }
 //    algorithmGraphics.setBounds(300, 650, 200, 200);
-    
-    waveformDisplay.setBounds(20, 50, 280, 500);
+
+    presetInterface->setBounds(20, 10, 800, 50);
+    waveformDisplay.setBounds(20, 70, 280, 500);
 
 }

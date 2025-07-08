@@ -50,12 +50,6 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     addAndMakeVisible(*releaseSlider);
     releaseSlider->setFontSize(12.0f);
 
-    
-
-    
-    
-    
-
     addAndMakeVisible(envGraphics);
     addAndMakeVisible(opGraphics);
     startTimerHz(30);
@@ -138,4 +132,94 @@ void OperatorInterface::timerCallback()
     bool release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
     envGraphics.setEnvelope(attack, decay, sustain, release);
 
+}
+
+
+PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts) : presetManager(apvts), audioProcessor(p)
+{
+    juce::FontOptions font { 12.0f, juce::Font::plain };
+
+    addAndMakeVisible(saveButton);
+    saveButton.addListener(this);
+ //   saveButton.setLookAndFeel(&saveLAF);
+
+    addAndMakeVisible(nextButton);
+    nextButton.addListener(this);
+//    nextButton.setLookAndFeel(&nextLAF);
+
+    addAndMakeVisible(prevButton);
+    prevButton.addListener(this);
+ //   prevButton.setLookAndFeel(&prevLAF);
+    
+    addAndMakeVisible(presetComboBox);
+    presetComboBox.addListener(this);
+ //   presetComboBox.setLookAndFeel(&comboBoxLAF);
+    
+    // refresh presets
+    loadPresetList();
+}
+
+PresetInterface::~PresetInterface()
+{
+    saveButton.removeListener(this);
+    nextButton.removeListener(this);
+    prevButton.removeListener(this);
+    presetComboBox.removeListener(this);
+}
+
+void PresetInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    float height = bounds.getHeight();
+
+    rateLabel.setBounds(600, y + height * 0.25f, 164, height * 0.35f);
+    rateValueLabel.setBounds(605, y + height * 0.25f, 164, height * 0.35f);
+
+    saveButton.setBounds(x, y, height, height);
+    prevButton.setBounds(x + height, y, height, height);
+    nextButton.setBounds(x + height * 9.0f, y, height, height);
+    presetComboBox.setBounds(x + height * 2.0f, bounds.getY(), height * 7.0f, height);
+}
+
+void PresetInterface::comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &presetComboBox)
+        presetManager.loadPreset(presetComboBox.getItemText(presetComboBox.getSelectedItemIndex()));
+}
+
+void PresetInterface::buttonClicked(juce::Button* buttonClicked)
+{
+    if (buttonClicked == &saveButton){
+        fileChooser = std::make_unique<juce::FileChooser>(
+            "Enter Preset Name",
+            presetManager.defaultDirectory,
+            "*." + presetManager.extension);
+        
+        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
+        {
+            const auto resultFile = chooser.getResult();
+            presetManager.savePreset(resultFile.getFileNameWithoutExtension());
+            loadPresetList();
+        });
+
+    } else if (buttonClicked == &nextButton){
+        presetManager.loadNextPreset();
+        loadPresetList();
+        
+    } else if (buttonClicked == &prevButton){
+        presetManager.loadPreviousPreset();
+        loadPresetList();
+    }
+}
+
+void PresetInterface::loadPresetList()
+{
+    presetComboBox.clear(juce::dontSendNotification);
+    const auto allPresets = presetManager.getAllPreset();
+    const auto currentPreset = presetManager.getCurrentPreset();
+    presetComboBox.addItemList(allPresets, 1);
+    presetComboBox.setTitle(currentPreset);
+    presetComboBox.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
 }
