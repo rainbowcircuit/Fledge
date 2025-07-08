@@ -58,7 +58,6 @@ private:
  //   TextBoxSlider laf;
     PracticeDialGraphics practiceLookAndFeel;
     juce::Slider practiceSlider;
-    
         
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     std::unique_ptr<PresetInterface>  presetInterface;

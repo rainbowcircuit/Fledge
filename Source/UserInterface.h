@@ -90,13 +90,7 @@ public:
     void buttonClicked(juce::Button* buttonClicked) override;
     void loadPresetList();
     
-private:
-    
-    /*
-    ButtonGraphics saveLAF { 0 }, nextLAF { 1 }, prevLAF { 2 };
-    ComboBoxGraphics comboBoxLAF;
-    */
-     
+private:     
     juce::TextButton saveButton, nextButton, prevButton;
     juce::ComboBox presetComboBox;
     juce::Label rateLabel, rateValueLabel;

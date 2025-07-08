@@ -79,22 +79,71 @@ public:
     {
         auto bounds = getLocalBounds().toFloat();
         bounds.reduce(5, 5);
-        width = bounds.getWidth();
-        x = bounds.getX();
-        y = bounds.getY();
-
-        float blockSize = width * 0.9f;
-        float blockMargin = width * 0.05f;
-
-        juce::Path graphicPath;
-        graphicPath.addRoundedRectangle(x + blockMargin, y + blockMargin, blockSize, blockSize, 4.0f);
-        g.setColour(juce::Colour(100, 100, 100));
-        g.fillPath(graphicPath);
+        blockCenterCoords = bounds.getCentre();
         
-        // input
-        drawPatchPoint(g, x + blockMargin + blockSize/2, y + blockMargin);
-        // output
-        drawPatchPoint(g, x + blockMargin + blockSize/2, y + blockMargin + blockSize);
+        float blockSize = bounds.getWidth() * 0.65f;
+        
+        blockCenterCoords = bounds.getCentre();
+        juce::Rectangle blockRectangle = { blockCenterCoords.x - blockSize/2,
+            blockCenterCoords.y - blockSize/2,
+            blockSize, blockSize
+        };
+
+        juce::Path frontPath, leftSidePath, rightSidePath, botSidePath, topSidePath;
+        
+        calculatePerspective(blockRectangle);
+        
+        leftSidePath = createSidePath(blockRectangle.getTopLeft(), perspectiveTopLeft, perspectiveBotLeft, blockRectangle.getBottomLeft());
+        leftSidePath = leftSidePath.createPathWithRoundedCorners(1.0f);
+        
+        rightSidePath = createSidePath(blockRectangle.getTopRight(), perspectiveTopRight, perspectiveBotRight, blockRectangle.getBottomRight());
+        rightSidePath = rightSidePath.createPathWithRoundedCorners(1.0f);
+
+        botSidePath.startNewSubPath(perspectiveBotLeft);
+        botSidePath.lineTo(perspectiveBotRight);
+
+        topSidePath.startNewSubPath(perspectiveTopLeft);
+        topSidePath.lineTo(perspectiveTopRight);
+
+        g.setColour(juce::Colour(70, 204, 164));
+        g.strokePath(leftSidePath, juce::PathStrokeType(2.0f));
+        g.strokePath(rightSidePath, juce::PathStrokeType(2.0f));
+        g.strokePath(topSidePath, juce::PathStrokeType(2.0f));
+        g.strokePath(botSidePath, juce::PathStrokeType(2.0f));
+
+        
+        frontPath.addRectangle(blockRectangle);
+        frontPath = frontPath.createPathWithRoundedCorners(1.0f);
+        g.setColour(juce::Colour(90, 224, 184));
+        g.strokePath(frontPath, juce::PathStrokeType(2.0f));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    }
+    
+    juce::Path createSidePath(juce::Point<float> point1, juce::Point<float> point2, juce::Point<float> point3, juce::Point<float> point4)
+    {
+        juce::Path path;
+        path.startNewSubPath(point1);
+        path.lineTo(point2);
+        path.lineTo(point3);
+        path.lineTo(point4);
+        path.closeSubPath();
+        return path;
+    }
+    
+    void setVanishingPoint(juce::Point<float> vanPoint, float perspective)
+    {
+        this->perspective = perspective;
+        this->vanPoint = vanPoint;
+        repaint();
     }
     
     void drawPatchPoint(juce::Graphics& g, float x, float y)
@@ -128,8 +177,34 @@ public:
     
     void resized() override {}
     
+    juce::Point<float> interpolateToVanishing(juce::Point<float> origin)
+    {
+        
+        juce::Point<float> interpolatedPoint {
+            origin.x + (vanPoint.x - origin.x) * perspective,
+            origin.y + (vanPoint.y - origin.y) * perspective };
+        
+        return interpolatedPoint;
+    }
+    
+    void calculatePerspective(juce::Rectangle<float> block)
+    {
+        perspectiveTopLeft = interpolateToVanishing(block.getTopLeft());
+        perspectiveTopRight = interpolateToVanishing(block.getTopRight());
+        perspectiveBotLeft = interpolateToVanishing(block.getBottomLeft());
+        perspectiveBotRight = interpolateToVanishing(block.getBottomRight());
+    }
+
 private:
     float width, x, y;
+    float perspective = 0.5f;
+    juce::Point<float> vanPoint,
+    blockCenterCoords,
+    perspectiveTopLeft,
+    perspectiveTopRight,
+    perspectiveBotLeft,
+    perspectiveBotRight;
+    
 };
 
 
@@ -149,6 +224,43 @@ public:
     
     void paint(juce::Graphics& g) override
     {
+        
+        auto bounds = getLocalBounds().toFloat();
+        
+        // draw background fill
+        juce::Path boundsPath;
+        boundsPath.addRoundedRectangle(bounds, 10, 10);
+        g.setColour(juce::Colour(40, 42, 41));
+        g.fillPath(boundsPath);
+        g.setColour(juce::Colour(30, 32, 31));
+        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
+
+        
+        float x = bounds.getX();
+        float y = bounds.getY();
+        // persepctive
+        juce::Path perspectivePath;
+        perspectivePath.startNewSubPath(x, y);
+        perspectivePath.lineTo(x + bounds.getWidth(), y + bounds.getHeight());
+        perspectivePath.startNewSubPath(x + bounds.getWidth(), y);
+        perspectivePath.lineTo(x, y + bounds.getHeight());
+        g.setColour(juce::Colour(90, 90, 90));
+        g.strokePath(perspectivePath, juce::PathStrokeType(2));
+
+        
+        float blockIncr = bounds.getWidth()/4.0f;
+
+        juce::Point<float> vp = bounds.getCentre();
+        op[0].setVanishingPoint(op[0].getLocalPoint(this, vp), 0.1f);
+        op[1].setVanishingPoint(op[1].getLocalPoint(this, vp), 0.1f);
+        op[2].setVanishingPoint(op[2].getLocalPoint(this, vp), 0.1f);
+        op[3].setVanishingPoint(op[3].getLocalPoint(this, vp), 0.1f);
+
+        
+    }
+    
+    void resized() override
+    {
         auto bounds = getLocalBounds().toFloat();
         float x = bounds.getX();
         float y = bounds.getY();
@@ -158,11 +270,7 @@ public:
         op[1].setBounds(x, y + blockIncr, blockIncr, blockIncr);
         op[2].setBounds(x, y + blockIncr * 2, blockIncr, blockIncr);
         op[3].setBounds(x + blockIncr * 3, y + blockIncr * 2, blockIncr, blockIncr);
-    }
-    
-    void resized() override
-    {
-        
+
         
     }
 
@@ -195,10 +303,25 @@ public:
         auto mouse = m.getPosition().toFloat();
         cable[0].setMousePoint(mouse);
         cable[0].setIsInUse(true);
-        DBG("drag");
             
-            
-            
+        /*
+            if (dragging box)
+            {
+                snap into place?
+                check for collision and skip
+         
+            }
+            if dragging cable
+            {
+                each op keeps count of input/output
+                
+         
+            }
+         
+         
+         
+         
+         */
     }
     
     void mouseUp(const juce::MouseEvent& m) override
