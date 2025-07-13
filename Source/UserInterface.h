@@ -14,6 +14,7 @@
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
 #include "DialLookAndFeel.h"
+#include "AlgorithmGraphics.h"
 #include "Presets.h"
 
 class MainInterface : public juce::Component
@@ -67,13 +68,48 @@ private:
 };
 
 
-class AlgorithmInterface : public juce::Component
+class AlgorithmSelectInterface : public juce::Component
 {
 public:
+    AlgorithmSelectInterface()
+    {
+        for(int i = 0; i < 8; i++)
+        {
+            addAndMakeVisible(algorithm[i]);
+            algorithmGraphics[i].setIndex(i);
+            algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
+        }
+    }
     
+    void paint(juce::Graphics& g) override {}
+    
+    void resized() override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        float x = bounds.getX();
+        float y = bounds.getY();
+        
+        float width = bounds.getWidth() * 0.8f;
+        float height = bounds.getHeight() * 0.8f;
+        float widthMargin = bounds.getWidth() * 0.1f;
+        float heightMargin = bounds.getHeight() * 0.1f;
+
+        float blockWidth = width * 0.2f;
+        float blockHeight = height/2;
+
+        for(int i = 0; i < 8; i++)
+        {
+            algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
+                                   y + heightMargin + blockWidth * (i / 4),
+                                   blockWidth,
+                                   blockHeight);
+        }
+    }
+
     
 private:
-    
+    std::array<BlockDiagrams, 8> algorithmGraphics;
+    std::array<juce::ToggleButton, 8> algorithm;
 };
 
 

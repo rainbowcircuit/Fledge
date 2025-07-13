@@ -138,9 +138,7 @@ bool FledgeAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-//    auto totalNumInputChannels  = getTotalNumInputChannels();
-  //  auto totalNumOutputChannels = getTotalNumOutputChannels();
-
+        
     float globalAttack = apvts.getRawParameterValue("globalAttack")->load();
     float globalDecay = apvts.getRawParameterValue("globalDecay")->load();
     float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
@@ -210,10 +208,11 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new FledgeAudioProcessor();
 }
 
-
 juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
 
@@ -266,6 +265,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f, 0.5f), 0.0f));
+        
+        //******** Operator Input ********//
+        juce::String operatorInputID = "operator" + juce::String(oper) + "Input";
+        juce::String operatorInputIDName = "Operator " + juce::String(oper) + " Input";
+        
+        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorInputID, 1 }, operatorInputIDName, 0, 15, 0));
+        
     }
 
     return layout;

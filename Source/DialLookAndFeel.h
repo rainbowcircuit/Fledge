@@ -85,11 +85,6 @@ private:
 
 };
 
-
-
-
-
-
 class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
 public:
@@ -178,7 +173,6 @@ public:
         repaint();
     }
 
-
     void textValueToParamValue(float value)
     {
         value = juce::jlimit(0.0f, 1.0f, value);
@@ -192,7 +186,7 @@ public:
         triggerAsyncUpdate();
     }
     
-    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override{}
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
     
     void handleAsyncUpdate() override
     {

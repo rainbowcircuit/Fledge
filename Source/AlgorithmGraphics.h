@@ -15,15 +15,55 @@
 class PatchCable : public juce::Component
 {
 public:
+    PatchCable()
+    {
+        isInUse = false;
+        isConnected = false;
+    }
+    
     void paint(juce::Graphics& g) override
     {
-        juce::Path cablePath;
-        cablePath.startNewSubPath(outputPoint);
-        cablePath.lineTo(mousePoint);
-        
-        g.setColour(juce::Colour(100, 100, 100));
-        g.strokePath(cablePath, juce::PathStrokeType(2.0f));
-        
+        juce::Path cablePath, cableEndPath;
+        g.setColour(juce::Colour(200, 200, 200));
+
+        if (isInUse){
+            // draw output arc and path start
+            cableEndPath.addCentredArc(outputPoint.x, outputPoint.y, 2, 2, 0.0f, 0.0f, 6.28f, true);
+            g.fillPath(cableEndPath);
+            cablePath.startNewSubPath(outputPoint);
+            
+            if (isConnected)
+            {
+                float dx = inputPoint.x - outputPoint.x;
+                float dy = inputPoint.y - outputPoint.y;
+                float slack = std::abs(dy) * 0.5f + 20.0f;
+
+                
+                juce::Point<float> bezierCoords1(outputPoint.x + dx * 0.15f, outputPoint.y + slack);
+                juce::Point<float> bezierCoords2(inputPoint.x - dx * 0.15f, inputPoint.y + 20.0f);
+
+                // draw to input point and its arc
+                cablePath.cubicTo(bezierCoords1, bezierCoords2, inputPoint);
+                g.strokePath(cablePath, juce::PathStrokeType(1.0));
+                cableEndPath.addCentredArc(inputPoint.x, inputPoint.y, 2, 2, 0.0f, 0.0f, 6.28f, true);
+                g.fillPath(cableEndPath);
+                
+            } else {
+                float dx = mousePoint.x - outputPoint.x;
+                float dy = mousePoint.y - outputPoint.y;
+                float slack = std::abs(dy) * 0.5f + 40.0f;
+                juce::Point<float> bezierCoords1(outputPoint.x + dx * 0.15f, outputPoint.y + slack);
+                juce::Point<float> bezierCoords2(mousePoint.x - dx * 0.15f, mousePoint.y + 40.0f);
+
+                // draw to mouse
+                cablePath.cubicTo(bezierCoords1, bezierCoords2, mousePoint);
+                g.strokePath(cablePath, juce::PathStrokeType(1.0));
+                cableEndPath.addCentredArc(mousePoint.x, mousePoint.y, 2, 2, 0.0f, 0.0f, 6.28f, true);
+                g.fillPath(cableEndPath);
+            }
+            g.strokePath(cablePath, juce::PathStrokeType(1.0));
+        }
+
     }
     
     void resized() override {}
@@ -57,7 +97,30 @@ public:
         this->isInUse = isInUse;
     }
     
+    bool getIsInUse()
+    {
+        return isInUse;
+    }
+    
+    bool getIsConnected()
+    {
+        return isConnected;
+    }
+    
+    void setCableOutputIndex(int outputIndex)
+    {
+        this->outputIndex = outputIndex;
+    }
+    
+    int getCableOutputIndex()
+    {
+        return outputIndex;
+    }
+
+    
 private:
+    int outputIndex;
+
     bool isConnected = false, isInUse = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
     
@@ -74,7 +137,7 @@ public:
         auto bounds = getLocalBounds().toFloat();
         bounds.reduce(5, 5);
         
-        blockSize = bounds.getWidth() * 0.15f;
+        blockSize = bounds.getWidth() * 0.2f;
         
         blockRectangle = { blockCenterCoords.x - blockSize/2,
             blockCenterCoords.y - blockSize/2,
@@ -230,21 +293,39 @@ public:
         return blockRectangle.contains(mouse);
     }
     
-    bool isOverPoint(juce::Point<float> mouse)
+    bool isOverOutputPoint(juce::Point<float> mouse)
     {
         float blockSize = width * 0.9f;
         float blockMargin = width * 0.05f;
         float pointArea = 10.0f;
-        
-        juce::Rectangle inputPoint(blockRectangle.getCentreX() - pointArea/2, blockRectangle.getY() - pointArea/2 - 8.0f, pointArea, pointArea);
-        
+                
         juce::Rectangle outputPoint(blockRectangle.getCentreX() - pointArea/2, blockRectangle.getY() + blockRectangle.getHeight() - pointArea/2 + 8.0f, pointArea, pointArea);
         
-        bool inputBool = inputPoint.contains(mouse);
-        bool outputBool = outputPoint.contains(mouse);
-        
-        return inputBool || outputBool;
+        return outputPoint.contains(mouse);
     }
+    
+    bool isOverInputPoint(juce::Point<float> mouse)
+    {
+   //     float blockSize = width * 0.9f;
+  //      float blockMargin = width * 0.05f;
+        float pointArea = 10.0f;
+        juce::Rectangle inputPoint(blockRectangle.getCentreX() - pointArea/2, blockRectangle.getY() - pointArea/2 - 8.0f, pointArea, pointArea);
+        
+        return inputPoint.contains(mouse);
+    }
+
+    juce::Point<float> getInputPoint()
+    {
+        juce::Point<float> point(blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
+        return point;
+    }
+    
+    juce::Point<float> getOutputPoint()
+    {
+        juce::Point<float> point(blockRectangle.getCentreX(), blockRectangle.getY() + blockRectangle.getHeight() + 8.0f);
+        return point;
+    }
+
     
     void setBlockInFocus(bool focus)
     {
@@ -284,10 +365,28 @@ public:
     {
         this->operatorIndex = operatorIndex;
     }
+    
+    void setNumCableAvailable(int amount)
+    {
+        numCableAvailable += amount;
+        
+        if (numCableAvailable >= 4) {
+            numCableAvailable = 4;
+        } else if (numCableAvailable <= 0) {
+            numCableAvailable = 0;
+        }
+    }
+    
+    int getNumCableAvailable()
+    {
+        return numCableAvailable;
+    }
+    
 
 private:
     float width, x, y;
     
+    int numCableAvailable = 4;
     int operatorIndex;
     std::array<float, 4> inputIndex;
     
@@ -321,6 +420,17 @@ public:
             op[i].setInterceptsMouseClicks(false, false);
             op[i].setOperatorIndex(i);
         }
+        
+        for (int i = 0; i < 16; i++)
+        {
+            int j = i % 4;
+            int k = i / 4;
+            addAndMakeVisible(cable[k][j]);
+            cable[k][j].setInterceptsMouseClicks(false, false);
+        }
+
+        
+
     }
     
     void paint(juce::Graphics& g) override
@@ -366,25 +476,51 @@ public:
         op[2].setBounds(bounds);
         op[3].setBounds(bounds);
         
-        op[0].setBlockCenter(x, y);
+        op[0].setBlockCenter(x + blockIncr * 2, y);
         op[1].setBlockCenter(x + blockIncr, y + blockIncr);
         op[2].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
         op[3].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
+        
+        for (int i = 0; i < 16; i++)
+        {
+            int j = i % 4;
+            int k = i / 4;
+            cable[k][j].setBounds(bounds);
+        }
+        
     }
 
     void mouseDown(const juce::MouseEvent& m) override
     {
+        /*
+         1. Creating new cables
+         2. editing exising cables
+         3.
+        
+        
+        */
         bool modifier = m.mods.isCommandDown();
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
-            if (op[i].isOverPoint(mouse))
+            if (op[i].isOverOutputPoint(mouse) && op[i].getNumCableAvailable() != 0)
             {
-                DBG("mousedown yes");
-
-                cable[0].setOutputPoint(mouse);
-                cable[0].setIsInUse(true);
-                currentCableIndex = 0;
+                //********** CREATE NEW CABLES **********//
+                int cableIndex = op[i].getNumCableAvailable();
+                
+                auto outputPoint = op[i].getOutputPoint();
+                
+                cable[i][cableIndex].setOutputPoint(outputPoint);
+                cable[i][cableIndex].setMousePoint(mouse);
+                cable[i][cableIndex].setIsInUse(true);
+                
+                currentOutputBlockIndex = i;
+                currentCableIndex = cableIndex;
+                dragState = 2; // dragging cable
+                
+            } else if (op[i].isOverBlock(mouse)) {
+                op[i].setBlockInFocus(true);
+                dragState = 1; // dragging block
                 
             }
             /*
@@ -398,6 +534,9 @@ public:
     
     void mouseDrag(const juce::MouseEvent& m) override
     {
+        int blk = *currentOutputBlockIndex;
+        int cbl = *currentCableIndex;
+
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
@@ -406,24 +545,95 @@ public:
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);
 
-            if (op[i].isOverBlock(mouse))
+
+            if (op[i].isOverBlock(mouse) && *dragState == 1)
             {
+                // DRAGGING BLOCK
                 op[i].setBlockInFocus(true);
                 op[i].setBlockCenter(globalMouse.x, globalMouse.y);
+                
+                
+                // ADJUST CABLE POSITION ON BLOCK DRAG
+                auto outputPoint = op[i].getOutputPoint();
+                auto inputPoint = op[i].getInputPoint();
+                for (int j = 0; j < 4; j++)
+                {
+
+                    if (cable[i][j].getIsInUse() && cable[i][j].getIsConnected())
+                        cable[i][j].setOutputPoint(outputPoint);
+                    
+                    int outputIndex = cable[i][j].getCableOutputIndex();
+                    if (cable[outputIndex][j].getIsInUse() && cable[outputIndex][j].getIsConnected())
+                        cable[outputIndex][j].setInputPoint(inputPoint);
+                }
             }
-            if (op[i].isOverPoint(mouse))
+            
+            if (currentCableIndex.has_value() && *dragState == 2)
+            {
+                // DRAGGING CABLE
+                int outputIndex = cable[blk][cbl].getCableOutputIndex();
+                auto outputPoint = op[outputIndex].getOutputPoint();
+                cable[blk][cbl].setIsInUse(true);
+                cable[blk][cbl].setOutputPoint(outputPoint);
+                cable[blk][cbl].setMousePoint(mouse);
+            }
+
+            
+            
+            
+            if(cable[blk][cbl].getIsInUse() && cable[blk][cbl].getIsConnected() && *dragState == 2){
+                int outputIndex = cable[blk][cbl].getCableOutputIndex();
+                auto outputPoint = op[outputIndex].getOutputPoint();
+                auto inputPoint = op[i].getInputPoint();
+                
+                cable[blk][cbl].setOutputPoint(outputPoint);
+                cable[blk][cbl].setInputPoint(inputPoint);
+            }
+            
+            if (op[i].isOverOutputPoint(mouse))
             {
                 op[i].setPointInFocus(true);
             }
+            if (op[i].isOverInputPoint(mouse))
+            {
+                op[i].setPointInFocus(true);
+            }
+
+            
         }
     }
     
     void mouseUp(const juce::MouseEvent& m) override
     {
+        int blk = *currentOutputBlockIndex;
+        int cbl = *currentCableIndex;
+
+        for (int i = 0; i < 4; i++)
+        {
+            auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
+            if (op[i].isOverInputPoint(mouse) && *dragState == 2)
+            {
+                
+                auto inputPoint = op[i].getInputPoint();
+                cable[blk][cbl].setInputPoint(inputPoint);
+                cable[blk][cbl].setCableOutputIndex(i);
+                cable[blk][cbl].setIsInUse(true);
+                cable[blk][cbl].setIsConnected(true);
+                
+                int outputIndex = cable[blk][cbl].getCableOutputIndex();
+                op[outputIndex].setNumCableAvailable(-1);
+                DBG("mouseup" << op[outputIndex].getNumCableAvailable());
+            }
+            
+        }
+
         currentCableIndex.reset();
+        dragState.reset();
         for (int i = 0; i < 4; i++)
         {
             op[i].setBlockInFocus(false);
+            op[i].setPointInFocus(false);
+
         }
 
     }
@@ -452,7 +662,192 @@ private:
     
     
     std::array<OperatorBlock, 4> op;
-    std::array<PatchCable, 16> cable;
-    std::optional<int> currentCableIndex;
+    std::array<std::array<PatchCable, 4>, 4> cable;
+    std::optional<int> currentCableIndex, currentOutputBlockIndex;
+    std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
 };
 
+
+class BlockDiagrams : public juce::LookAndFeel_V4
+{
+public:
+    
+    void setIndex(int graphicIndex)
+    {
+        this->graphicIndex = graphicIndex;
+        selectAlgorithm();
+    }
+    
+    void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    {
+        auto bounds = button.getLocalBounds().toFloat();
+        drawAlgorithm(g, bounds.getX(), bounds.getY(), bounds.getWidth());
+    }
+    
+    void selectAlgorithm()
+    {
+        switch(graphicIndex){
+            case 0:
+                block.blockToUse = { 4, 7, 10, 11 };
+                block.connectValue = { DOWN, DOWN, DOWN, DOWN };
+                block.label = { "3","2", "1", "N" };
+                break;
+                
+            case 1:
+                block.blockToUse = { 6, 9, 10, 11 };
+                block.connectValue = { RIGHTDOWN, DOWN, DOWN, DOWN };
+                block.label = { "3","1", "2", "N" };
+                break;
+                
+            case 2:
+                block.blockToUse = { 7, 8, 9, 10 };
+                block.connectValue = { DOWN, DOWNLEFT, DOWN, DOWN };
+                block.label = { "3","2", "N", "1" };
+
+                break;
+                
+            case 3:
+                block.blockToUse = { 4, 6, 7, 10 };
+                block.connectValue = { DOWN, DOWNRIGHT, DOWN, DOWN };
+                block.label = { "3","N", "2", "1" };
+                break;
+
+            case 4:
+                block.blockToUse = { 6, 7, 10, 11 };
+                block.connectValue = { DOWNRIGHT, RIGHTDOWN, DOWN, DOWN };
+                block.label = { "N","3", "1", "2" };
+                break;
+                
+            case 5:
+                block.blockToUse = { 6, 7, 8, 10 };
+                block.connectValue = { DOWNRIGHT, DOWN, DOWNLEFT, DOWN };
+                block.label = { "N","3", "2", "1" };
+                break;
+
+            case 6:
+                block.blockToUse = { 3, 5, 7, 10 };
+                block.connectValue = { DOWNRIGHT, DOWNLEFT, DOWN, DOWN };
+                block.label = { "N","3", "2", "1" };
+                break;
+
+            case 7:
+                block.blockToUse = { 4, 7, 10, 11 };
+                block.connectValue = { DOWN, DOWN, DOWN, DOWN };
+                block.label = { "N","3", "1", "2" };
+                break;
+
+            case 8:
+                block.blockToUse = { 4, 7, 8, 10 };
+                block.connectValue = { DOWN, DOWN, DOWNLEFT, DOWN };
+                block.label = { "N","3", "2", "1" };
+                break;
+        }
+
+    }
+    
+    
+    void drawAlgorithm(juce::Graphics& g, float x, float y, float size)
+    {
+        float graphicSize = size * 0.9f;
+        float margin = size * 0.15;
+        float blockSize = (graphicSize/4) * 0.7f;
+        float blockMargin = (graphicSize/4) * 0.15f;
+
+        //==============================================================================
+
+        for (int i = 0; i < 16; i++){ // column
+            float xIncr = x + margin + (graphicSize/4) * (i % 4);
+            float yIncr = y + margin + (graphicSize/4) * (i / 4);
+            
+            juce::Path blockPath;
+            blockPath.addRoundedRectangle(xIncr, yIncr, blockSize, blockSize, 2);
+            
+            for (int j = 0; j < 4; j++) {
+                if (i != block.blockToUse[j]) {
+                    g.setColour(juce::Colour(30, 154, 114));
+                    g.strokePath(blockPath, juce::PathStrokeType(1.0f));
+
+                } else {
+                    g.setColour(juce::Colour(90, 224, 184));
+                    g.fillPath(blockPath);
+                    g.strokePath(blockPath, juce::PathStrokeType(1.0f));
+                    break;
+                }
+
+            }
+        }
+        
+        for (int i = 0; i < 16; i++){ // column
+            float xIncr = x + margin + (graphicSize/4) * (i % 4);
+            float yIncr = y + margin + (graphicSize/4) * (i / 4);
+            
+            juce::Path linePath;
+            for (int j = 0; j < 4; j++) {
+                if (i == block.blockToUse[j]){
+                    if (block.connectValue[j] == DOWNLEFT){
+                        linePath.startNewSubPath(xIncr + blockSize/2, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + blockSize/2, yIncr + (blockSize + blockMargin) * 1.5f);
+                        linePath.lineTo(xIncr - (blockSize + blockMargin), yIncr + (blockSize + blockMargin) * 1.5f);
+                        
+                    } else if (block.connectValue[j] == DOWNRIGHT){
+                        linePath.startNewSubPath(xIncr + blockSize/2, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + blockSize/2, yIncr + (blockSize + blockMargin) * 1.5f);
+                        linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + (blockSize + blockMargin) * 1.5f);
+                        
+                    } else if (block.connectValue[j] == DOWN) {
+                        linePath.startNewSubPath(xIncr + blockSize/2, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + blockSize/2, yIncr + (blockSize + blockMargin) * 1.25f);
+                        
+                    } else if (block.connectValue[j] == LEFTDOWN) {
+                        linePath.startNewSubPath(xIncr + blockSize/2, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr - (blockSize + blockMargin) * 1.5f, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr - (blockSize + blockMargin) * 1.5f, yIncr + (blockSize + blockMargin) * 1.5f);
+                        
+                    } else if (block.connectValue[j] == RIGHTDOWN) {
+                        linePath.startNewSubPath(xIncr + blockSize/2, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + (blockSize + blockMargin) * 1.5f);
+                        
+                    } else if (block.connectValue[j] == NONE) {
+                        
+                    }
+                }
+            }
+            
+            linePath = linePath.createPathWithRoundedCorners(3);
+            g.setColour(juce::Colour(90, 224, 184));
+
+            juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+            g.strokePath(linePath, juce::PathStrokeType(strokeType));
+            
+        }
+            for (int i = 0; i < 16; i++){ // column
+                float xIncr = x + margin + (graphicSize/4) * (i % 4);
+                float yIncr = y + margin + (graphicSize/4) * (i / 4);
+                g.setColour(juce::Colour(150, 150, 150));
+                g.setFont(11.0f);
+                
+                for (int j = 0; j < 4; j++) {
+                    if (i == block.blockToUse[j]) {
+                            g.drawText(block.label[j], xIncr + 0.75f, yIncr + 0.5f, blockSize, blockSize,juce::Justification::centred);
+                    }
+                }
+            }
+        
+    }
+
+    
+    
+private:
+    int graphicIndex;
+    
+    struct blockValues
+    {
+        std::array<int, 4> blockToUse;
+        std::array<int, 4> connectValue;
+        std::array<juce::String, 4> label = { "3","2", "1", "4" };
+    };
+    enum blockConnect { NONE, DOWN, DOWNLEFT, DOWNRIGHT, LEFTDOWN, RIGHTDOWN };
+    blockValues block;
+    
+};

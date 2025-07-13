@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    Graphics.h
-    Created: 30 May 2025 2:07:31pm
-    Author:  Takuma Matsui
-
-  ==============================================================================
-*/
-
 #pragma once
 #include <JuceHeader.h>
 #include <cmath>
@@ -286,7 +276,6 @@ public:
             float amp1 = op[1].generateAmplitude(k);
             float amp0 = op[0].generateAmplitude(k);
 
-            
             float heightScaled = y + heightMargin + heightIncrement * j;
             graphicLines.startNewSubPath(x + widthMargin, heightScaled + height * 0.005f);
 
@@ -310,7 +299,7 @@ public:
         
         graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
         g.setColour(juce::Colour(90, 224, 184));
-        juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
     }
     

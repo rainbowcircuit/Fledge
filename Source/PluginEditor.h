@@ -17,7 +17,7 @@
 //==============================================================================
 /**
 */
-class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener
+class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener, juce::Button::Listener
 {
 public:
     FledgeAudioProcessorEditor (FledgeAudioProcessor&);
@@ -52,6 +52,20 @@ public:
     }
     
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
+    void buttonClicked(juce::Button* buttonClicked) override
+    {
+        if (buttonClicked == &showWaveformButton)
+        {
+            waveformDisplay.setVisible(true);
+            algorithmGraphics.setVisible(false);
+            algorithmSelector.setVisible(false);
+
+        } else if (buttonClicked == &showAlgorithmButton) {
+            waveformDisplay.setVisible(false);
+            algorithmGraphics.setVisible(true);
+            algorithmSelector.setVisible(true);
+        }
+    }
 
 
 private:
@@ -62,8 +76,10 @@ private:
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     std::unique_ptr<PresetInterface>  presetInterface;
 
+    juce::TextButton showWaveformButton, showAlgorithmButton;
     WaveformDisplayGraphics waveformDisplay;
     AlgorithmGraphics algorithmGraphics;
+    AlgorithmSelectInterface algorithmSelector;
     FledgeAudioProcessor& audioProcessor;
 
     

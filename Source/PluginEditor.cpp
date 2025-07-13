@@ -21,6 +21,10 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     presetInterface = std::make_unique<PresetInterface>(audioProcessor, audioProcessor.apvts);
     addAndMakeVisible(*presetInterface);
 
+    addAndMakeVisible(showWaveformButton);
+    showWaveformButton.addListener(this);
+    addAndMakeVisible(showAlgorithmButton);
+    showAlgorithmButton.addListener(this);
     
     addAndMakeVisible(waveformDisplay);
     
@@ -30,7 +34,8 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     }
 
     addAndMakeVisible(algorithmGraphics);
-    
+    addAndMakeVisible(algorithmSelector);
+
     addAndMakeVisible(practiceSlider);
     
     setSize (800, 800);
@@ -42,6 +47,10 @@ FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
     for (auto param : params){
         param->removeListener(this);
     }
+    showWaveformButton.removeListener(this);
+    showAlgorithmButton.removeListener(this);
+
+    
 }
 
 //==============================================================================
@@ -58,10 +67,13 @@ void FledgeAudioProcessorEditor::resized()
     {
         opInterface[oper]->setBounds(300, oper * 125 + 70, 500, 125);
     }
-    algorithmGraphics.setBounds(20, 570, 250, 250);
 
     presetInterface->setBounds(20, 10, 800, 50);
     waveformDisplay.setBounds(20, 70, 280, 500);
+    algorithmGraphics.setBounds(20, 70, 280, 330);
+    algorithmSelector.setBounds(20, 390, 280, 150);
     
+    showWaveformButton.setBounds(20, 570, 140, 40);
+    showAlgorithmButton.setBounds(160, 570, 140, 40);
 
 }
