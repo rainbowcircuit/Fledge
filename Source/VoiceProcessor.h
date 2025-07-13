@@ -12,6 +12,12 @@
 #include <JuceHeader.h>
 #include "Operator.h"
 
+class SynthSound : public juce::SynthesiserSound
+{
+public:
+    bool appliesToNote(int midiNoteNumber) override { return 1; }
+    bool appliesToChannel(int midiChannel) override { return 1; }
+};
 
 class SynthVoice : public juce::SynthesiserVoice
 {
@@ -27,8 +33,11 @@ public:
         setOperatorGain(); // move this elsewhere
     }
     
-    bool canPlaySound(juce::SynthesiserSound *) override { return 1; }
-
+    bool canPlaySound (juce::SynthesiserSound* sound) override
+    {
+        return dynamic_cast<SynthSound*> (sound) != nullptr;
+    }
+    
     void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition) override
     {
         for (int i = 0; i < 4; i++)
@@ -36,10 +45,6 @@ public:
             op[i].startNote();
             op[i].setNoteNumber(midiNoteNumber);
         }
-        float frequency = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-        
-        auto tableSizeOverSampleRate = (float)outputWavetable.getNumSamples()/sampleRate;
-        tableDelta = frequency * tableSizeOverSampleRate;
     }
     
     void stopNote(float velocity, bool allowTailOff) override
@@ -107,8 +112,9 @@ public:
                            feedback * outputGain[4];
 
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
-                outputBuffer.setSample(channel, sample, output);
-                
+           //     outputBuffer.setSample(channel, sample, output);
+                outputBuffer.addSample(channel, sample, output);
+
             }
         }
     }
@@ -124,70 +130,6 @@ public:
         
     }
     
-    void createWavetable() // maybe unused atm
-    {
-        /*
-        outputWavetable.setSize(1, (int) tableSize);
-        auto* samples = outputWavetable.getWritePointer(0);
-        
-        for (unsigned int i = 0; i < tableSize; ++i)
-        {
-            setOperatorGain();
-            op3 = op[3].processOperator(op0 * op1Gain[0],
-                                        op1 * op1Gain[1],
-                                        op2 * op1Gain[2],
-                                        op3 * op1Gain[3],
-                                        feedback * op1Gain[4]);
-            
-            op2 = op[2].processOperator(op0 * op1Gain[0],
-                                        op1 * op1Gain[1],
-                                        op2 * op1Gain[2],
-                                        op3 * op1Gain[3],
-                                        feedback * op1Gain[4]);
-
-            op1 = op[1].processOperator(op0 * op1Gain[0],
-                                        op1 * op1Gain[1],
-                                        op2 * op1Gain[2],
-                                        op3 * op1Gain[3],
-                                        feedback * op1Gain[4]);
-
-            op0 = op[0].processOperator(op0 * op1Gain[0],
-                                        op1 * op1Gain[1],
-                                        op2 * op1Gain[2],
-                                        op3 * op1Gain[3],
-                                        feedback * op1Gain[4]);
-
-            float output = op0 * outputGain[0] +
-                           op1 * outputGain[1] +
-                           op2 * outputGain[2] +
-                           op3 * outputGain[3] +
-                           feedback * outputGain[4];
-
-            samples[i] = output;
-        }
-         */
-
-    }
-    
-    forcedinline float getNextSample()
-    {
-        auto tableSize = (unsigned int)outputWavetable.getNumSamples();
-        auto index0 = (unsigned int) currentIndex;
-        auto index1 = index0 == (tableSize - 1) ? 0 : index0 + 1;
-        auto frac = currentIndex - (float) index0;
-        
-        auto* table = outputWavetable.getReadPointer(0);
-        auto value0 = table[index0];
-        auto value1 = table[index1];
-
-        auto currentSample = value0 + frac * (value1 - value0);
-        if ((currentIndex += tableDelta) > (float)tableSize)
-        {
-            currentIndex -= (float)tableSize;
-        }
-        
-        return currentSample;
-    }
 
 private:
     double sampleRate;
@@ -204,12 +146,5 @@ private:
     juce::AudioSampleBuffer outputWavetable;
     int tableSize = 128;
     float tableDelta, currentIndex, tableSizeOverSampleRate;
-};
-
-class SynthSound : public juce::SynthesiserSound
-{
-public:
-    bool appliesToNote(int midiNoteNumber) override { return 1; }
-    bool appliesToChannel(int midiChannel) override { return 1; }
 };
 

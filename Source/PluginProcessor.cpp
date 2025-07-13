@@ -94,8 +94,11 @@ void FledgeAudioProcessor::changeProgramName (int index, const juce::String& new
 //==============================================================================
 void FledgeAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+
+    for (int v = 0; v < 8; v++)
+        synth.addVoice(new SynthVoice());
+    
     synth.addSound(new SynthSound());
-    synth.addVoice(new SynthVoice());
     synth.setNoteStealingEnabled(true);
     synth.setCurrentPlaybackSampleRate(sampleRate);
     
@@ -267,12 +270,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f, 0.5f), 0.0f));
         
         //******** Operator Input ********//
-        juce::String operatorInputID = "operator" + juce::String(oper) + "Input";
-        juce::String operatorInputIDName = "Operator " + juce::String(oper) + " Input";
+        juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
+        juce::String operatorRoutingName = "Operator " + juce::String(oper) + " Routing";
         
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorInputID, 1 }, operatorInputIDName, 0, 15, 0));
+        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, 0));
         
     }
+    
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 0));
 
     return layout;
 }
