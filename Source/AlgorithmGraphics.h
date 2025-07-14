@@ -120,7 +120,6 @@ public:
     
 private:
     int outputIndex;
-
     bool isConnected = false, isInUse = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
     
@@ -295,8 +294,6 @@ public:
     
     bool isOverOutputPoint(juce::Point<float> mouse)
     {
-        float blockSize = width * 0.9f;
-        float blockMargin = width * 0.05f;
         float pointArea = 10.0f;
                 
         juce::Rectangle outputPoint(blockRectangle.getCentreX() - pointArea/2, blockRectangle.getY() + blockRectangle.getHeight() - pointArea/2 + 8.0f, pointArea, pointArea);
@@ -306,8 +303,6 @@ public:
     
     bool isOverInputPoint(juce::Point<float> mouse)
     {
-   //     float blockSize = width * 0.9f;
-  //      float blockMargin = width * 0.05f;
         float pointArea = 10.0f;
         juce::Rectangle inputPoint(blockRectangle.getCentreX() - pointArea/2, blockRectangle.getY() - pointArea/2 - 8.0f, pointArea, pointArea);
         
@@ -353,7 +348,7 @@ public:
     void setInput(int index, float value) // potentially with bool
     {
         inputIndex[index] = value;
-        
+        DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
     }
 
     int getOperatorIndex()
@@ -507,7 +502,6 @@ public:
             {
                 //********** CREATE NEW CABLES **********//
                 int cableIndex = op[i].getNumCableAvailable();
-                
                 auto outputPoint = op[i].getOutputPoint();
                 
                 cable[i][cableIndex].setOutputPoint(outputPoint);
@@ -552,34 +546,16 @@ public:
                 op[i].setBlockInFocus(true);
                 op[i].setBlockCenter(globalMouse.x, globalMouse.y);
                 
-                
-                // ADJUST CABLE POSITION ON BLOCK DRAG
-                auto outputPoint = op[i].getOutputPoint();
-                auto inputPoint = op[i].getInputPoint();
-                for (int j = 0; j < 4; j++)
-                {
-
-                    if (cable[i][j].getIsInUse() && cable[i][j].getIsConnected())
-                        cable[i][j].setOutputPoint(outputPoint);
-                    
-                    int outputIndex = cable[i][j].getCableOutputIndex();
-                    if (cable[outputIndex][j].getIsInUse() && cable[outputIndex][j].getIsConnected())
-                        cable[outputIndex][j].setInputPoint(inputPoint);
-                }
+                // REFRESH CABLE POSITION WITH BLOCK
             }
             
             if (currentCableIndex.has_value() && *dragState == 2)
             {
-                // DRAGGING CABLE
-                int outputIndex = cable[blk][cbl].getCableOutputIndex();
-                auto outputPoint = op[outputIndex].getOutputPoint();
+                auto outputPoint = op[blk].getOutputPoint();
                 cable[blk][cbl].setIsInUse(true);
                 cable[blk][cbl].setOutputPoint(outputPoint);
                 cable[blk][cbl].setMousePoint(mouse);
             }
-
-            
-            
             
             if(cable[blk][cbl].getIsInUse() && cable[blk][cbl].getIsConnected() && *dragState == 2){
                 int outputIndex = cable[blk][cbl].getCableOutputIndex();
@@ -622,18 +598,21 @@ public:
                 
                 int outputIndex = cable[blk][cbl].getCableOutputIndex();
                 op[outputIndex].setNumCableAvailable(-1);
-                DBG("mouseup" << op[outputIndex].getNumCableAvailable());
+
+                op[i].setInput(blk, 1.0f);
+
             }
             
         }
 
         currentCableIndex.reset();
+        currentOutputBlockIndex.reset();
         dragState.reset();
+        
         for (int i = 0; i < 4; i++)
         {
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);
-
         }
 
     }

@@ -23,10 +23,18 @@ FledgeAudioProcessor::FledgeAudioProcessor()
                        )
 #endif
 {
+    const auto params = this->getParameters();
+    for (auto param : params){
+        param->addListener(this);
+    }
 }
 
 FledgeAudioProcessor::~FledgeAudioProcessor()
 {
+    const auto params = this->getParameters();
+    for (auto param : params){
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -142,6 +150,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 {
     juce::ScopedNoDenormals noDenormals;
         
+    /*
     float globalAttack = apvts.getRawParameterValue("globalAttack")->load();
     float globalDecay = apvts.getRawParameterValue("globalDecay")->load();
     float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
@@ -176,6 +185,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             }
         }
     }
+     */
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
@@ -193,15 +203,16 @@ juce::AudioProcessorEditor* FledgeAudioProcessor::createEditor()
 //==============================================================================
 void FledgeAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    copyXmlToBinary(*apvts.copyState().createXml(), destData);
 }
 
 void FledgeAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    const auto xmlState = getXmlFromBinary(data, sizeInBytes);
+       if (xmlState == nullptr)
+           return;
+       const auto newTree = juce::ValueTree::fromXml(*xmlState);
+       apvts.replaceState(newTree);
 }
 
 //==============================================================================
