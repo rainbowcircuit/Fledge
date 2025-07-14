@@ -3,6 +3,8 @@
 #include <cmath>
 #include "LookAndFeel.h"
 
+//Takuma your waveforms look like a butt
+
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
