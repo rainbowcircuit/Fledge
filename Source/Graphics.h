@@ -3,6 +3,8 @@
 #include <cmath>
 #include "LookAndFeel.h"
 
+//Takuma your waveforms look like a butt
+
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
@@ -147,10 +149,31 @@ public:
     
     void setEnvelope(float attack, float decay, float sustain, float release)
     {
-        this->attack = attack/20.0f;
-        this->decay = decay/20.0f;
+        this->attack = attack;
+        this->decay = decay;
         this->sustain = sustain;
-        this->release = release/20.0f;
+        this->release = release;
+
+        float sustainPercent = 0.25f;
+        float remainderPercent = 1.0f - sustainPercent;
+
+      float adrSum = attack + decay + release;
+
+    if (adrSum > 0.0f)
+    {
+        attackPct  = (attack / adrSum) * remainderPercent;
+        decayPct   = (decay / adrSum) * remainderPercent;
+        releasePct = (release / adrSum) * remainderPercent;
+    }
+    else
+    {
+        float evenShare = remainderPercent / 3.0f;
+        attackPct  = evenShare;
+        decayPct   = evenShare;
+        releasePct = evenShare;
+    }
+    sustainPct = sustainPercent;
+        
     }
     
     void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
@@ -205,6 +228,7 @@ public:
     }
     
 private:
+    float attackPct, decayPct, releasePct, sustainPct;
     float attack, decay, sustain, release;
     float attackSegment, decaySegment, sustainSegment, releaseSegment;
     
@@ -314,16 +338,6 @@ public:
         op[index].isRatio = isRatio;
     }
     
-    void setEnvelope(int index, float attack, float decay, float sustain, float release)
-    {
-        op[index].attack = attack * 1000.0f;
-        op[index].decay = decay * 1000.0f;
-        op[index].sustain = sustain / 10.0f;
-        op[index].release = release * 1000.0f;
-        
-        calculateEnvelopeSegments();
-        repaint();
-    }
     
     void calculateEnvelopeSegments()
     {
