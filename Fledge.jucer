@@ -4,8 +4,6 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyName="Rainbow Circuit"
               version="1.0.0" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="HjcJ18" name="Fledge">
-    <FILE id="xsm3Ci" name="perfetto.h" compile="0" resource="0" file="../../../perfetto/sdk/perfetto.h"/>
-    <FILE id="Uqx2nV" name="perfetto.cc" compile="1" resource="0" file="../../../perfetto/sdk/perfetto.cc"/>
     <GROUP id="{E95012C8-BA53-E04B-38D3-3734F17061CD}" name="Utility">
       <FILE id="UZk6lh" name="Presets.cpp" compile="1" resource="0" file="Source/Presets.cpp"/>
       <FILE id="DEaSpT" name="Presets.h" compile="0" resource="0" file="Source/Presets.h"/>
