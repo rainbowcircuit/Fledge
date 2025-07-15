@@ -150,7 +150,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 {
     juce::ScopedNoDenormals noDenormals;
         
-    /*
+    
     float globalAttack = apvts.getRawParameterValue("globalAttack")->load();
     float globalDecay = apvts.getRawParameterValue("globalDecay")->load();
     float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
@@ -170,10 +170,12 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String fixedID = "fixed" + juce::String(oper);
         juce::String modIndexID = "amplitude" + juce::String(oper);
+        juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
 
         float ratio = apvts.getRawParameterValue(ratioID)->load();
         float fixed = apvts.getRawParameterValue(fixedID)->load();
         float modIndex = apvts.getRawParameterValue(modIndexID)->load();
+        float routing = apvts.getRawParameterValue(operatorRoutingID)->load();
 
         for (int v = 0; v < synth.getNumVoices(); v++)
         {
@@ -182,10 +184,12 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
+                voice->setOperatorGain(oper, routing);
             }
         }
     }
-     */
+     
+    
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 

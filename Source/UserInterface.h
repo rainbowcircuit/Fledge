@@ -81,6 +81,7 @@ public:
         }
     }
     
+    
     void paint(juce::Graphics& g) override {}
     
     void resized() override
@@ -105,7 +106,29 @@ public:
                                    blockHeight);
         }
     }
+    
+/*
+    void buttonClicked(juce::Button* buttonClicked) override
+    {
+        if (buttonClicked == &algorithm[0]){
 
+        } else if (buttonClicked == &algorithm[1]) {
+
+        } else if (buttonClicked == &algorithm[2]) {
+            
+        } else if (buttonClicked == &algorithm[3]) {
+            
+        } else if (buttonClicked == &algorithm[4]) {
+            
+        } else if (buttonClicked == &algorithm[5]) {
+            
+        } else if (buttonClicked == &algorithm[6]) {
+            
+        } else if (buttonClicked == &algorithm[7]) {
+            
+        }
+    }
+*/
     
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;

@@ -116,13 +116,23 @@ public:
     {
         return outputIndex;
     }
+    
+    void setCableInputIndex(int inputIndex)
+    {
+        this->inputIndex = inputIndex;
+    }
+    
+    int getCableInputIndex()
+    {
+        return inputIndex;
+    }
+
 
     
 private:
-    int outputIndex;
+    int outputIndex, inputIndex;
     bool isConnected = false, isInUse = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
-    
 };
 
 
@@ -487,13 +497,6 @@ public:
 
     void mouseDown(const juce::MouseEvent& m) override
     {
-        /*
-         1. Creating new cables
-         2. editing exising cables
-         3.
-        
-        
-        */
         bool modifier = m.mods.isCommandDown();
         for (int i = 0; i < 4; i++)
         {
@@ -547,6 +550,26 @@ public:
                 op[i].setBlockCenter(globalMouse.x, globalMouse.y);
                 
                 // REFRESH CABLE POSITION WITH BLOCK
+                for (int j = 0; j < 4; j++)
+                {
+                    bool inUse = cable[i][j].getIsInUse();
+                    bool isConnected = cable[i][j].getIsConnected();
+                    int outputIndex = cable[i][j].getCableOutputIndex();
+                    int inputIndex = cable[i][j].getCableInputIndex();
+
+                    
+                    if (outputIndex == blk && outputIndex != -1 && inUse && isConnected)
+                    {
+                        auto outputPoint = op[blk].getOutputPoint();
+                        cable[i][j].setOutputPoint(outputPoint);
+                    }
+                    
+                    if (inputIndex == i && inputIndex != -1 && inUse && isConnected)
+                    {
+                        auto inputPoint = op[i].getInputPoint();
+                        cable[i][j].setInputPoint(inputPoint);
+                    }
+                }
             }
             
             if (currentCableIndex.has_value() && *dragState == 2)
@@ -574,8 +597,6 @@ public:
             {
                 op[i].setPointInFocus(true);
             }
-
-            
         }
     }
     
@@ -587,12 +608,12 @@ public:
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
-            if (op[i].isOverInputPoint(mouse) && *dragState == 2)
+            if (currentCableIndex.has_value() && op[i].isOverInputPoint(mouse) && *dragState == 2)
             {
-                
                 auto inputPoint = op[i].getInputPoint();
                 cable[blk][cbl].setInputPoint(inputPoint);
-                cable[blk][cbl].setCableOutputIndex(i);
+                cable[blk][cbl].setCableInputIndex(i);
+                cable[blk][cbl].setCableOutputIndex(blk);
                 cable[blk][cbl].setIsInUse(true);
                 cable[blk][cbl].setIsConnected(true);
                 
@@ -600,9 +621,12 @@ public:
                 op[outputIndex].setNumCableAvailable(-1);
 
                 op[i].setInput(blk, 1.0f);
-
+                
+            } else if (currentCableIndex.has_value() && !op[i].isOverInputPoint(mouse) && *dragState == 2)
+            {
+                cable[blk][cbl].setIsInUse(false);
+                cable[blk][cbl].setIsConnected(false);
             }
-            
         }
 
         currentCableIndex.reset();
@@ -635,7 +659,29 @@ public:
         return coords;
     }
     
+    
+    
 private:
+    std::array<float, 4> toBinary4(int input)
+   {
+       std::array<float, 4> bits;
+       for (int i = 0; i < 4; ++i)
+           bits[i] = (input >> i) & 1;
+       return bits;
+   }
+    
+    int fromBinary4(const std::array<float, 4>& bits)
+    {
+        int result = 0;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (bits[i] >= 0.5f)
+                result |= (1 << (3 - i));
+        }
+        return result;
+    }
+
+    
     juce::Rectangle<float> bounds;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
     
@@ -812,7 +858,6 @@ public:
                     }
                 }
             }
-        
     }
 
     

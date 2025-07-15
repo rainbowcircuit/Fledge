@@ -58,14 +58,14 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float modIn
     this->isFixed = isFixed;
 }
 
-float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4, float feedback)
+float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4)
 {
     frequency = noteFrequency * ratioSmoothed.getNextValue();
     if (isFixed) frequency = fixedSmoothed.getNextValue();
     operatorAngle = frequency/sampleRate;
 
     
-    float modulatorPhase = phase1 + phase2 + phase3 + phase4 + feedback;
+    float modulatorPhase = phase1 + phase2 + phase3 + phase4;
     float twopi = juce::MathConstants<float>::twoPi;
     float envelope = ampEnvelope.getNextSample();
     float waveform = std::sin(operatorPhase * twopi + (modulatorPhase * modIndexSmoothed.getNextValue())) * envelope;

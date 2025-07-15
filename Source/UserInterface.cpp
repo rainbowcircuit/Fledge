@@ -92,10 +92,25 @@ void OperatorInterface::resized()
 
     opGraphics.setBounds(x + 100, y + height * 0.125f, sliderSize * 2, height * 0.75f);
 
-    attackLabel.setBounds(x + width * 0.8f,   y + height * 0.1f, width * 0.035f, height * 0.2f);
-    decayLabel.setBounds(x + width * 0.8f,    y + height * 0.3f, width * 0.035f, height * 0.2f);
-    sustainLabel.setBounds(x + width * 0.8f,  y + height * 0.5f, width * 0.035f, height * 0.2f);
-    releaseLabel.setBounds(x + width * 0.8f,  y + height * 0.7f, width * 0.035f, height * 0.2f);
+    attackLabel.setBounds(x + width * 0.8f,
+                          y + height * 0.1f,
+                          width * 0.035f,
+                          height * 0.2f);
+    
+    decayLabel.setBounds(x + width * 0.8f,
+                         y + height * 0.3f,
+                         width * 0.035f,
+                         height * 0.2f);
+    
+    sustainLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.5f,
+                           width * 0.035f,
+                           height * 0.2f);
+    
+    releaseLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.7f,
+                           width * 0.035f,
+                           height * 0.2f);
     
     attackSlider->setBounds(x + width * 0.835f,  y + height * 0.1f, width * 0.165f, height * 0.2f);
     decaySlider->setBounds(x + width * 0.835f,   y + height * 0.3f, width * 0.165f, height * 0.2f);
