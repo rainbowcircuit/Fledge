@@ -95,7 +95,7 @@ public:
         calculateSegment();
         drawSegment(g, x + widthMargin, y + heightMargin, width, height);
         
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 5; i++)
         {
             points[i].drawHandles(g);
         }
@@ -107,12 +107,12 @@ public:
         
         points[0].yAdjustOnly = true;
         points[1].yAdjustOnly = true;
-        points[2].yAdjustOnly = false;
+        points[2].yAdjustOnly = true;
         points[3].yAdjustOnly = true;
-        points[4].yAdjustOnly = false;
-        points[5].yAdjustOnly = false;
-        points[6].yAdjustOnly = true;
-        points[7].yAdjustOnly = false;
+        points[4].yAdjustOnly = true;
+      //  points[5].yAdjustOnly = false;
+     //   points[6].yAdjustOnly = false;
+       // points[7].yAdjustOnly = false;
     }
     
     
@@ -138,10 +138,10 @@ public:
         float heightMargin = bounds.getHeight() * 0.05f;
 
         points[0].coords = { x + widthMargin, y + height + heightMargin }; // initial
-        points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin + height * 0.5f }; // peak
-        points[2].coords = { x + widthMargin + width * decayPct, y + heightMargin + height * 0.5f}; // sustain start
-        points[3].coords = { x + widthMargin + width * sustainPct, y + heightMargin + height * 0.3f }; // sustain end
-        points[4].coords = { x + widthMargin + width * releasePct, y + heightMargin + height }; // end of envelope
+        points[1].coords = { points[0].coords.x + width * attackPct, y + heightMargin }; // peak
+        points[2].coords = { points[1].coords.x + width * decayPct, y + heightMargin + height * 0.3f}; // sustain start
+        points[3].coords = { points[2].coords.x + width * sustainPct, y + heightMargin + height * 0.3f }; // sustain end
+        points[4].coords = { points[3].coords.x + width * releasePct, y + heightMargin + height }; // end of envelope
         repaint();
     }
     
@@ -151,7 +151,7 @@ public:
         this->decay = decay;
         this->sustain = sustain;
         this->release = release;
-
+        
         float sustainPercent = 0.25f;
         float remainderPercent = 1.0f - sustainPercent;
         float adrSum = attack + decay + release;
@@ -166,8 +166,8 @@ public:
             attackPct  = evenShare;
             decayPct   = evenShare;
             releasePct = evenShare;
-            
         }
+        
         sustainPct = sustainPercent;
     }
     
@@ -179,10 +179,6 @@ public:
         envelopePath.lineTo(points[2].coords);
         envelopePath.lineTo(points[3].coords);
         envelopePath.lineTo(points[4].coords);
-      //  envelopePath.lineTo(points[5].coords);
-     //   envelopePath.lineTo(points[6].coords);
-     //   envelopePath.lineTo(points[7].coords);
-
 
         g.setColour(juce::Colour(90, 224, 184));
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
@@ -265,13 +261,6 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
-
-        juce::Path boundsPath;
-        boundsPath.addRoundedRectangle(bounds, 10, 10);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(boundsPath);
-        g.setColour(juce::Colour(30, 32, 31));
-        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
 
         float x = bounds.getX();
         float y = bounds.getY();

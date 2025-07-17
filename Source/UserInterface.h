@@ -38,9 +38,11 @@ public:
     void setLabel(juce::Label &l, juce::String labelText, float size);
     
     void setIndex(int index);
-    
+
     void timerCallback() override;
-    
+    OperatorDisplayGraphics opGraphics;
+    EnvelopeDisplayGraphics envGraphics;
+
 private:
     int index;
     
@@ -62,8 +64,6 @@ private:
     sustainSlider,
     releaseSlider;
 
-    OperatorDisplayGraphics opGraphics;
-    EnvelopeDisplayGraphics envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 
@@ -149,7 +149,9 @@ public:
     void buttonClicked(juce::Button* buttonClicked) override;
     void loadPresetList();
     
-private:     
+private:
+    ButtonLookAndFeel saveLAF { 0 }, prevLAF { 1 }, nextLAF { 2 };
+    
     juce::TextButton saveButton, nextButton, prevButton;
     juce::ComboBox presetComboBox;
     juce::Label rateLabel, rateValueLabel;
