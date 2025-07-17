@@ -13,6 +13,7 @@
 #include "UserInterface.h"
 #include "AlgorithmGraphics.h"
 #include "LookAndFeel.h"
+#include "Graphics.h"
 
 //==============================================================================
 /**

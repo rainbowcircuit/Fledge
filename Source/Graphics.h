@@ -3,7 +3,6 @@
 #include <cmath>
 #include "LookAndFeel.h"
 
-//Takuma your waveforms look like a butt
 
 class OperatorDisplayGraphics : public juce::Component
 {
@@ -61,6 +60,15 @@ public:
     }
     
     void resized() override {}
+    
+      void setEnvelope(int index, float attack, float decay, float sustain, float release)
+    {
+        op[index].attack = attack;
+        op[index].decay = decay;
+        op[index].sustain = sustain/10.0f;
+        op[index].release = release;
+        repaint();
+    }
     
     void setRatioAndAmplitude(float ratio, float fixed, float modIndex, bool isRatio)
     {
@@ -138,13 +146,11 @@ public:
         float heightMargin = bounds.getHeight() * 0.05f;
 
         points[0].coords = { x + widthMargin, y + height + heightMargin }; // initial
-        points[1].coords = { x + widthMargin + width * 0.1f, y + heightMargin + height * 0.5f }; // attack slope
-        points[2].coords = { x + widthMargin + width * 0.2f, y + heightMargin }; // peak
-        points[3].coords = { x + widthMargin + width * 0.3f, y + heightMargin + height * 0.25f }; // decay slope
-        points[4].coords = { x + widthMargin + width * 0.4f, y + heightMargin + height * 0.5f }; // sustain start
-        points[5].coords = { x + widthMargin + width * 0.5f, y + heightMargin + height * 0.5f }; // // sustain end
-        points[6].coords = { x + widthMargin + width * 0.7f, y + heightMargin + height * 0.75f };  // release start
-        points[7].coords = { x + widthMargin + width * 0.8f, y + heightMargin + height }; // release end;
+        points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin + height * 0.5f }; // peak
+        points[2].coords = { x + widthMargin + width * decayPct, y + heightMargin + height * 0.5f}; // sustain start
+        points[3].coords = { x + widthMargin + width * sustainPct, y + heightMargin + height * 0.3f }; // sustain end
+        points[4].coords = { x + widthMargin + width * releasePct, y + heightMargin + height }; // end of envelope
+        repaint();
     }
     
     void setEnvelope(float attack, float decay, float sustain, float release)
@@ -156,24 +162,21 @@ public:
 
         float sustainPercent = 0.25f;
         float remainderPercent = 1.0f - sustainPercent;
+        float adrSum = attack + decay + release;
 
-      float adrSum = attack + decay + release;
-
-    if (adrSum > 0.0f)
-    {
-        attackPct  = (attack / adrSum) * remainderPercent;
-        decayPct   = (decay / adrSum) * remainderPercent;
-        releasePct = (release / adrSum) * remainderPercent;
-    }
-    else
-    {
-        float evenShare = remainderPercent / 3.0f;
-        attackPct  = evenShare;
-        decayPct   = evenShare;
-        releasePct = evenShare;
-    }
-    sustainPct = sustainPercent;
-        
+        if (adrSum > 0.0f) {
+            attackPct  = (attack / adrSum) * remainderPercent;
+            decayPct   = (decay / adrSum) * remainderPercent;
+            releasePct = (release / adrSum) * remainderPercent;
+            
+        } else {
+            float evenShare = remainderPercent / 3.0f;
+            attackPct  = evenShare;
+            decayPct   = evenShare;
+            releasePct = evenShare;
+            
+        }
+        sustainPct = sustainPercent;
     }
     
     void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
@@ -184,9 +187,9 @@ public:
         envelopePath.lineTo(points[2].coords);
         envelopePath.lineTo(points[3].coords);
         envelopePath.lineTo(points[4].coords);
-        envelopePath.lineTo(points[5].coords);
-        envelopePath.lineTo(points[6].coords);
-        envelopePath.lineTo(points[7].coords);
+      //  envelopePath.lineTo(points[5].coords);
+     //   envelopePath.lineTo(points[6].coords);
+     //   envelopePath.lineTo(points[7].coords);
 
 
         g.setColour(juce::Colour(90, 224, 184));
@@ -301,7 +304,11 @@ public:
             float amp0 = op[0].generateAmplitude(k);
 
             float heightScaled = y + heightMargin + heightIncrement * j;
-            graphicLines.startNewSubPath(x + widthMargin, heightScaled + height * 0.005f);
+            
+            float sin0Phase = fmodf(((0/40.7f) * op[0].ratio * 2.0f), 6.28318f);
+            float sin = amp0 * fastSin.sin(sin0Phase);
+
+            graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
 
             for (int i = 0; i < domainResolution; i++)
             {
@@ -330,14 +337,23 @@ public:
     
     void resized() override {};
     
+    void setEnvelope(int index, float attack, float decay, float sustain, float release)
+    {
+        op[index].attack = attack;
+        op[index].decay = decay;
+        op[index].sustain = sustain/10.0f;
+        op[index].release = release;
+        repaint();
+    }
+    
     void setFMParameter(int index, float ratio, float fixed, bool isRatio, float modIndex)
     {
         op[index].ratio = ratio;
         op[index].fixed = fixed;
         op[index].modIndex = modIndex/10.0f;
         op[index].isRatio = isRatio;
+        repaint();
     }
-    
     
     void calculateEnvelopeSegments()
     {

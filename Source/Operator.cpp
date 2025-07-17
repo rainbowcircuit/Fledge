@@ -19,6 +19,13 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
     ratioSmoothed.reset(sampleRate, 0.001);
     fixedSmoothed.reset(sampleRate, 0.001);
     modIndexSmoothed.reset(sampleRate, 0.001);
+    
+    
+    float smoothingTimeSeconds = frequencySmoothingTimeMs / 1000.0f;
+    frequencySmoothingCoeff = 1.0f - std::exp(-1.0f / (smoothingTimeSeconds * sampleRate));
+    
+    currentFrequency = 0.0f;
+    targetFrequency = 0.0f;
 }
 
 void FMOperator::startNote()
@@ -47,7 +54,7 @@ void FMOperator::setEnvelope(float attackInMs, float decayInMs, float sustainInF
 
 void FMOperator::setNoteNumber(float noteNumber)
 {
-    noteFrequency = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
+    targetFrequency = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
 }
 
 void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float modIndex)
@@ -60,9 +67,20 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float modIn
 
 float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4, float feedback)
 {
-    frequency = noteFrequency * ratioSmoothed.getNextValue();
-    if (isFixed) frequency = fixedSmoothed.getNextValue();
+
+    
+    
+     currentFrequency += frequencySmoothingCoeff * (targetFrequency - currentFrequency);
+
+
+    frequency = currentFrequency * ratioSmoothed.getNextValue();
+    if (isFixed) frequency = fixedSmoothed.getNextValue(); 
+
+    
     operatorAngle = frequency/sampleRate;
+    
+    
+    
 
     
     float modulatorPhase = phase1 + phase2 + phase3 + phase4 + feedback;
