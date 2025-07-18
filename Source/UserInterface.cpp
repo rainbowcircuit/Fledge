@@ -66,7 +66,6 @@ void OperatorInterface::paint(juce::Graphics &g)
     g.fillPath(boundsPath);
     g.setColour(juce::Colour(35, 37, 36));
     g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
-
     
 }
 
@@ -135,7 +134,6 @@ void OperatorInterface::setIndex(int index)
 
 void OperatorInterface::timerCallback()
 {
-    /*
     float ratio = audioProcessor.apvts.getRawParameterValue("ratio" + juce::String(index))->load();
     float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
     float modIndex = audioProcessor.apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
@@ -143,12 +141,11 @@ void OperatorInterface::timerCallback()
     opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
     
     float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
-    float decay = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
+    float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
     float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
     float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
-    
     envGraphics.setEnvelope(attack, decay, sustain, release);
-     */
+
 }
 
 
@@ -158,15 +155,15 @@ PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorVa
 
     addAndMakeVisible(saveButton);
     saveButton.addListener(this);
-    saveButton.setLookAndFeel(&saveLAF);
+ //   saveButton.setLookAndFeel(&saveLAF);
 
     addAndMakeVisible(nextButton);
     nextButton.addListener(this);
-    nextButton.setLookAndFeel(&nextLAF);
+//    nextButton.setLookAndFeel(&nextLAF);
 
     addAndMakeVisible(prevButton);
     prevButton.addListener(this);
-    prevButton.setLookAndFeel(&prevLAF);
+ //   prevButton.setLookAndFeel(&prevLAF);
     
     addAndMakeVisible(presetComboBox);
     presetComboBox.addListener(this);
