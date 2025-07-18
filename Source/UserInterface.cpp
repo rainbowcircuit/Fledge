@@ -66,7 +66,6 @@ void OperatorInterface::paint(juce::Graphics &g)
     g.fillPath(boundsPath);
     g.setColour(juce::Colour(35, 37, 36));
     g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
-
     
 }
 
@@ -92,10 +91,25 @@ void OperatorInterface::resized()
 
     opGraphics.setBounds(x + 100, y + height * 0.125f, sliderSize * 2, height * 0.75f);
 
-    attackLabel.setBounds(x + width * 0.8f,   y + height * 0.1f, width * 0.035f, height * 0.2f);
-    decayLabel.setBounds(x + width * 0.8f,    y + height * 0.3f, width * 0.035f, height * 0.2f);
-    sustainLabel.setBounds(x + width * 0.8f,  y + height * 0.5f, width * 0.035f, height * 0.2f);
-    releaseLabel.setBounds(x + width * 0.8f,  y + height * 0.7f, width * 0.035f, height * 0.2f);
+    attackLabel.setBounds(x + width * 0.8f,
+                          y + height * 0.1f,
+                          width * 0.035f,
+                          height * 0.2f);
+    
+    decayLabel.setBounds(x + width * 0.8f,
+                         y + height * 0.3f,
+                         width * 0.035f,
+                         height * 0.2f);
+    
+    sustainLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.5f,
+                           width * 0.035f,
+                           height * 0.2f);
+    
+    releaseLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.7f,
+                           width * 0.035f,
+                           height * 0.2f);
     
     attackSlider->setBounds(x + width * 0.835f,  y + height * 0.1f, width * 0.165f, height * 0.2f);
     decaySlider->setBounds(x + width * 0.835f,   y + height * 0.3f, width * 0.165f, height * 0.2f);
@@ -127,9 +141,9 @@ void OperatorInterface::timerCallback()
     opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
     
     float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
-    float decay = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
+    float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
     float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
-    bool release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
+    float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
     envGraphics.setEnvelope(attack, decay, sustain, release);
 
 }

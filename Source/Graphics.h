@@ -3,6 +3,7 @@
 #include <cmath>
 #include "LookAndFeel.h"
 
+//Takuma your waveforms look like a butt
 
 class OperatorDisplayGraphics : public juce::Component
 {
@@ -61,14 +62,7 @@ public:
     
     void resized() override {}
     
-      void setEnvelope(int index, float attack, float decay, float sustain, float release)
-    {
-        op[index].attack = attack;
-        op[index].decay = decay;
-        op[index].sustain = sustain/10.0f;
-        op[index].release = release;
-        repaint();
-    }
+     
     
     void setRatioAndAmplitude(float ratio, float fixed, float modIndex, bool isRatio)
     {
@@ -77,7 +71,7 @@ public:
         this->modIndex = modIndex;
         repaint();
     }
-    
+
 private:
     float ratio, fixed, modIndex;
 };
@@ -145,39 +139,40 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.05f;
 
-        points[0].coords = { x + widthMargin, y + height + heightMargin }; // initial
-        points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin + height * 0.5f }; // peak
-        points[2].coords = { x + widthMargin + width * decayPct, y + heightMargin + height * 0.5f}; // sustain start
-        points[3].coords = { x + widthMargin + width * sustainPct, y + heightMargin + height * 0.3f }; // sustain end
-        points[4].coords = { x + widthMargin + width * releasePct, y + heightMargin + height }; // end of envelope
+       points[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
+    points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
+    points[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
+    points[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
+    points[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
         repaint();
     }
     
-    void setEnvelope(float attack, float decay, float sustain, float release)
-    {
-        this->attack = attack;
-        this->decay = decay;
-        this->sustain = sustain;
-        this->release = release;
+  
+void setEnvelope(float attack, float decay, float sustain, float release)
+{
+    this->attack = attack;
+    this->decay = decay;
+    this->sustain = sustain / 100.0f;
+    this->release = release;
 
-        float sustainPercent = 0.25f;
-        float remainderPercent = 1.0f - sustainPercent;
-        float adrSum = attack + decay + release;
-
-        if (adrSum > 0.0f) {
-            attackPct  = (attack / adrSum) * remainderPercent;
-            decayPct   = (decay / adrSum) * remainderPercent;
-            releasePct = (release / adrSum) * remainderPercent;
-            
-        } else {
-            float evenShare = remainderPercent / 3.0f;
-            attackPct  = evenShare;
-            decayPct   = evenShare;
-            releasePct = evenShare;
-            
-        }
-        sustainPct = sustainPercent;
+    // Sustain always takes 25% of width
+    sustainPct = 0.25f;
+    
+    // Calculate A+D+R proportions for remaining 75%
+    float adrSum = attack + decay + release;
+    
+    if (adrSum > 0.0f) {
+        attackPct  = (attack / adrSum) * 0.75f;
+        decayPct   = (decay / adrSum) * 0.75f;
+        releasePct = (release / adrSum) * 0.75f;
+    } else {
+        attackPct  = 0.25f;
+        decayPct   = 0.25f;
+        releasePct = 0.25f;
     }
+    
+    calculateSegment();
+}
     
     void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
     {

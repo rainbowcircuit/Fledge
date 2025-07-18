@@ -29,8 +29,6 @@ public:
         {
             op[i].prepareToPlay(sampleRate, samplesPerBlock, numChannels);
         }
-        
-        setOperatorGain(); // move this elsewhere
     }
     
     bool canPlaySound (juce::SynthesiserSound* sound) override
@@ -79,37 +77,31 @@ public:
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override
     {
-        setOperatorGain(); // move elsewehre later
         for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
             op3 = op[3].processOperator(op0 * op3Gain[0],
                                         op1 * op3Gain[1],
                                         op2 * op3Gain[2],
-                                        op3 * op3Gain[3],
-                                        feedback * op3Gain[4]);
+                                        op3 * op3Gain[3]);
             
             op2 = op[2].processOperator(op0 * op2Gain[0],
                                         op1 * op2Gain[1],
                                         op2 * op2Gain[2],
-                                        op3 * op2Gain[3],
-                                        feedback * op2Gain[4]);
+                                        op3 * op2Gain[3]);
 
             op1 = op[1].processOperator(op0 * op1Gain[0],
                                         op1 * op1Gain[1],
                                         op2 * op1Gain[2],
-                                        op3 * op1Gain[3],
-                                        feedback * op1Gain[4]);
+                                        op3 * op1Gain[3]);
 
             op0 = op[0].processOperator(op0 * op0Gain[0],
                                         op1 * op0Gain[1],
                                         op2 * op0Gain[2],
-                                        op3 * op0Gain[3],
-                                        feedback * op0Gain[4]);
+                                        op3 * op0Gain[3]);
 
             float output = op0 * outputGain[0] +
                            op1 * outputGain[1] +
                            op2 * outputGain[2] +
-                           op3 * outputGain[3] +
-                           feedback * outputGain[4];
+                        op3 * outputGain[3];
 
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
            //     outputBuffer.setSample(channel, sample, output);
@@ -119,27 +111,44 @@ public:
         }
     }
     
-    void setOperatorGain()
+    void setOperatorGain(int index, int gainIndex)
     {
-        // potentially replace with a different data structure than an array?
-        op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // no feedback atm
-        op2Gain = { 0.0f, 0.0f, 0.0f, 1.0f, 0.0f };
-        op1Gain = { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
-        op0Gain = { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f };
-        outputGain = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // op1, op2, op3, op4, feedback
-        
+        switch(index){
+            case 0:
+                outputGain = toBinary4(gainIndex);
+                break;
+            case 1:
+                op0Gain = toBinary4(gainIndex);
+                break;
+            case 2:
+                op1Gain = toBinary4(gainIndex);
+                break;
+            case 3:
+                op2Gain = toBinary4(gainIndex);
+                break;
+            case 4:
+                op3Gain = toBinary4(gainIndex);
+                break;
+        }
     }
     
-
 private:
+    std::array<float, 4> toBinary4(int input)
+   {
+       std::array<float, 4> bits;
+       for (int i = 0; i < 4; ++i)
+           bits[i] = (input >> i) & 1;
+       return bits;
+   }
+    
     double sampleRate;
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm
     
-    std::array<float, 5> op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    std::array<float, 5> op2Gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    std::array<float, 5> op1Gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    std::array<float, 5> op0Gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    std::array<float, 5> outputGain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    std::array<float, 4> op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::array<float, 4> op2Gain = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::array<float, 4> op1Gain = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::array<float, 4> op0Gain = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::array<float, 4> outputGain = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     std::array<FMOperator, 4> op;
 

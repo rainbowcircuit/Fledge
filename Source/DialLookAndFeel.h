@@ -131,7 +131,7 @@ public:
         
     }
     
-    void mouseDown(const juce::MouseEvent& m) override
+   /* void mouseDown(const juce::MouseEvent& m) override
     {
         auto mousePoint = m.getPosition().toFloat();
         dragStartPoint.y = mousePoint.y;
@@ -145,6 +145,28 @@ public:
         float value = juce::jlimit(0.0f, 1.0f, deltaY/100.0f); // clamp this
         textValueToParamValue(value);
     }
+    */
+    
+    void mouseDown(const juce::MouseEvent& m) override
+    {
+        auto mousePoint = m.getPosition().toFloat();
+        dragStartPoint.y = mousePoint.y;
+        
+        // Get the normalized parameter value (0.0-1.0)
+        initialParamValue = audioProcessor.apvts.getParameter(parameterID)->getValue();
+    }
+
+    void mouseDrag(const juce::MouseEvent& m) override
+    {
+        auto mousePoint = m.getPosition().toFloat();
+        float deltaY = mousePoint.y - dragStartPoint.y; // Remove std::abs to allow bidirectional dragging
+        
+        // Modify the initial normalized value based on drag distance
+        float sensitivity = 0.01f; // Adjust this value to change drag sensitivity
+        float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
+        textValueToParamValue(newValue);
+    }
+    
     
     void mouseUp(const juce::MouseEvent& m) override
     {
@@ -165,7 +187,7 @@ public:
         auto value = l->getText().getFloatValue();
         float valueLimited = juce::jlimit(rangeStart, rangeEnd, value);
         
-        l->setText(juce::String(valueLimited, 2), juce::dontSendNotification);
+        l->setText(juce::String(valueLimited, 3), juce::dontSendNotification);
         textBox.setInterceptsMouseClicks(false, false);
         
         float normalized = (valueLimited - rangeStart) / (rangeEnd - rangeStart);
@@ -206,7 +228,7 @@ public:
         
         if (newParameterID == parameterID)
         {
-            juce::String formattedValue = juce::String(scaledValue, 2) + parameterSuffix;
+            juce::String formattedValue = juce::String(scaledValue, 3) + parameterSuffix;
             textBox.setText(formattedValue, juce::dontSendNotification);
         }
     }
@@ -217,6 +239,7 @@ public:
     }
     
 private:
+    float initialParamValue;
     float rangeStart, rangeEnd;
     std::atomic<float> newValueAtomic;
     std::atomic<int> parameterIndexAtomic;
