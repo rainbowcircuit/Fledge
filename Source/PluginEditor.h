@@ -27,6 +27,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
         for (int oper = 0; oper < 4; oper++)
@@ -51,7 +52,6 @@ public:
 
             waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude);
             opInterface[oper]->opGraphics.setRatioAndAmplitude(ratio, 0.0f, amplitude, true);
-
         }
     }
     

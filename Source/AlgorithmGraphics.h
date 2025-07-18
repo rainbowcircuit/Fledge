@@ -448,29 +448,21 @@ public:
         juce::Point<float> vp = bounds.getCentre().toFloat();
 
         calculateCoordinates(bounds.toFloat());
-
-        op[0].setBounds(bounds);
-        op[1].setBounds(bounds);
-        op[2].setBounds(bounds);
-        op[3].setBounds(bounds);
         
         op[0].setBlockCenter(x + blockIncr * 2, y);
         op[1].setBlockCenter(x + blockIncr, y + blockIncr);
         op[2].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
         op[3].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
-        
-        op[0].setVanishingPoint(vp, 0.1f);
-        op[1].setVanishingPoint(vp, 0.1f);
-        op[2].setVanishingPoint(vp, 0.1f);
-        op[3].setVanishingPoint(vp, 0.1f);
 
-        for (int i = 0; i < 16; i++)
-        {
-            int j = i % 4;
-            int k = i / 4;
-            cable[k][j].setBounds(bounds);
+        for (int i = 0; i < 4; i++){
+            op[i].setBounds(bounds);
+            op[i].setVanishingPoint(vp, 0.1f);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                cable[i][j].setBounds(bounds);
+            }
         }
-        
     }
 
     
@@ -537,16 +529,15 @@ public:
                     int outputIndex = cable[i][j].getCableOutputIndex();
                     int inputIndex = cable[i][j].getCableInputIndex();
 
-                    
                     if (outputIndex == blk && outputIndex != -1 && inUse && isConnected)
                     {
-                        auto outputPoint = op[blk].getOutputPoint();
+                        auto outputPoint = op[outputIndex].getOutputPoint();
                         cable[i][j].setOutputPoint(outputPoint);
                     }
                     
                     if (inputIndex == i && inputIndex != -1 && inUse && isConnected)
                     {
-                        auto inputPoint = op[i].getInputPoint();
+                        auto inputPoint = op[inputIndex].getInputPoint();
                         cable[i][j].setInputPoint(inputPoint);
                     }
                 }
