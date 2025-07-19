@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "LookAndFeel.h"
 
 
 class PatchCable : public juce::Component
@@ -141,26 +142,37 @@ class OperatorBlock : public juce::Component
 {
 
 public:
+    void setIsOutput(bool isOutput)
+    {
+        this->isOutput = isOutput;
+    }
+    
     void paint(juce::Graphics& g) override
     {
         auto bounds = getLocalBounds().toFloat();
         bounds.reduce(5, 5);
         
         blockSize = bounds.getWidth() * 0.2f;
-        
         blockRectangle = { blockCenterCoords.x - blockSize/2,
             blockCenterCoords.y - blockSize/2,
-            blockSize, blockSize
-        };
-
+            blockSize, blockSize };
         juce::Path frontPath, leftSidePath, rightSidePath, botSidePath, topSidePath;
         
         calculatePerspective();
         
-        drawBlockBackground(g);
-        drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
-        drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() + blockRectangle.getHeight() + 8.0f);
-        drawBlockForeground(g);
+        if (!isOutput){
+            drawBlockBackground(g);
+            drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
+            drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() + blockRectangle.getHeight() + 8.0f);
+            drawBlockForeground(g);
+            g.setColour(juce::Colour(120, 120, 120));
+            g.drawText(juce::String(operatorIndex), blockRectangle, juce::Justification::centred);
+
+        } else {
+            drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
+            g.setColour(juce::Colour(120, 120, 120));
+            g.drawText("Output", blockRectangle.getX(), blockRectangle.getY() - 16.0f, blockRectangle.getWidth(), blockRectangle.getHeight(), juce::Justification::centred);
+        }
         
     }
     
@@ -198,14 +210,14 @@ public:
     {
         juce::Path pointPath, outlinePath;
         
-        pointPath.addCentredArc(x, y, 2.0f, 2.0f, 0.0f, 0.0f, 6.28f, true);
-        g.setColour(juce::Colour(70, 204, 164));
+        pointPath.addCentredArc(x, y, 2.5f, 2.5f, 0.0f, 0.0f, 6.28f, true);
+        g.setColour(Colors::mainColors[4]);
         g.fillPath(pointPath);
         
         if (pointInFocus)
         {
-            outlinePath.addCentredArc(x, y, 6.0f, 6.0f, 0.0f, 0.0f, 6.28f, true);
-            g.setColour(juce::Colour(50, 184, 144));
+            outlinePath.addCentredArc(x, y, 8.0f, 8.0f, 0.0f, 0.0f, 6.28f, true);
+            g.setColour(Colors::mainColors[4]);
             g.strokePath(outlinePath, juce::PathStrokeType(1.0f));
         }
         
@@ -227,7 +239,7 @@ public:
         topSidePath = createSidePath(blockRectangle.getTopLeft(), blockRectangle.getTopRight(), perspectiveTopRight, perspectiveTopLeft);
         topSidePath = topSidePath.createPathWithRoundedCorners(1.0f);
 
-        g.setColour(juce::Colour(30, 154, 114));
+        g.setColour(Colors::mainColors[operatorIndex]);
         g.strokePath(leftSidePath, juce::PathStrokeType(1.0f));
         g.strokePath(rightSidePath, juce::PathStrokeType(1.0f));
         g.strokePath(topSidePath, juce::PathStrokeType(1.0f));
@@ -250,7 +262,7 @@ public:
         graphicPath.addRectangle(blockRectangle);
         graphicPath = graphicPath.createPathWithRoundedCorners(1.0f);
         
-        g.setColour(juce::Colour(90, 224, 184));
+        g.setColour(Colors::mainColors[operatorIndex]);
         g.strokePath(graphicPath, juce::PathStrokeType(1.0f));
         
         if (!blockInFocus)
@@ -279,7 +291,7 @@ public:
     {
         juce::Path graphicPath;
         graphicPath.addCentredArc(x, y, 4.0f, 4.0f, 0.0f, 0.0f, 6.28f, true);
-        g.setColour(juce::Colour(120, 120, 120));
+        g.setColour(Colors::mainColors[4]);
         g.strokePath(graphicPath, juce::PathStrokeType(1.0f));
     }
     
@@ -398,6 +410,7 @@ private:
     // drawing state
     bool blockInFocus;
     bool pointInFocus;
+    bool isOutput;
     
     float blockSize;
     float perspective = 0.5f;
@@ -411,19 +424,30 @@ private:
     perspectiveBotRight;
 };
 
-
-
 class AlgorithmGraphics : public juce::Component
 {
 public:
     
     AlgorithmGraphics()
     {
+        addAndMakeVisible(op[4]);
+        op[4].setOperatorIndex(4);
+        op[4].setInterceptsMouseClicks(false, false);
+        op[4].setIsOutput(true);
+
         for (int i = 0; i < 4; i++)
         {
             addAndMakeVisible(op[i]);
             op[i].setInterceptsMouseClicks(false, false);
             op[i].setOperatorIndex(i);
+            op[i].setIsOutput(false);
+            
+            for (int j = 0; j < 4; j++){
+                addAndMakeVisible(cable[i][j]);
+                cable[i][j].setInterceptsMouseClicks(false, false);
+                cable[i][j].setAlwaysOnTop(true);
+                cable[i][j].setThisCableIndex(j);
+            }
         }
         
         for (int i = 0; i < 16; i++)
@@ -481,16 +505,21 @@ public:
         op[2].setBounds(bounds);
         op[3].setBounds(bounds);
         
-        op[0].setBlockCenter(x + blockIncr * 2, y);
-        op[1].setBlockCenter(x + blockIncr, y + blockIncr);
-        op[2].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
-        op[3].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
-        
-        for (int i = 0; i < 16; i++)
-        {
-            int j = i % 4;
-            int k = i / 4;
-            cable[k][j].setBounds(bounds);
+        op[1].setBlockCenter(x + blockIncr * 2, y);
+        op[2].setBlockCenter(x + blockIncr, y + blockIncr);
+        op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
+        op[4].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
+
+        op[0].setBlockCenter(x + width/2, y + height); // output
+
+        for (int i = 0; i <= 4; i++){
+            op[i].setBounds(bounds);
+            op[i].setVanishingPoint(vp, 0.1f);
+            
+            for (int j = 0; j < 4; j++)
+            {
+                cable[i][j].setBounds(bounds);
+            }
         }
         
     }
@@ -542,35 +571,40 @@ public:
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);
 
-
-            if (op[i].isOverBlock(mouse) && *dragState == 1)
+            // REFRESH CABLE POSITION WITH BLOCK
+            for (int j = 0; j < 4; j++)
             {
-                // DRAGGING BLOCK
-                op[i].setBlockInFocus(true);
-                op[i].setBlockCenter(globalMouse.x, globalMouse.y);
-                
-                // REFRESH CABLE POSITION WITH BLOCK
-                for (int j = 0; j < 4; j++)
-                {
-                    bool inUse = cable[i][j].getIsInUse();
-                    bool isConnected = cable[i][j].getIsConnected();
-                    int outputIndex = cable[i][j].getCableOutputIndex();
-                    int inputIndex = cable[i][j].getCableInputIndex();
+                // iterating all cables for every block.
+                bool inUseAndConnected = cable[i][j].getIsInUse() && cable[i][j].getIsConnected();
+                int outputIndex = cable[i][j].getCableOutputIndex(); // cable origin
+                int inputIndex = cable[i][j].getCableInputIndex(); // cable dest
 
-                    
-                    if (outputIndex == blk && outputIndex != -1 && inUse && isConnected)
-                    {
-                        auto outputPoint = op[blk].getOutputPoint();
-                        cable[i][j].setOutputPoint(outputPoint);
-                    }
-                    
-                    if (inputIndex == i && inputIndex != -1 && inUse && isConnected)
-                    {
-                        auto inputPoint = op[i].getInputPoint();
-                        cable[i][j].setInputPoint(inputPoint);
-                    }
+                if (outputIndex == blk && outputIndex != -1 && inUseAndConnected)
+                {
+                    DBG("outputs associated with block input: " << outputIndex);
+                    auto outputPoint = op[outputIndex].getOutputPoint();
+                    cable[i][j].setOutputPoint(outputPoint);
+                }
+                
+                if (inputIndex == i && inputIndex != -1 && inUseAndConnected)
+                {
+
+                    DBG("inputs associated with block output: " << inputIndex);
+
+                    auto inputPoint = op[inputIndex].getInputPoint();
+                    cable[i][j].setInputPoint(inputPoint);
+                }
+
+                if (op[i].isOverBlock(mouse) && *dragState == 1)
+                {
+                    DBG("current block being dragged: " << i);
+                    // DRAGGING BLOCK
+                    op[i].setBlockInFocus(true);
+                    op[i].setBlockCenter(globalMouse.x, globalMouse.y);
+
                 }
             }
+            
             
             if (currentCableIndex.has_value() && *dragState == 2)
             {
@@ -686,8 +720,8 @@ private:
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
     
     
-    std::array<OperatorBlock, 4> op;
-    std::array<std::array<PatchCable, 4>, 4> cable;
+    std::array<OperatorBlock, 5> op;
+    std::array<std::array<PatchCable, 4>, 5> cable;
     std::optional<int> currentCableIndex, currentOutputBlockIndex;
     std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
 };
@@ -713,61 +747,54 @@ public:
     {
         switch(graphicIndex){
             case 0:
-                block.blockToUse = { 4, 7, 10, 11 };
+                block.blockToUse = { 1, 5, 9, 13 };
                 block.connectValue = { DOWN, DOWN, DOWN, DOWN };
                 block.label = { "3","2", "1", "N" };
                 break;
                 
             case 1:
-                block.blockToUse = { 6, 9, 10, 11 };
+                block.blockToUse = { 7, 9, 11, 14 };
                 block.connectValue = { RIGHTDOWN, DOWN, DOWN, DOWN };
                 block.label = { "3","1", "2", "N" };
                 break;
                 
             case 2:
-                block.blockToUse = { 7, 8, 9, 10 };
+                block.blockToUse = { 9, 10, 11, 14 };
                 block.connectValue = { DOWN, DOWNLEFT, DOWN, DOWN };
                 block.label = { "3","2", "N", "1" };
 
                 break;
                 
             case 3:
-                block.blockToUse = { 4, 6, 7, 10 };
+                block.blockToUse = { 6, 9, 11, 14 };
                 block.connectValue = { DOWN, DOWNRIGHT, DOWN, DOWN };
                 block.label = { "3","N", "2", "1" };
                 break;
 
             case 4:
-                block.blockToUse = { 6, 7, 10, 11 };
+                block.blockToUse = { 9, 10, 13, 14 };
                 block.connectValue = { DOWNRIGHT, RIGHTDOWN, DOWN, DOWN };
                 block.label = { "N","3", "1", "2" };
                 break;
                 
             case 5:
-                block.blockToUse = { 6, 7, 8, 10 };
+                block.blockToUse = { 5, 9, 12, 14 };
                 block.connectValue = { DOWNRIGHT, DOWN, DOWNLEFT, DOWN };
                 block.label = { "N","3", "2", "1" };
                 break;
 
             case 6:
-                block.blockToUse = { 3, 5, 7, 10 };
+                block.blockToUse = { 10, 12, 13, 14 };
                 block.connectValue = { DOWNRIGHT, DOWNLEFT, DOWN, DOWN };
                 block.label = { "N","3", "2", "1" };
                 break;
 
             case 7:
-                block.blockToUse = { 4, 7, 10, 11 };
+                block.blockToUse = { 12, 13, 14, 15 };
                 block.connectValue = { DOWN, DOWN, DOWN, DOWN };
                 block.label = { "N","3", "1", "2" };
                 break;
-
-            case 8:
-                block.blockToUse = { 4, 7, 8, 10 };
-                block.connectValue = { DOWN, DOWN, DOWNLEFT, DOWN };
-                block.label = { "N","3", "2", "1" };
-                break;
         }
-
     }
     
     
@@ -869,7 +896,7 @@ private:
     {
         std::array<int, 4> blockToUse;
         std::array<int, 4> connectValue;
-        std::array<juce::String, 4> label = { "3","2", "1", "4" };
+        std::array<juce::String, 4> label = { "3", "2", "1", "4" };
     };
     enum blockConnect { NONE, DOWN, DOWNLEFT, DOWNRIGHT, LEFTDOWN, RIGHTDOWN };
     blockValues block;

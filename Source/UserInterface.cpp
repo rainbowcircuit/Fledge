@@ -14,7 +14,6 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
 {
     this->index = index;
     
-    
     setLabel(ratioLabel, "Ratio", 12.0f);
     ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index), "");
     addAndMakeVisible(*ratioSlider);
@@ -52,6 +51,9 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
 
     addAndMakeVisible(envGraphics);
     addAndMakeVisible(opGraphics);
+    envGraphics.setIndex(index);
+    opGraphics.setIndex(index);
+
     startTimerHz(30);
 }
 

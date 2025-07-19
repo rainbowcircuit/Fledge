@@ -185,12 +185,14 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
                 voice->setOperatorGain(oper, routing);
+                levelAtomic.store(voice->getOutputSample());
             }
         }
     }
      
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    
 }
 
 //==============================================================================
