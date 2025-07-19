@@ -21,10 +21,10 @@ namespace Colors
     };
 
     inline std::array<juce::Colour, 5> mainHoverColors {
-        juce::Colour(57, 232, 237),
-        juce::Colour(74, 239, 220),
-        juce::Colour(67, 239, 202),
-        juce::Colour(79, 237, 189),
+        juce::Colour(67, 242, 247),
+        juce::Colour(84, 249, 230),
+        juce::Colour(77, 249, 212),
+        juce::Colour(89, 247, 199),
         juce::Colour(251, 251, 251),
     };
 };

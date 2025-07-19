@@ -466,31 +466,11 @@ public:
         auto bounds = getLocalBounds().toFloat();
         calculateCoordinates(bounds);
         
-        // draw background fill
-        juce::Path boundsPath;
-        boundsPath.addRoundedRectangle(bounds, 10, 10);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(boundsPath);
-        g.setColour(juce::Colour(30, 32, 31));
-        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
-
-        // persepctive
-        juce::Path perspectivePath;
-        perspectivePath.startNewSubPath(x, y);
-        perspectivePath.lineTo(x + bounds.getWidth(), y + bounds.getHeight());
-        perspectivePath.startNewSubPath(x + bounds.getWidth(), y);
-        perspectivePath.lineTo(x, y + bounds.getHeight());
-        g.setColour(juce::Colour(90, 90, 90));
-        g.strokePath(perspectivePath, juce::PathStrokeType(2));
-
-        
         juce::Point<float> vp = bounds.getCentre();
         op[0].setVanishingPoint(vp, 0.1f);
         op[1].setVanishingPoint(vp, 0.1f);
         op[2].setVanishingPoint(vp, 0.1f);
         op[3].setVanishingPoint(vp, 0.1f);
-        
-
     }
     
     void resized() override
@@ -504,12 +484,12 @@ public:
         op[2].setBounds(bounds);
         op[3].setBounds(bounds);
         
+        op[0].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
         op[1].setBlockCenter(x + blockIncr * 2, y);
         op[2].setBlockCenter(x + blockIncr, y + blockIncr);
         op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
-        op[4].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
 
-        op[0].setBlockCenter(x + width/2, y + height); // output
+        op[4].setBlockCenter(x + width/2, y + height); // output
 
         for (int i = 0; i <= 4; i++){
             op[i].setBounds(bounds);
@@ -715,7 +695,6 @@ private:
         }
         return result;
     }
-
     
     juce::Rectangle<float> bounds;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
@@ -750,25 +729,25 @@ public:
             case 0:
                 block.blockToUse = { 1, 5, 9, 13 };
                 block.connectValue = { DOWN, DOWN, DOWN, DOWN };
-                block.label = { "3","2", "1", "N" };
+                block.label = { "4", "3", "2", "1" };
                 break;
                 
             case 1:
                 block.blockToUse = { 7, 9, 11, 14 };
-                block.connectValue = { RIGHTDOWN, DOWN, DOWN, DOWN };
+                block.connectValue = { DOWN, DOWNRIGHT, DOWNLEFT, DOWN };
                 block.label = { "3","1", "2", "N" };
                 break;
                 
             case 2:
                 block.blockToUse = { 9, 10, 11, 14 };
-                block.connectValue = { DOWN, DOWNLEFT, DOWN, DOWN };
+                block.connectValue = { DOWNRIGHT, DOWN, DOWNLEFT, DOWN };
                 block.label = { "3","2", "N", "1" };
 
                 break;
                 
             case 3:
                 block.blockToUse = { 6, 9, 11, 14 };
-                block.connectValue = { DOWN, DOWNRIGHT, DOWN, DOWN };
+                block.connectValue = { LEFTDOWN, DOWNRIGHT, DOWNLEFT, DOWN };
                 block.label = { "3","N", "2", "1" };
                 break;
 
@@ -780,13 +759,13 @@ public:
                 
             case 5:
                 block.blockToUse = { 5, 9, 12, 14 };
-                block.connectValue = { DOWNRIGHT, DOWN, DOWNLEFT, DOWN };
+                block.connectValue = { DOWN, DOWN, DOWN, DOWN };
                 block.label = { "N","3", "2", "1" };
                 break;
 
             case 6:
                 block.blockToUse = { 10, 12, 13, 14 };
-                block.connectValue = { DOWNRIGHT, DOWNLEFT, DOWN, DOWN };
+                block.connectValue = { DOWN, DOWNLEFT, DOWN, DOWN };
                 block.label = { "N","3", "2", "1" };
                 break;
 
@@ -801,8 +780,8 @@ public:
     
     void drawAlgorithm(juce::Graphics& g, float x, float y, float size, bool mouseDown)
     {
-        float graphicSize = size * 0.9f;
-        float margin = size * 0.15;
+        float graphicSize = size * 0.8f;
+        float margin = size * 0.2f;
         float blockSize = (graphicSize/4) * 0.7f;
         float blockMargin = (graphicSize/4) * 0.15f;
 
@@ -821,7 +800,7 @@ public:
                     g.strokePath(blockPath, juce::PathStrokeType(1.0f));
 
                 } else {
-                    auto fillColor = mouseDown ? Colors::mainColors[j] : Colors::mainHoverColors[j];
+                    auto fillColor = mouseDown ? Colors::mainHoverColors[j] : Colors::mainColors[j];
                     g.setColour(fillColor);
                     g.fillPath(blockPath);
                     g.strokePath(blockPath, juce::PathStrokeType(1.0f));
@@ -875,18 +854,19 @@ public:
             g.strokePath(linePath, juce::PathStrokeType(strokeType));
             
         }
-            for (int i = 0; i < 16; i++){ // column
-                float xIncr = x + margin + (graphicSize/4) * (i % 4);
-                float yIncr = y + margin + (graphicSize/4) * (i / 4);
-                g.setColour(juce::Colour(150, 150, 150));
-                g.setFont(11.0f);
-                
-                for (int j = 0; j < 4; j++) {
-                    if (i == block.blockToUse[j]) {
-                            g.drawText(block.label[j], xIncr + 0.75f, yIncr + 0.5f, blockSize, blockSize,juce::Justification::centred);
-                    }
+        
+        for (int i = 0; i < 16; i++){ // column
+            float xIncr = x + margin + (graphicSize/4) * (i % 4);
+            float yIncr = y + margin + (graphicSize/4) * (i / 4);
+            g.setColour(juce::Colour(40, 40, 40));
+            g.setFont(9.0f);
+            
+            for (int j = 0; j < 4; j++) {
+                if (i == block.blockToUse[j]) {
+                        g.drawText(block.label[j], xIncr + 0.75f, yIncr + 0.5f, blockSize, blockSize,juce::Justification::centred);
                 }
             }
+        }
     }
 
     
@@ -900,7 +880,7 @@ private:
         std::array<int, 4> connectValue;
         std::array<juce::String, 4> label = { "3", "2", "1", "4" };
     };
-    enum blockConnect { NONE, DOWN, DOWNLEFT, DOWNRIGHT, LEFTDOWN, RIGHTDOWN };
+    enum blockConnect { NONE, DOWN, DOWNLEFT, DOWNRIGHT, LEFTDOWN, RIGHTDOWN, DOWNLEFTRIGHT };
     blockValues block;
     
 };

@@ -156,6 +156,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
     float globalRelease = apvts.getRawParameterValue("globalRelease")->load();
     
+    int outputRouting = apvts.getRawParameterValue("outputRouting")->load();
     for (int oper = 0; oper < 4; oper++){
         juce::String attackID = "attack" + juce::String(oper);
         juce::String decayID = "decay" + juce::String(oper);
@@ -184,12 +185,12 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
-                voice->setOperatorGain(oper, routing);
-                levelAtomic.store(voice->getOutputSample());
+           //     voice->setOperatorGain(oper + 1, oper + 1);
+           //     voice->setOperatorGain(0, 1);
+
             }
         }
     }
-     
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
@@ -241,6 +242,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 80.0f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 1.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 10));
 
     for (int oper = 0; oper < 4; oper++)
     {
@@ -290,11 +293,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
         juce::String operatorRoutingName = "Operator " + juce::String(oper) + " Routing";
         
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, 0));
+        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, oper + 1 ));
         
     }
     
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 0));
 
     return layout;
 }

@@ -29,6 +29,12 @@ public:
         {
             op[i].prepareToPlay(sampleRate, samplesPerBlock, numChannels);
         }
+
+        outputGain = {1.0, 0.0, 0.0, 0.0};
+        op0Gain = {0.0, 1.0, 0.0, 0.0};
+        op1Gain = {0.0, 0.0, 1.0, 0.0};
+        op2Gain = {0.0, 0.0, 0.0, 1.0};
+        op3Gain = {0.0, 0.0, 0.0, 0.0};
     }
     
     bool canPlaySound (juce::SynthesiserSound* sound) override
@@ -77,35 +83,39 @@ public:
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override
     {
-        for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
-            op3 = op[3].processOperator(op0 * op3Gain[0],
-                                        op1 * op3Gain[1],
-                                        op2 * op3Gain[2],
-                                        op3 * op3Gain[3]);
-            
-            op2 = op[2].processOperator(op0 * op2Gain[0],
-                                        op1 * op2Gain[1],
-                                        op2 * op2Gain[2],
-                                        op3 * op2Gain[3]);
-
-            op1 = op[1].processOperator(op0 * op1Gain[0],
-                                        op1 * op1Gain[1],
-                                        op2 * op1Gain[2],
-                                        op3 * op1Gain[3]);
-
-            op0 = op[0].processOperator(op0 * op0Gain[0],
-                                        op1 * op0Gain[1],
-                                        op2 * op0Gain[2],
-                                        op3 * op0Gain[3]);
-
-            float output = op0 * outputGain[0] +
-                           op1 * outputGain[1] +
-                           op2 * outputGain[2] +
-                        op3 * outputGain[3];
-
-            outputSample = output;
-            for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
-                outputBuffer.addSample(channel, sample, output);
+        if (op[0].ampEnvelope.isActive())
+        {
+            for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
+                op3 = op[3].processOperator(op0 * op3Gain[0],
+                                            op1 * op3Gain[1],
+                                            op2 * op3Gain[2],
+                                            op3 * op3Gain[3]);
+                
+                op2 = op[2].processOperator(op0 * op2Gain[0],
+                                            op1 * op2Gain[1],
+                                            op2 * op2Gain[2],
+                                            op3 * op2Gain[3]);
+                
+                op1 = op[1].processOperator(op0 * op1Gain[0],
+                                            op1 * op1Gain[1],
+                                            op2 * op1Gain[2],
+                                            op3 * op1Gain[3]);
+                
+                op0 = op[0].processOperator(op0 * op0Gain[0],
+                                            op1 * op0Gain[1],
+                                            op2 * op0Gain[2],
+                                            op3 * op0Gain[3]);
+                                
+                float output = op0 * outputGain[0] +
+                op1 * outputGain[1] +
+                op2 * outputGain[2] +
+                op3 * outputGain[3];
+                
+                outputSample = output;
+                for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
+                {
+                    outputBuffer.addSample(channel, sample, output);
+                }
             }
         }
     }
@@ -114,19 +124,19 @@ public:
     {
         switch(index){
             case 0:
-                outputGain = toBinary4(gainIndex);
+                outputGain = toBinary4(1);
                 break;
             case 1:
-                op0Gain = toBinary4(gainIndex);
+                op0Gain = toBinary4(2);
                 break;
             case 2:
-                op1Gain = toBinary4(gainIndex);
+                op1Gain = toBinary4(3);
                 break;
             case 3:
-                op2Gain = toBinary4(gainIndex);
+                op2Gain = toBinary4(4);
                 break;
             case 4:
-                op3Gain = toBinary4(gainIndex);
+                op3Gain = toBinary4(0);
                 break;
         }
     }

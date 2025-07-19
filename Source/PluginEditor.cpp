@@ -27,7 +27,8 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     showAlgorithmButton.addListener(this);
     
     addAndMakeVisible(waveformDisplay);
-    
+    waveformDisplay.setVisible(true);
+
     const auto params = audioProcessor.getParameters();
     for (auto param : params){
         param->addListener(this);
@@ -35,7 +36,10 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 
     addAndMakeVisible(algorithmGraphics);
     addAndMakeVisible(algorithmSelector);
-    setSize (800, 700);
+    algorithmGraphics.setVisible(false);
+    algorithmSelector.setVisible(false);
+
+    setSize (765, 700);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
@@ -54,7 +58,14 @@ FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
 void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(juce::Colour(60, 62, 61));
+    g.setColour(juce::Colour(35, 37, 36));
+    g.fillAll();
+    
+    juce::Path leftBounds;
+    leftBounds.addRoundedRectangle(5, 60, 280, 490, 5.0f);
+    g.setColour(juce::Colour(40, 42, 41));
+    g.fillPath(leftBounds);
+
 
 }
 
@@ -62,15 +73,15 @@ void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(300, oper * 125 + 70, 500, 125);
+        opInterface[oper]->setBounds(285, oper * 125 + 55, 480, 125);
     }
 
-    presetInterface->setBounds(20, 10, 800, 50);
-    waveformDisplay.setBounds(20, 70, 280, 500);
-    algorithmGraphics.setBounds(20, 70, 280, 330);
-    algorithmSelector.setBounds(20, 390, 280, 150);
+    presetInterface->setBounds(5, 5, 760, 50);
+    waveformDisplay.setBounds(5, 60, 280, 490);
+    algorithmGraphics.setBounds(5, 60, 280, 330);
+    algorithmSelector.setBounds(5, 400, 280, 150);
     
-    showWaveformButton.setBounds(20, 570, 140, 40);
-    showAlgorithmButton.setBounds(160, 570, 140, 40);
+    showWaveformButton.setBounds(5, 555, 94, 40);
+    showAlgorithmButton.setBounds(150, 555, 94, 40);
 
 }

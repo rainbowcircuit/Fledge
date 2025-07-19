@@ -66,8 +66,6 @@ void OperatorInterface::paint(juce::Graphics &g)
     boundsPath.addRoundedRectangle(bounds, 5, 5);
     g.setColour(juce::Colour(40, 42, 41));
     g.fillPath(boundsPath);
-    g.setColour(juce::Colour(35, 37, 36));
-    g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
     
 }
 
@@ -91,7 +89,7 @@ void OperatorInterface::resized()
     amplitudeLabel.setBounds(x + width * 0.025f,  height * 0.6f, width * 0.15f, height * 0.1f);
     amplitudeSlider->setBounds(x + width * 0.025f, height * 0.6f + labelHeight, width * 0.15f, height * 0.25f);
 
-    opGraphics.setBounds(x + 100, y + height * 0.125f, width * 0.25f, height * 0.75f);
+    opGraphics.setBounds(x + width * 0.2f, y + height * 0.125f, width * 0.275f, height * 0.75f);
 
     attackLabel.setBounds(x + width * 0.8f,
                           y + height * 0.1f,
@@ -124,7 +122,7 @@ void OperatorInterface::resized()
     sustainSlider->setBounds(x + width * 0.835f, y + height * 0.5f, width * 0.165f, height * 0.2f);
     releaseSlider->setBounds(x + width * 0.835f, y + height * 0.7f, width * 0.165f, height * 0.2f);
 
-    envGraphics.setBounds(x + sliderSize * 3.5 , y + height * 0.125f, width * 0.25f, height * 0.75f);
+    envGraphics.setBounds(x + width * 0.5f, y + height * 0.125f, width * 0.275f, height * 0.75f);
 }
 
 void OperatorInterface::setLabel(juce::Label &l, juce::String labelText, float size)

@@ -5,6 +5,25 @@
 
 //Takuma your waveforms look like a butt
 
+
+class LevelMeterGraphics : public juce::Component
+{
+    void paint(juce::Graphics &g) override
+    {
+        
+    }
+    
+    void resized() override {}
+
+    void setLevel(float level)
+    {
+        this->level = level;
+    }
+    
+private:
+    float level = 0.0f;
+};
+
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
@@ -106,7 +125,7 @@ public:
         calculateSegment();
         drawSegment(g, x + widthMargin, y + heightMargin, width, height);
         
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 5; i++)
         {
             points[i].drawHandles(g);
         }
@@ -146,39 +165,39 @@ public:
         float heightMargin = bounds.getHeight() * 0.05f;
 
        points[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
-    points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
-    points[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
-    points[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
-    points[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
+        points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
+        points[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
+        points[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
+        points[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
         repaint();
     }
     
   
-void setEnvelope(float attack, float decay, float sustain, float release)
-{
-    this->attack = attack;
-    this->decay = decay;
-    this->sustain = sustain / 100.0f;
-    this->release = release;
+    void setEnvelope(float attack, float decay, float sustain, float release)
+    {
+        this->attack = attack;
+        this->decay = decay;
+        this->sustain = sustain / 100.0f;
+        this->release = release;
 
-    // Sustain always takes 25% of width
-    sustainPct = 0.25f;
-    
-    // Calculate A+D+R proportions for remaining 75%
-    float adrSum = attack + decay + release;
-    
-    if (adrSum > 0.0f) {
-        attackPct  = (attack / adrSum) * 0.75f;
-        decayPct   = (decay / adrSum) * 0.75f;
-        releasePct = (release / adrSum) * 0.75f;
-    } else {
-        attackPct  = 0.25f;
-        decayPct   = 0.25f;
-        releasePct = 0.25f;
+        // Sustain always takes 25% of width
+        sustainPct = 0.25f;
+        
+        // Calculate A+D+R proportions for remaining 75%
+        float adrSum = attack + decay + release;
+        
+        if (adrSum > 0.0f) {
+            attackPct  = (attack / adrSum) * 0.75f;
+            decayPct   = (decay / adrSum) * 0.75f;
+            releasePct = (release / adrSum) * 0.75f;
+        } else {
+            attackPct  = 0.25f;
+            decayPct   = 0.25f;
+            releasePct = 0.25f;
+        }
+        
+        calculateSegment();
     }
-    
-    calculateSegment();
-}
     
     void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
     {
@@ -192,17 +211,20 @@ void setEnvelope(float attack, float decay, float sustain, float release)
         envelopePath.cubicTo(points[3].coords.x, points[4].coords.y,
                              points[3].coords.x + width * releasePct * 0.5f, points[4].coords.y,
                              points[4].coords.x, points[4].coords.y);
+        g.setColour(Colors::mainColors[index].withAlpha((float)0.15f));
+        g.fillPath(envelopePath);
+        
         g.setColour(Colors::mainColors[index]);
-
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
+        
         
     }
 
     void mouseDown(const juce::MouseEvent &m) override
     {
         auto mouse = m.getPosition().toFloat();
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
             if (points[i].isOver(mouse))
             {
@@ -275,13 +297,6 @@ public:
     {
         auto bounds = getLocalBounds().toFloat();
 
-        juce::Path boundsPath;
-        boundsPath.addRoundedRectangle(bounds, 10, 10);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(boundsPath);
-        g.setColour(juce::Colour(30, 32, 31));
-        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
-
         float x = bounds.getX();
         float y = bounds.getY();
         float height = bounds.getHeight();
@@ -311,7 +326,7 @@ public:
 
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
 
-            for (int i = 0; i < domainResolution; i++)
+            for (int i = 1; i <= domainResolution; i++)
             {
              //   float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
                 

@@ -34,7 +34,6 @@ void FMOperator::stopNote()
 }
 
 
-
 void FMOperator::setEnvelope(float attackInMs, float decayInMs, float sustainInFloat, float releaseInMs, bool isLooping)
 {
     envParameters.attack = attackInMs;
@@ -60,11 +59,12 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float modIn
 
 float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4)
 {
-
+    /*
     currentFrequency += frequencySmoothingCoeff * (targetFrequency - currentFrequency);
     frequency = currentFrequency * ratioSmoothed.getNextValue();
     if (isFixed) frequency = fixedSmoothed.getNextValue(); 
-
+     */
+    frequency = currentFrequency * ratioSmoothed.getNextValue();
     operatorAngle = frequency/sampleRate;
 
     
@@ -72,9 +72,6 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     float twopi = juce::MathConstants<float>::twoPi;
     float envelope = ampEnvelope.getNextSample();
     float waveform = std::sin(operatorPhase * twopi + (modulatorPhase * modIndexSmoothed.getNextValue())) * envelope;
-    
-    
-    
     
     // accumulate and wrap
     operatorPhase += operatorAngle;

@@ -100,19 +100,19 @@ public:
         float x = bounds.getX();
         float y = bounds.getY();
         
-        float width = bounds.getWidth() * 0.8f;
+        float width = bounds.getWidth() * 0.95f;
         float height = bounds.getHeight() * 0.8f;
-        float widthMargin = bounds.getWidth() * 0.1f;
+        float widthMargin = bounds.getWidth() * 0.025f;
         float heightMargin = bounds.getHeight() * 0.1f;
 
-        float blockWidth = width * 0.2f;
-        float blockHeight = height/2;
+        float blockWidth = width * 0.25f;
+        float blockHeight = height * 0.5f;
 
         for(int i = 0; i < 8; i++)
         {
             algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
                                    y + heightMargin + blockWidth * (i / 4),
-                                   blockWidth,
+                                   blockHeight,
                                    blockHeight);
         }
     }
