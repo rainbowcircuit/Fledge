@@ -32,16 +32,15 @@ class OperatorInterface : public juce::Component, juce::Timer
 {
 public:
     OperatorInterface(FledgeAudioProcessor& p, int index);
-    
+    void setIndex(int index);
+
     void paint(juce::Graphics &g) override;
     void resized() override;
-    void setLabel(juce::Label &l, juce::String labelText, float size);
-    
-    void setIndex(int index);
-    
-    void timerCallback() override;
     
 private:
+    void setLabel(juce::Label &l, juce::String labelText, float size);
+    void timerCallback() override;
+
     int index;
     
     juce::Label ratioLabel,
@@ -68,7 +67,7 @@ private:
 };
 
 
-class AlgorithmSelectInterface : public juce::Component
+class AlgorithmSelectInterface : public juce::Component, public juce::Button::Listener
 {
 public:
     AlgorithmSelectInterface()
@@ -78,10 +77,21 @@ public:
             addAndMakeVisible(algorithm[i]);
             algorithmGraphics[i].setIndex(i);
             algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
+            algorithm[i].addListener(this);
+
         }
     }
     
-    
+    ~AlgorithmSelectInterface()
+    {
+        for(int i = 0; i < 8; i++)
+        {
+            algorithm[i].setLookAndFeel(nullptr);
+            algorithm[i].removeListener(this);
+
+        }
+    }
+
     void paint(juce::Graphics& g) override {}
     
     void resized() override
@@ -107,28 +117,28 @@ public:
         }
     }
     
-/*
-    void buttonClicked(juce::Button* buttonClicked) override
+
+    void buttonClicked(juce::Button* button) override
     {
-        if (buttonClicked == &algorithm[0]){
+        if (button == &algorithm[0]){
 
-        } else if (buttonClicked == &algorithm[1]) {
+        } else if (button == &algorithm[1]) {
 
-        } else if (buttonClicked == &algorithm[2]) {
+        } else if (button == &algorithm[2]) {
             
-        } else if (buttonClicked == &algorithm[3]) {
+        } else if (button == &algorithm[3]) {
             
-        } else if (buttonClicked == &algorithm[4]) {
+        } else if (button == &algorithm[4]) {
             
-        } else if (buttonClicked == &algorithm[5]) {
+        } else if (button == &algorithm[5]) {
             
-        } else if (buttonClicked == &algorithm[6]) {
+        } else if (button == &algorithm[6]) {
             
-        } else if (buttonClicked == &algorithm[7]) {
+        } else if (button == &algorithm[7]) {
             
         }
     }
-*/
+    
     
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
@@ -149,7 +159,8 @@ public:
     void buttonClicked(juce::Button* buttonClicked) override;
     void loadPresetList();
     
-private:     
+private:
+    
     juce::TextButton saveButton, nextButton, prevButton;
     juce::ComboBox presetComboBox;
     juce::Label rateLabel, rateValueLabel;
@@ -159,46 +170,3 @@ private:
     PresetManager presetManager;
     FledgeAudioProcessor& audioProcessor;
 };
-
-
-
-
-
-
-
-
-class PracticeDialGraphics : public juce::LookAndFeel_V4
-{
-public:
-    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override
-    {
-        g.fillAll(juce::Colour(255, 255, 255));
-        
-        for (int i = 0 ; i < 6; i++)
-        {
-            float lineIncr = (height/6) * sliderPosProportional * i;
-            
-            juce::Point<float> leftCoords = { (float)x, (float)y + lineIncr };
-            juce::Point<float> rightCoords = { (float)x + width, (float)y + lineIncr };
-            
-            juce::Path linePath;
-            linePath.startNewSubPath(leftCoords);
-            linePath.lineTo(rightCoords);
-            
-            g.setColour(juce::Colour(155, 155, 155));
-            
-            if (slider.isMouseOverOrDragging())
-            {
-                g.setColour(juce::Colour(200, 200, 200));
-            }
-            
-            g.strokePath(linePath, juce::PathStrokeType(1.0f));
-        }
-    }
-
-private:
-    
-    
-};
-
-

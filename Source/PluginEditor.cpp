@@ -35,10 +35,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 
     addAndMakeVisible(algorithmGraphics);
     addAndMakeVisible(algorithmSelector);
-
-    addAndMakeVisible(practiceSlider);
-    
-    setSize (800, 800);
+    setSize (800, 700);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()

@@ -446,7 +446,6 @@ public:
                 addAndMakeVisible(cable[i][j]);
                 cable[i][j].setInterceptsMouseClicks(false, false);
                 cable[i][j].setAlwaysOnTop(true);
-                cable[i][j].setThisCableIndex(j);
             }
         }
         
@@ -497,7 +496,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-
+        juce::Point<float> vp = bounds.getCentre().toFloat();
         calculateCoordinates(bounds.toFloat());
 
         op[0].setBounds(bounds);
@@ -655,8 +654,10 @@ public:
                 op[outputIndex].setNumCableAvailable(-1);
 
                 op[i].setInput(blk, 1.0f);
-                
-            } else if (currentCableIndex.has_value() && !op[i].isOverInputPoint(mouse) && *dragState == 2)
+                break;
+            }
+            
+            if (currentCableIndex.has_value() && !op[i].isOverInputPoint(mouse) && *dragState == 2)
             {
                 cable[blk][cbl].setIsInUse(false);
                 cable[blk][cbl].setIsConnected(false);
@@ -740,7 +741,7 @@ public:
     void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         auto bounds = button.getLocalBounds().toFloat();
-        drawAlgorithm(g, bounds.getX(), bounds.getY(), bounds.getWidth());
+        drawAlgorithm(g, bounds.getX(), bounds.getY(), bounds.getWidth(), shouldDrawButtonAsDown);
     }
     
     void selectAlgorithm()
@@ -798,7 +799,7 @@ public:
     }
     
     
-    void drawAlgorithm(juce::Graphics& g, float x, float y, float size)
+    void drawAlgorithm(juce::Graphics& g, float x, float y, float size, bool mouseDown)
     {
         float graphicSize = size * 0.9f;
         float margin = size * 0.15;
@@ -816,11 +817,12 @@ public:
             
             for (int j = 0; j < 4; j++) {
                 if (i != block.blockToUse[j]) {
-                    g.setColour(juce::Colour(30, 154, 114));
+                    g.setColour(juce::Colour(50, 50, 50));
                     g.strokePath(blockPath, juce::PathStrokeType(1.0f));
 
                 } else {
-                    g.setColour(juce::Colour(90, 224, 184));
+                    auto fillColor = mouseDown ? Colors::mainColors[j] : Colors::mainHoverColors[j];
+                    g.setColour(fillColor);
                     g.fillPath(blockPath);
                     g.strokePath(blockPath, juce::PathStrokeType(1.0f));
                     break;
