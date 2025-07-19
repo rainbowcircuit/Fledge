@@ -446,7 +446,6 @@ public:
                 addAndMakeVisible(cable[i][j]);
                 cable[i][j].setInterceptsMouseClicks(false, false);
                 cable[i][j].setAlwaysOnTop(true);
-                cable[i][j].setThisCableIndex(j);
             }
         }
         
@@ -497,6 +496,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
+        juce::Point<float> vp = bounds.getCentre().toFloat();
 
         calculateCoordinates(bounds.toFloat());
 
