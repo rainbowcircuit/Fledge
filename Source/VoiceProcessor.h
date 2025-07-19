@@ -103,10 +103,9 @@ public:
                            op2 * outputGain[2] +
                         op3 * outputGain[3];
 
+            outputSample = output;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
-           //     outputBuffer.setSample(channel, sample, output);
                 outputBuffer.addSample(channel, sample, output);
-
             }
         }
     }
@@ -132,6 +131,11 @@ public:
         }
     }
     
+    float getOutputSample()
+    {
+        return outputSample;
+    }
+    
 private:
     std::array<float, 4> toBinary4(int input)
    {
@@ -142,6 +146,8 @@ private:
    }
     
     double sampleRate;
+    float outputSample;
+
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm
     
     std::array<float, 4> op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -151,9 +157,5 @@ private:
     std::array<float, 4> outputGain = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     std::array<FMOperator, 4> op;
-
-    juce::AudioSampleBuffer outputWavetable;
-    int tableSize = 128;
-    float tableDelta, currentIndex, tableSizeOverSampleRate;
 };
 

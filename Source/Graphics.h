@@ -8,6 +8,10 @@
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
+    void setIndex(int index)
+    {
+        this->index = index;
+    }
     
     void paint(juce::Graphics &g) override
     {
@@ -16,7 +20,6 @@ public:
         juce::Path bgFill;
         bgFill.addRoundedRectangle(bounds, 5.0f);
         g.setColour(juce::Colour(12, 10, 11));
-      //  g.fillPath(bgFill);
 
         float x = bounds.getX();
         float y = bounds.getY();
@@ -39,7 +42,7 @@ public:
         
         
         juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
-        g.setColour(juce::Colour(90, 224, 184));
+        g.setColour(Colors::mainColors[index]);
         g.strokePath(fgWaveform, strokeType);
 
     }
@@ -71,6 +74,7 @@ public:
     }
     
 private:
+    int index;
     float ratio, fixed, modIndex;
 };
 
@@ -81,6 +85,11 @@ class EnvelopeDisplayGraphics : public juce::Component
 public:
     EnvelopeDisplayGraphics() {}
     
+    void setIndex(int index)
+    {
+        this->index = index;
+    }
+
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
@@ -110,9 +119,6 @@ public:
         points[2].yAdjustOnly = true;
         points[3].yAdjustOnly = true;
         points[4].yAdjustOnly = true;
-      //  points[5].yAdjustOnly = false;
-     //   points[6].yAdjustOnly = false;
-       // points[7].yAdjustOnly = false;
     }
     
     
@@ -176,11 +182,14 @@ public:
         juce::Path envelopePath;
         envelopePath.startNewSubPath(points[0].coords);
         envelopePath.lineTo(points[1].coords);
-        envelopePath.lineTo(points[2].coords);
+        envelopePath.cubicTo(points[1].coords.x, points[2].coords.y,
+                             points[1].coords.x + width * decayPct * 0.5f, points[2].coords.y,
+                             points[2].coords.x, points[2].coords.y);
         envelopePath.lineTo(points[3].coords);
-        envelopePath.lineTo(points[4].coords);
-
-        g.setColour(juce::Colour(90, 224, 184));
+        envelopePath.cubicTo(points[3].coords.x, points[4].coords.y,
+                             points[3].coords.x + width * releasePct * 0.5f, points[4].coords.y,
+                             points[4].coords.x, points[4].coords.y);
+        g.setColour(Colors::mainColors[index]);
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
         
@@ -189,7 +198,7 @@ public:
     void mouseDown(const juce::MouseEvent &m) override
     {
         auto mouse = m.getPosition().toFloat();
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 4; i++)
         {
             if (points[i].isOver(mouse))
             {
@@ -219,6 +228,7 @@ public:
     }
     
 private:
+    int index;
     float attackPct, decayPct, releasePct, sustainPct;
     float attack, decay, sustain, release;
     float attackSegment, decaySegment, sustainSegment, releaseSegment;
@@ -244,8 +254,7 @@ private:
         }
     };
     
-    std::array<Handle, 8> points;
-    // initial, attack, peak, decay, sustain start, sustain end, release, final
+    std::array<Handle, 5> points;
     std::optional<int> dragIndex;
 };
 
@@ -310,7 +319,7 @@ public:
         }
         
         graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
-        g.setColour(juce::Colour(90, 224, 184));
+        g.setColour(Colors::mainColors[0]);
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
     }

@@ -113,7 +113,8 @@ public:
     
     
 private:
-    
+    float outputLevel;
+    std::atomic<float> levelAtomic;
     
     juce::Synthesiser synth;
     //==============================================================================
