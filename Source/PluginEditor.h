@@ -13,7 +13,6 @@
 #include "UserInterface.h"
 #include "AlgorithmGraphics.h"
 #include "LookAndFeel.h"
-#include "DialLookAndFeel.h"
 
 //==============================================================================
 /**
@@ -27,7 +26,6 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-    
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
         for (int oper = 0; oper < 4; oper++)
@@ -43,15 +41,13 @@ public:
             float release = audioProcessor.apvts.getRawParameterValue(releaseID)->load();
             
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
-            opInterface[oper]->envGraphics.setEnvelope(attack, decay, sustain, release);
 
             juce::String ratioID = "ratio" + juce::String(oper);
             juce::String amplitudeID = "amplitude" + juce::String(oper);
             float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
-            float amplitude = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
+            float modIndex = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
 
-            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude);
-            opInterface[oper]->opGraphics.setRatioAndAmplitude(ratio, 0.0f, amplitude, true);
+            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, modIndex);
         }
     }
     
@@ -80,9 +76,7 @@ private:
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     std::unique_ptr<PresetInterface>  presetInterface;
 
-    ButtonLookAndFeel showWaveformLAF { 4 }, showAlgorithmLAF { 3 };
     juce::TextButton showWaveformButton, showAlgorithmButton;
-    
     WaveformDisplayGraphics waveformDisplay;
     AlgorithmGraphics algorithmGraphics;
     AlgorithmSelectInterface algorithmSelector;

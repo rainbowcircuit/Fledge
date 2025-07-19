@@ -23,6 +23,12 @@ private:
     float noteFrequency, frequency, ratio, fixed;
     bool isFixed = false;
     
+    float targetFrequency = 0.0f;
+    float currentFrequency = 0.0f;
+    float frequencySmoothingTimeMs = 100.0f;
+    float frequencySmoothingCoeff = 0.0f;
+    
+    
     juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, modIndexSmoothed;
     juce::ADSR ampEnvelope;
     juce::ADSR::Parameters envParameters;

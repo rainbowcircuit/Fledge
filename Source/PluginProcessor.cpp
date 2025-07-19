@@ -232,15 +232,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 0.01f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 0.2f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 80.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 1.0f));
 
     for (int oper = 0; oper < 4; oper++)
     {
@@ -248,12 +248,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String attackID = "attack" + juce::String(oper);
         juce::String attackName = "Attack " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { attackID, 1 }, attackName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { attackID, 1 }, attackName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), .01f));
         
         juce::String decayID = "decay" + juce::String(oper);
         juce::String decayName = "Decay " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { decayID, 1 }, decayName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { decayID, 1 }, decayName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), .2f));
 
         juce::String sustainID = "sustain" + juce::String(oper);
         juce::String sustainName = "Sustain " + juce::String(oper);
@@ -263,7 +263,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String releaseID = "release" + juce::String(oper);
         juce::String releaseName = "Release " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { releaseID, 1 }, releaseName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.1f, 0.5f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { releaseID, 1 }, releaseName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), 1.0f));
         
         //******** Ratio and FM Amount ********//
         juce::String ratioID = "ratio" + juce::String(oper);
