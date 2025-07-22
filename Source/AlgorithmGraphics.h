@@ -310,8 +310,9 @@ public:
         juce::Rectangle blockRectangle = { blockCenterCoords.x - blockSize/2,
             blockCenterCoords.y - blockSize/2,
             blockSize, blockSize };
-
-        return blockRectangle.contains(mouse);
+        
+        if (!isOutput){ return blockRectangle.contains(mouse); }
+        else { return false; }
     }
     
     bool isOverOutputPoint(juce::Point<float> mouse)
@@ -399,7 +400,6 @@ public:
         return numCableAvailable;
     }
     
-
 private:
     float width, x, y;
     
@@ -475,21 +475,16 @@ public:
     
     void resized() override
     {
-        auto bounds = getLocalBounds();
+        auto bounds = getBounds();
         juce::Point<float> vp = bounds.getCentre().toFloat();
         calculateCoordinates(bounds.toFloat());
-
-        op[0].setBounds(bounds);
-        op[1].setBounds(bounds);
-        op[2].setBounds(bounds);
-        op[3].setBounds(bounds);
         
         op[0].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
         op[1].setBlockCenter(x + blockIncr * 2, y);
         op[2].setBlockCenter(x + blockIncr, y + blockIncr);
         op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
-        op[4].setBlockCenter(x + width/2, y + height); // output
+        op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 4); // output
 
         for (int i = 0; i <= 4; i++){
             op[i].setBounds(bounds);
@@ -542,7 +537,7 @@ public:
         int blk = *currentOutputBlockIndex;
         int cbl = *currentCableIndex;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i <= 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
             auto globalMouse = op[i].getLocalPoint(this, m.getPosition());
@@ -618,7 +613,7 @@ public:
         int blk = *currentOutputBlockIndex;
         int cbl = *currentCableIndex;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i <= 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
             if (currentCableIndex.has_value() && op[i].isOverInputPoint(mouse) && *dragState == 2)
@@ -648,7 +643,7 @@ public:
         currentOutputBlockIndex.reset();
         dragState.reset();
         
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i <= 4; i++)
         {
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);

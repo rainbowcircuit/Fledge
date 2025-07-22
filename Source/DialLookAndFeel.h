@@ -21,19 +21,11 @@ public:
         auto bounds = slider.getLocalBounds().toFloat();
         float xPos = bounds.getX();
         float yPos = bounds.getY();
-        float graphicWidth = bounds.getWidth();
-        float graphicHeight = bounds.getHeight();
+        float size = bounds.getWidth();
         
-        displayText(g, xPos, yPos, graphicWidth, graphicHeight, juce::String(slider.getValue()));
+        drawRoundDial(g, xPos, yPos, size, sliderPosProportional);
     }
     
-    void displayText(juce::Graphics &g, float x, float y, float width, float height, juce::String value)
-    {
-        g.setFont(juce::FontOptions(40.0f, juce::Font::plain));
-        g.setColour(juce::Colour(255, 255, 255));
-        g.drawText(value, x, y, width, height, juce::Justification::centredLeft);
-    }
-
     void drawRoundDial(juce::Graphics &g, float x, float y, float size, float position)
     {
         //==============================================================================
@@ -80,9 +72,6 @@ public:
         g.setColour(juce::Colour(20, 20, 20)); //
         g.fillPath(dialDotPath);
     }
-    
-private:
-
 };
 
 class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
@@ -130,23 +119,7 @@ public:
         textBox.setBounds(bounds);
         
     }
-    
-   /* void mouseDown(const juce::MouseEvent& m) override
-    {
-        auto mousePoint = m.getPosition().toFloat();
-        dragStartPoint.y = mousePoint.y;
-    }
-
-    void mouseDrag(const juce::MouseEvent& m) override
-    {
-        auto mousePoint = m.getPosition().toFloat();
-        float deltaY = std::abs(mousePoint.y - dragStartPoint.y);
-
-        float value = juce::jlimit(0.0f, 1.0f, deltaY/100.0f); // clamp this
-        textValueToParamValue(value);
-    }
-    */
-    
+        
     void mouseDown(const juce::MouseEvent& m) override
     {
         auto mousePoint = m.getPosition().toFloat();
@@ -161,12 +134,10 @@ public:
         auto mousePoint = m.getPosition().toFloat();
         float deltaY = mousePoint.y - dragStartPoint.y; // Remove std::abs to allow bidirectional dragging
         
-        // Modify the initial normalized value based on drag distance
-        float sensitivity = 0.01f; // Adjust this value to change drag sensitivity
+        float sensitivity = 0.01f;
         float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
         textValueToParamValue(newValue);
     }
-    
     
     void mouseUp(const juce::MouseEvent& m) override
     {

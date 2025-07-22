@@ -12,6 +12,9 @@
 
 namespace Colors
 {
+inline juce::Colour textColor = juce::Colour(130, 130, 130);
+
+
     inline std::array<juce::Colour, 5> mainColors {
     juce::Colour(47, 222, 227),
     juce::Colour(64, 229, 210),

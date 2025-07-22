@@ -31,19 +31,26 @@ public:
         if (graphicIndex == 0)
         {
             drawSaveButton(g, xPos, yPos, size, size);
+            
         } else if (graphicIndex == 1)
         {
             drawArrowButton(g, xPos, yPos, size, size, false);
+            
         } else if (graphicIndex == 2)
         {
             drawArrowButton(g, xPos, yPos, size, size, true);
+            
         } else if (graphicIndex == 3)
         {
-            
-            drawBlockIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
+            drawWaveIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
+
         } else if (graphicIndex == 4)
         {
-            drawWaveIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
+            drawBlockIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
+
+        } else if (graphicIndex == 5)
+        {
+            drawMacroIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
         }
     }
     
@@ -167,11 +174,35 @@ public:
             linePath = linePath.createPathWithRoundedCorners(4.0f);
             g.setColour(juce::Colour(70, 204, 164));
             g.strokePath(linePath, juce::PathStrokeType(1.0f));
-
         }
-        
-        
     }
+    
+    void drawMacroIcon(juce::Graphics &g, float x, float y, float size, bool buttonDown)
+    {
+        g.setColour(juce::Colour(70, 70, 70));
+        g.fillAll();
+
+        juce::Path outlinePath, bodyPath, dotPath;
+        juce::Point<float> centerCoords = { x + size/2, y + size/2 };
+        float pi = juce::MathConstants<float>::pi;
+        float outlineRadius = size * 0.3f;
+        float bodyRadius = size * 0.25f;
+        float dotRadius = size * 0.125f;
+
+        outlinePath.addCentredArc(centerCoords.x, centerCoords.y, outlineRadius, outlineRadius, 0.0f, 1.25f * pi, 2.75f * pi, true);
+        g.setColour(juce::Colour(70, 204, 164));
+        g.strokePath(outlinePath, juce::PathStrokeType(1.0f));
+
+        bodyPath.addCentredArc(centerCoords.x, centerCoords.y, bodyRadius, bodyRadius, 0.0f, 0.0f, 6.28f, true);
+        g.setColour(juce::Colour(70, 204, 164));
+        g.fillPath(bodyPath);
+        
+        dotPath.addCentredArc(centerCoords.x + dotRadius, centerCoords.y - dotRadius, 1.5f, 1.5f, 0.0f, 0.0f, 6.28f, true);
+        g.setColour(juce::Colour(50, 50, 50));
+        g.fillPath(dotPath);
+
+    }
+
     
 private:
     int graphicIndex;

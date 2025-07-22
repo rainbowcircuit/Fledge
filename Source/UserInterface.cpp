@@ -10,6 +10,95 @@
 
 #include "UserInterface.h"
 
+PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts) : presetManager(apvts), audioProcessor(p)
+{
+    juce::FontOptions font { 12.0f, juce::Font::plain };
+
+    addAndMakeVisible(saveButton);
+    saveButton.addListener(this);
+    saveButton.setLookAndFeel(&saveLAF);
+
+    addAndMakeVisible(nextButton);
+    nextButton.addListener(this);
+    nextButton.setLookAndFeel(&nextLAF);
+
+    addAndMakeVisible(prevButton);
+    prevButton.addListener(this);
+    prevButton.setLookAndFeel(&prevLAF);
+    
+    addAndMakeVisible(presetComboBox);
+    presetComboBox.addListener(this);
+ //   presetComboBox.setLookAndFeel(&comboBoxLAF);
+    
+    // refresh presets
+    loadPresetList();
+}
+
+PresetInterface::~PresetInterface()
+{
+    saveButton.removeListener(this);
+    nextButton.removeListener(this);
+    prevButton.removeListener(this);
+    presetComboBox.removeListener(this);
+}
+
+void PresetInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    float height = bounds.getHeight();
+
+    rateLabel.setBounds(600, y + height * 0.25f, 164, height * 0.35f);
+    rateValueLabel.setBounds(605, y + height * 0.25f, 164, height * 0.35f);
+
+    saveButton.setBounds(x, y, height, height);
+    prevButton.setBounds(x + height, y, height, height);
+    nextButton.setBounds(x + height * 9.0f, y, height, height);
+    presetComboBox.setBounds(x + height * 2.0f, bounds.getY(), height * 7.0f, height);
+}
+
+void PresetInterface::comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &presetComboBox)
+        presetManager.loadPreset(presetComboBox.getItemText(presetComboBox.getSelectedItemIndex()));
+}
+
+void PresetInterface::buttonClicked(juce::Button* buttonClicked)
+{
+    if (buttonClicked == &saveButton){
+        fileChooser = std::make_unique<juce::FileChooser>(
+            "Enter Preset Name",
+            presetManager.defaultDirectory,
+            "*." + presetManager.extension);
+        
+        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
+        {
+            const auto resultFile = chooser.getResult();
+            presetManager.savePreset(resultFile.getFileNameWithoutExtension());
+            loadPresetList();
+        });
+
+    } else if (buttonClicked == &nextButton){
+        presetManager.loadNextPreset();
+        loadPresetList();
+        
+    } else if (buttonClicked == &prevButton){
+        presetManager.loadPreviousPreset();
+        loadPresetList();
+    }
+}
+
+void PresetInterface::loadPresetList()
+{
+    presetComboBox.clear(juce::dontSendNotification);
+    const auto allPresets = presetManager.getAllPreset();
+    const auto currentPreset = presetManager.getCurrentPreset();
+    presetComboBox.addItemList(allPresets, 1);
+    presetComboBox.setTitle(currentPreset);
+    presetComboBox.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
+}
+
 OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audioProcessor(p)
 {
     this->index = index;
@@ -154,92 +243,201 @@ void OperatorInterface::timerCallback()
 
 }
 
-
-PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts) : presetManager(apvts), audioProcessor(p)
+AlgorithmSelectInterface::AlgorithmSelectInterface(FledgeAudioProcessor& p) : audioProcessor(p)
 {
-    juce::FontOptions font { 12.0f, juce::Font::plain };
+    for(int i = 0; i < 8; i++)
+    {
+        addAndMakeVisible(algorithm[i]);
+        algorithmGraphics[i].setIndex(i);
+        algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
+        algorithm[i].addListener(this);
 
-    addAndMakeVisible(saveButton);
-    saveButton.addListener(this);
- //   saveButton.setLookAndFeel(&saveLAF);
-
-    addAndMakeVisible(nextButton);
-    nextButton.addListener(this);
-//    nextButton.setLookAndFeel(&nextLAF);
-
-    addAndMakeVisible(prevButton);
-    prevButton.addListener(this);
- //   prevButton.setLookAndFeel(&prevLAF);
-    
-    addAndMakeVisible(presetComboBox);
-    presetComboBox.addListener(this);
- //   presetComboBox.setLookAndFeel(&comboBoxLAF);
-    
-    // refresh presets
-    loadPresetList();
+    }
 }
-
-PresetInterface::~PresetInterface()
+    
+AlgorithmSelectInterface::~AlgorithmSelectInterface()
 {
-    saveButton.removeListener(this);
-    nextButton.removeListener(this);
-    prevButton.removeListener(this);
-    presetComboBox.removeListener(this);
-}
+    for(int i = 0; i < 8; i++)
+    {
+        algorithm[i].setLookAndFeel(nullptr);
+        algorithm[i].removeListener(this);
 
-void PresetInterface::resized()
+    }
+}
+    
+void AlgorithmSelectInterface::resized()
 {
     auto bounds = getLocalBounds().toFloat();
     float x = bounds.getX();
     float y = bounds.getY();
-    float height = bounds.getHeight();
+    
+    float width = bounds.getWidth() * 0.95f;
+    float height = bounds.getHeight() * 0.8f;
+    float widthMargin = bounds.getWidth() * 0.025f;
+    float heightMargin = bounds.getHeight() * 0.1f;
 
-    rateLabel.setBounds(600, y + height * 0.25f, 164, height * 0.35f);
-    rateValueLabel.setBounds(605, y + height * 0.25f, 164, height * 0.35f);
+    float blockWidth = width * 0.25f;
+    float blockHeight = height * 0.5f;
 
-    saveButton.setBounds(x, y, height, height);
-    prevButton.setBounds(x + height, y, height, height);
-    nextButton.setBounds(x + height * 9.0f, y, height, height);
-    presetComboBox.setBounds(x + height * 2.0f, bounds.getY(), height * 7.0f, height);
+    for(int i = 0; i < 8; i++)
+    {
+        algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
+                               y + heightMargin + blockWidth * (i / 4),
+                               blockHeight,
+                               blockHeight);
+    }
 }
+    
 
-void PresetInterface::comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged)
+void AlgorithmSelectInterface::buttonClicked(juce::Button* button) 
 {
-    if (comboBoxThatHasChanged == &presetComboBox)
-        presetManager.loadPreset(presetComboBox.getItemText(presetComboBox.getSelectedItemIndex()));
-}
+    if (button == &algorithm[0]){
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 1.0, 0.0 };
+        // op0 { 0.0, 1.0, 0.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setParam(3, 1);
+        setParam(2, 8);
+        setParam(1, 4);
+        setParam(0, 2);
+        setParam(-1, 1);
+    } else if (button == &algorithm[1]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 1.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setParam(3, 0);
+        setParam(2, 8);
+        setParam(1, 0);
+        setParam(0, 6);
+        setParam(-1, 1);
 
-void PresetInterface::buttonClicked(juce::Button* buttonClicked)
-{
-    if (buttonClicked == &saveButton){
-        fileChooser = std::make_unique<juce::FileChooser>(
-            "Enter Preset Name",
-            presetManager.defaultDirectory,
-            "*." + presetManager.extension);
         
-        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
-        {
-            const auto resultFile = chooser.getResult();
-            presetManager.savePreset(resultFile.getFileNameWithoutExtension());
-            loadPresetList();
-        });
+    } else if (button == &algorithm[2]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 0.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 1.0, 1.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setParam(3, 0);
+        setParam(2, 0);
+        setParam(1, 0);
+        setParam(0, 14);
+        setParam(-1, 1);
+        
+    } else if (button == &algorithm[3]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 1.0 };
+        // op0 { 0.0, 1.0, 1.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setParam(3, 0);
+        setParam(2, 8);
+        setParam(1, 8);
+        setParam(0, 6);
+        setParam(-1, 1);
 
-    } else if (buttonClicked == &nextButton){
-        presetManager.loadNextPreset();
-        loadPresetList();
+    } else if (button == &algorithm[4]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 0.0, 0.0 };
+        // output { 1.0f, 1.0f, 0.0f, 0.0f };
+        setParam(3, 0);
+        setParam(2, 8);
+        setParam(1, 0);
+        setParam(0, 2);
+        setParam(-1, 1); // output
+
+    } else if (button == &algorithm[5]) {
         
-    } else if (buttonClicked == &prevButton){
-        presetManager.loadPreviousPreset();
-        loadPresetList();
+    } else if (button == &algorithm[6]) {
+        
+    } else if (button == &algorithm[7]) {
+        
     }
 }
 
-void PresetInterface::loadPresetList()
+void AlgorithmSelectInterface::setParam(int index, int gainIndex)
 {
-    presetComboBox.clear(juce::dontSendNotification);
-    const auto allPresets = presetManager.getAllPreset();
-    const auto currentPreset = presetManager.getCurrentPreset();
-    presetComboBox.addItemList(allPresets, 1);
-    presetComboBox.setTitle(currentPreset);
-    presetComboBox.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
+    auto paramRange = audioProcessor.apvts.getParameterRange("outputRouting");
+    float valueScaled = paramRange.convertTo0to1(gainIndex);
+    if (index < 0){
+        juce::String parameterID = "operator" + juce::String(gainIndex) + "Routing";
+        audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
+    } else {
+        audioProcessor.apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
+    }
+}
+
+MacroControlsInterface::MacroControlsInterface()
+{
+    setSliderAndLabel(globalFreqSlider, globalFreqLabel, dialLAF, "Global Freq", "");
+    setSliderAndLabel(globalModIndexSlider, globalModIndexLabel, dialLAF, "Global Freq", "");
+    setSliderAndLabel(globalAttackSlider, globalAttackLabel, dialLAF, "Global Attack", "%");
+    setSliderAndLabel(globalDecaySlider, globalDecayLabel, dialLAF, "Global Decay", "%");
+    setSliderAndLabel(globalSustainSlider, globalSustainLabel, dialLAF, "Global Sustain", "%");
+    setSliderAndLabel(globalReleaseSlider, globalReleaseLabel, dialLAF, "Global Release", "%");
+}
+
+void MacroControlsInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    float width = bounds.getWidth();
+    float height = bounds.getHeight();
+
+    globalFreqSlider.setBounds(x + width * 0.25f,
+                               y + height * 0.05f,
+                               height * 0.2f,
+                               height * 0.2f);
+    
+    globalModIndexSlider.setBounds(x + width * 0.55f,
+                                   y + height * 0.05f,
+                                   height * 0.2f,
+                                   height * 0.2f);
+    
+    globalAttackSlider.setBounds(x + width * 0.25f,
+                                 y + height * 0.275f,
+                                 height * 0.2f,
+                                 height * 0.2f);
+    
+    globalDecaySlider.setBounds(x + width * 0.55f,
+                                y + height * 0.275f,
+                                height * 0.2f,
+                                height * 0.2f);
+    
+    globalSustainSlider.setBounds(x + width * 0.25f,
+                                  y + height * 0.5f,
+                                  height * 0.2f,
+                                  height * 0.2f);
+    
+    globalReleaseSlider.setBounds(x + width * 0.65f,
+                                  y + height * 0.5f,
+                                  height * 0.2f,
+                                  height * 0.2f);
+
+    globalAttackLabel.setBounds(x + width * 0.25f,
+                                y + height * 0.25f,
+                                height * 0.2f,
+                                height * 0.1f);
+    
+    globalDecayLabel.setBounds(x + width * 0.65f,
+                               y + height * 0.25f,
+                               height * 0.2f,
+                               height * 0.1f);
+    
+    globalSustainLabel.setBounds(x + width * 0.25f,
+                                 y + height * 0.45f,
+                                 height * 0.2f,
+                                 height * 0.1f);
+    
+    globalReleaseLabel.setBounds(x + width * 0.65f,
+                                 y + height * 0.45f,
+                                 height * 0.2f,
+                                 height * 0.1f);
+
 }

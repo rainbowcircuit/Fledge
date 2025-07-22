@@ -14,19 +14,35 @@
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
 #include "DialLookAndFeel.h"
+#include "ButtonLookAndFeel.h"
 #include "AlgorithmGraphics.h"
 #include "Presets.h"
 
-class MainInterface : public juce::Component
+class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
 {
 public:
+    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
+    ~PresetInterface();
     
+    void paint(juce::Graphics& g) override {}
+    
+    void resized() override;
+    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void buttonClicked(juce::Button* buttonClicked) override;
+    void loadPresetList();
     
 private:
-    juce::Slider modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
     
-};
+    ButtonLookAndFeel saveLAF { 0 }, prevLAF{ 1 }, nextLAF { 2 };
+    juce::TextButton saveButton, nextButton, prevButton;
+    juce::ComboBox presetComboBox;
+    juce::Label rateLabel, rateValueLabel;
+    
+    std::unique_ptr<juce::FileChooser> fileChooser;
 
+    PresetManager presetManager;
+    FledgeAudioProcessor& audioProcessor;
+};
 
 class OperatorInterface : public juce::Component, juce::Timer
 {
@@ -66,107 +82,65 @@ private:
     FledgeAudioProcessor& audioProcessor;
 };
 
-
 class AlgorithmSelectInterface : public juce::Component, public juce::Button::Listener
 {
 public:
-    AlgorithmSelectInterface()
-    {
-        for(int i = 0; i < 8; i++)
-        {
-            addAndMakeVisible(algorithm[i]);
-            algorithmGraphics[i].setIndex(i);
-            algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
-            algorithm[i].addListener(this);
-
-        }
-    }
-    
-    ~AlgorithmSelectInterface()
-    {
-        for(int i = 0; i < 8; i++)
-        {
-            algorithm[i].setLookAndFeel(nullptr);
-            algorithm[i].removeListener(this);
-
-        }
-    }
-
+    AlgorithmSelectInterface(FledgeAudioProcessor& p);
+    ~AlgorithmSelectInterface();
     void paint(juce::Graphics& g) override {}
-    
-    void resized() override
-    {
-        auto bounds = getLocalBounds().toFloat();
-        float x = bounds.getX();
-        float y = bounds.getY();
-        
-        float width = bounds.getWidth() * 0.95f;
-        float height = bounds.getHeight() * 0.8f;
-        float widthMargin = bounds.getWidth() * 0.025f;
-        float heightMargin = bounds.getHeight() * 0.1f;
-
-        float blockWidth = width * 0.25f;
-        float blockHeight = height * 0.5f;
-
-        for(int i = 0; i < 8; i++)
-        {
-            algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
-                                   y + heightMargin + blockWidth * (i / 4),
-                                   blockHeight,
-                                   blockHeight);
-        }
-    }
-    
-
-    void buttonClicked(juce::Button* button) override
-    {
-        if (button == &algorithm[0]){
-
-        } else if (button == &algorithm[1]) {
-
-        } else if (button == &algorithm[2]) {
-            
-        } else if (button == &algorithm[3]) {
-            
-        } else if (button == &algorithm[4]) {
-            
-        } else if (button == &algorithm[5]) {
-            
-        } else if (button == &algorithm[6]) {
-            
-        } else if (button == &algorithm[7]) {
-            
-        }
-    }
-    
-    
+    void resized() override;
+    void buttonClicked(juce::Button* button) override;
+    void setParam(int index, int gainIndex);
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
     std::array<juce::ToggleButton, 8> algorithm;
+    
+    FledgeAudioProcessor& audioProcessor;
 };
 
-
-class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
+class MacroControlsInterface : public juce::Component
 {
 public:
-    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
-    ~PresetInterface();
-    
+    MacroControlsInterface();
     void paint(juce::Graphics& g) override {}
-    
     void resized() override;
-    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
-    void buttonClicked(juce::Button* buttonClicked) override;
-    void loadPresetList();
+    
+    void setSliderAndLabel(juce::Slider &s, juce::Label &l, DialLookAndFeel &lookAndFeel, juce::String labelText, juce::String suffix)
+    {
+        addAndMakeVisible(l);
+        l.setText(labelText, juce::dontSendNotification);
+        l.setJustificationType(juce::Justification::centred);
+        l.setColour(juce::Label::textColourId, Colors::textColor);
+        
+        addAndMakeVisible(s);
+        s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 20);
+        s.setLookAndFeel(&lookAndFeel);
+        s.setTextValueSuffix(suffix);
+    }
     
 private:
+    // look and feel
+    DialLookAndFeel dialLAF;
     
-    juce::TextButton saveButton, nextButton, prevButton;
-    juce::ComboBox presetComboBox;
-    juce::Label rateLabel, rateValueLabel;
+    juce::Slider globalFreqSlider,
+    globalModIndexSlider,
+    globalAttackSlider,
+    globalDecaySlider,
+    globalSustainSlider,
+    globalReleaseSlider;
     
-    std::unique_ptr<juce::FileChooser> fileChooser;
-
-    PresetManager presetManager;
-    FledgeAudioProcessor& audioProcessor;
+    juce::Label globalFreqLabel,
+    globalModIndexLabel,
+    globalAttackLabel,
+    globalDecayLabel,
+    globalSustainLabel,
+    globalReleaseLabel;
+    
+    std::unique_ptr<juce::SliderParameterAttachment> globalFreqAttachment,
+    globalModIndexAttachment,
+    globalAttackAttachment,
+    globalDecayAttachment,
+    globalSustainAttachment,
+    globalReleaseAttachment;
 };

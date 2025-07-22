@@ -185,8 +185,8 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
-           //     voice->setOperatorGain(oper + 1, oper + 1);
-           //     voice->setOperatorGain(0, 1);
+                voice->setOperatorGain(oper + 1, oper + 1);
+                voice->setOperatorGain(0, routing);
 
             }
         }
@@ -243,7 +243,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 1.0f));
     
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 10));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
 
     for (int oper = 0; oper < 4; oper++)
     {
@@ -282,7 +282,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String opModeID = "opMode" + juce::String(oper);
         juce::String opModeName = "Mode " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { opModeID, 1 }, opModeName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
+        layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { opModeID, 1},
+                                                              opModeName,
+                                                               false));
 
         juce::String modIndexID = "amplitude" + juce::String(oper);
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);

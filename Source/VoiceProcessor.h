@@ -29,12 +29,6 @@ public:
         {
             op[i].prepareToPlay(sampleRate, samplesPerBlock, numChannels);
         }
-
-        outputGain = {1.0, 0.0, 0.0, 0.0};
-        op0Gain = {0.0, 1.0, 0.0, 0.0};
-        op1Gain = {0.0, 0.0, 1.0, 0.0};
-        op2Gain = {0.0, 0.0, 0.0, 1.0};
-        op3Gain = {0.0, 0.0, 0.0, 0.0};
     }
     
     bool canPlaySound (juce::SynthesiserSound* sound) override
@@ -78,9 +72,9 @@ public:
         op[index].setOperator(ratio, fixed, isFixed, modIndex);
     }
     
-    
     void pitchWheelMoved(int newPitchWheelValue) override {}
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
+    
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override
     {
         if (op[0].ampEnvelope.isActive())

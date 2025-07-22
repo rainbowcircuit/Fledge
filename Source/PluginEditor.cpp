@@ -23,22 +23,34 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 
     addAndMakeVisible(showWaveformButton);
     showWaveformButton.addListener(this);
+    showWaveformButton.setLookAndFeel(&showWaveLAF);
+    
     addAndMakeVisible(showAlgorithmButton);
     showAlgorithmButton.addListener(this);
+    showAlgorithmButton.setLookAndFeel(&showAlgoLAF);
+
+    addAndMakeVisible(showMacrosButton);
+    showMacrosButton.addListener(this);
+    showMacrosButton.setLookAndFeel(&showMacroLAF);
+
     
     addAndMakeVisible(waveformDisplay);
     waveformDisplay.setVisible(true);
+
+    addAndMakeVisible(algorithmGraphics);
+    
+    
+    algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor);
+    addAndMakeVisible(*algorithmSelector);
+    addAndMakeVisible(macroInterface);
+    algorithmGraphics.setVisible(false);
+    algorithmSelector->setVisible(false);
+    macroInterface.setVisible(false);
 
     const auto params = audioProcessor.getParameters();
     for (auto param : params){
         param->addListener(this);
     }
-
-    addAndMakeVisible(algorithmGraphics);
-    addAndMakeVisible(algorithmSelector);
-    algorithmGraphics.setVisible(false);
-    algorithmSelector.setVisible(false);
-
     setSize (765, 700);
 }
 
@@ -50,8 +62,8 @@ FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
     }
     showWaveformButton.removeListener(this);
     showAlgorithmButton.removeListener(this);
+    showMacrosButton.removeListener(this);
 
-    
 }
 
 //==============================================================================
@@ -65,8 +77,6 @@ void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
     leftBounds.addRoundedRectangle(5, 60, 280, 490, 5.0f);
     g.setColour(juce::Colour(40, 42, 41));
     g.fillPath(leftBounds);
-
-
 }
 
 void FledgeAudioProcessorEditor::resized()
@@ -78,10 +88,12 @@ void FledgeAudioProcessorEditor::resized()
 
     presetInterface->setBounds(5, 5, 760, 50);
     waveformDisplay.setBounds(5, 60, 280, 490);
-    algorithmGraphics.setBounds(5, 60, 280, 330);
-    algorithmSelector.setBounds(5, 400, 280, 150);
-    
+    algorithmGraphics.setBounds(5, 30, 280, 330);
+    algorithmSelector->setBounds(5, 400, 280, 150);
+    macroInterface.setBounds(5, 60, 280, 490);
+
     showWaveformButton.setBounds(5, 555, 94, 40);
-    showAlgorithmButton.setBounds(150, 555, 94, 40);
+    showAlgorithmButton.setBounds(100, 555, 94, 40);
+    showMacrosButton.setBounds(200, 555, 94, 40);
 
 }
