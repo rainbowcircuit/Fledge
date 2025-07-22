@@ -484,7 +484,7 @@ public:
         op[2].setBlockCenter(x + blockIncr, y + blockIncr);
         op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
-        op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 4); // output
+        op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 5); // output
 
         for (int i = 0; i <= 4; i++){
             op[i].setBounds(bounds);
@@ -720,6 +720,7 @@ public:
     
     void selectAlgorithm()
     {
+
         switch(graphicIndex){
             case 0:
                 block.blockToUse = { 1, 5, 9, 13 };
@@ -730,44 +731,43 @@ public:
             case 1:
                 block.blockToUse = { 7, 9, 11, 14 };
                 block.connectValue = { DOWN, DOWNRIGHT, DOWNLEFT, DOWN };
-                block.label = { "3","1", "2", "N" };
+                block.label = { "4", "3", "2", "1" };
                 break;
                 
             case 2:
                 block.blockToUse = { 9, 10, 11, 14 };
                 block.connectValue = { DOWNRIGHT, DOWN, DOWNLEFT, DOWN };
-                block.label = { "3","2", "N", "1" };
-
+                block.label = { "4", "3", "2", "1" };
                 break;
                 
             case 3:
                 block.blockToUse = { 6, 9, 11, 14 };
-                block.connectValue = { LEFTDOWN, DOWNRIGHT, DOWNLEFT, DOWN };
-                block.label = { "3","N", "2", "1" };
+                block.connectValue = { DOWNLEFTRIGHT, DOWNRIGHT, DOWNLEFT, DOWN };
+                block.label = { "4", "3", "2", "1" };
                 break;
 
             case 4:
                 block.blockToUse = { 9, 10, 13, 14 };
-                block.connectValue = { DOWNRIGHT, RIGHTDOWN, DOWN, DOWN };
-                block.label = { "N","3", "1", "2" };
+                block.connectValue = { DOWN, DOWN, DOWN, DOWN };
+                block.label = { "2", "4", "1", "3" };
                 break;
                 
             case 5:
                 block.blockToUse = { 5, 9, 12, 14 };
-                block.connectValue = { DOWN, DOWN, DOWN, DOWN };
-                block.label = { "N","3", "2", "1" };
+                block.connectValue = { DOWN, DOWNLEFTRIGHT, DOWN, DOWN };
+                block.label = { "4", "3", "1", "2" };
                 break;
 
             case 6:
                 block.blockToUse = { 10, 12, 13, 14 };
                 block.connectValue = { DOWN, DOWNLEFT, DOWN, DOWN };
-                block.label = { "N","3", "2", "1" };
+                block.label = { "4", "1", "2", "3" };
                 break;
 
             case 7:
                 block.blockToUse = { 12, 13, 14, 15 };
                 block.connectValue = { DOWN, DOWN, DOWN, DOWN };
-                block.label = { "N","3", "1", "2" };
+                block.label = { "1", "2", "3", "4" };
                 break;
         }
     }
@@ -836,9 +836,16 @@ public:
                         linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + blockSize/2);
                         linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + (blockSize + blockMargin) * 1.5f);
                         
-                    } else if (block.connectValue[j] == NONE) {
-                        
-                    }
+                    } else if (block.connectValue[j] == DOWNLEFTRIGHT) {
+                        linePath.startNewSubPath(xIncr + blockSize * 0.425f, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + blockSize * 0.425f, yIncr + (blockSize + blockMargin) * 1.5f);
+                        linePath.lineTo(xIncr - (blockSize + blockMargin), yIncr + (blockSize + blockMargin) * 1.5f);
+
+                        linePath.startNewSubPath(xIncr + blockSize * 0.575f, yIncr + blockSize/2);
+                        linePath.lineTo(xIncr + blockSize * 0.575f, yIncr + (blockSize + blockMargin) * 1.5f);
+                        linePath.lineTo(xIncr + (blockSize + blockMargin) * 1.5f, yIncr + (blockSize + blockMargin) * 1.5f);
+
+                    } else if (block.connectValue[j] == NONE) {}
                 }
             }
             

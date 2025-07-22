@@ -99,38 +99,39 @@ public:
                                             op1 * op0Gain[1],
                                             op2 * op0Gain[2],
                                             op3 * op0Gain[3]);
+                
+          //      DBG(op0Gain[0] << op0Gain[1] << op0Gain[2] << op0Gain[3]);
                                 
                 float output = op0 * outputGain[0] +
                 op1 * outputGain[1] +
                 op2 * outputGain[2] +
                 op3 * outputGain[3];
                 
-                outputSample = output;
+                outputSample = output * 0.25f;
                 for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
                 {
-                    outputBuffer.addSample(channel, sample, output);
+                    outputBuffer.addSample(channel, sample, outputSample);
                 }
             }
         }
     }
     
-    void setOperatorGain(int index, int gainIndex)
+    void setOperatorGain(int index, int gainIndex, int outputGainIndex)
     {
+        outputGain = toBinary4(outputGainIndex);
+
         switch(index){
             case 0:
-                outputGain = toBinary4(1);
+                op0Gain = toBinary4(gainIndex);
                 break;
             case 1:
-                op0Gain = toBinary4(2);
+                op1Gain = toBinary4(gainIndex);
                 break;
             case 2:
-                op1Gain = toBinary4(3);
+                op2Gain = toBinary4(gainIndex);
                 break;
             case 3:
-                op2Gain = toBinary4(4);
-                break;
-            case 4:
-                op3Gain = toBinary4(0);
+                op3Gain = toBinary4(gainIndex);
                 break;
         }
     }
@@ -150,6 +151,7 @@ private:
    }
     
     double sampleRate;
+    juce::AudioBuffer<float> synthBuffer;
     float outputSample;
 
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm

@@ -10,13 +10,14 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "Graphics.h"
 #include "PluginProcessor.h"
-#include "LookAndFeel.h"
+#include "Presets.h"
+#include "Graphics.h"
+#include "AlgorithmGraphics.h"
 #include "DialLookAndFeel.h"
 #include "ButtonLookAndFeel.h"
-#include "AlgorithmGraphics.h"
-#include "Presets.h"
+#include "ComboBoxLookAndFeel.h"
+#include "LookAndFeel.h"
 
 class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
 {
@@ -34,6 +35,7 @@ public:
 private:
     
     ButtonLookAndFeel saveLAF { 0 }, prevLAF{ 1 }, nextLAF { 2 };
+    ComboBoxGraphics presetComboBoxLAF;
     juce::TextButton saveButton, nextButton, prevButton;
     juce::ComboBox presetComboBox;
     juce::Label rateLabel, rateValueLabel;
@@ -78,7 +80,7 @@ private:
     releaseSlider;
 
     OperatorDisplayGraphics opGraphics;
-    EnvelopeDisplayGraphics envGraphics;
+    std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 
@@ -90,7 +92,9 @@ public:
     void paint(juce::Graphics& g) override {}
     void resized() override;
     void buttonClicked(juce::Button* button) override;
-    void setParam(int index, int gainIndex);
+    void setOperatorParam(int index, int gainIndex);
+    void setOutputParam(int gainIndex);
+
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
     std::array<juce::ToggleButton, 8> algorithm;

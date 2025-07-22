@@ -11,11 +11,11 @@
 #pragma once
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "LookAndFeel.h"
 
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider &slider) override
     {
         auto bounds = slider.getLocalBounds().toFloat();
@@ -40,15 +40,15 @@ public:
         juce::Path dialBodyPath, dialDotPath, dialOutlinePath, dialSelectPath, tensionLeftPath, tensionRightPath;
         
         float dialOutlineRadius = (size * 0.8f)/2;
-        float dialBodyRadius = (size * 0.7f)/2;
-        float dialDotRadius = (size * 0.5f)/2;
+        float dialBodyRadius = (size * 0.65f)/2;
+        float dialDotRadius = (size * 0.45f)/2;
 
         dialOutlinePath.addCentredArc(x + size/2, x + size/2,
                                       dialOutlineRadius, dialOutlineRadius,
                                       0.0f, dialStart, dialEnd, true);
-        g.setColour(juce::Colour(200, 200, 200)); //
+        g.setColour(Colors::mainColors[0]); //
 
-        juce::PathStrokeType strokeType(2.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(dialOutlinePath, juce::PathStrokeType(strokeType));
 
         //==============================================================================
@@ -57,9 +57,11 @@ public:
         dialBodyPath.addCentredArc(x + size/2, y + size/2,
                                    dialBodyRadius, dialBodyRadius,
                                    0.0f, 0.0f, 6.28f, true);
-        g.setColour(juce::Colour(200, 200, 200)); //
+        g.setColour(Colors::mainColors[0]); //
+        g.strokePath(dialBodyPath, juce::PathStrokeType(strokeType));
+        g.setColour(Colors::mainColors[0].withAlpha((float)0.35f)); //
         g.fillPath(dialBodyPath);
-        
+
         //==============================================================================
         // dial dot
         
@@ -68,11 +70,11 @@ public:
 
         dialDotPath.addCentredArc(outlineCoords.x, outlineCoords.y,
                                   1.5, 1.5, 0.0f, 0.0f, pi * 2, true);
-        
-        g.setColour(juce::Colour(20, 20, 20)); //
+        g.setColour(juce::Colour(200, 200, 200));
         g.fillPath(dialDotPath);
     }
 };
+
 
 class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
@@ -101,6 +103,7 @@ public:
         const auto params = audioProcessor.getParameters();
         for (auto param : params){
             param->addListener(this);
+            
         }
     }
     

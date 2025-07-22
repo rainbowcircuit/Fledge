@@ -28,7 +28,7 @@ PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorVa
     
     addAndMakeVisible(presetComboBox);
     presetComboBox.addListener(this);
- //   presetComboBox.setLookAndFeel(&comboBoxLAF);
+    presetComboBox.setLookAndFeel(&presetComboBoxLAF);
     
     // refresh presets
     loadPresetList();
@@ -138,9 +138,10 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     addAndMakeVisible(*releaseSlider);
     releaseSlider->setFontSize(12.0f);
 
-    addAndMakeVisible(envGraphics);
+    envGraphics = std::make_unique<EnvelopeDisplayGraphics>(audioProcessor, index);
+    addAndMakeVisible(*envGraphics);
+    
     addAndMakeVisible(opGraphics);
-    envGraphics.setIndex(index);
     opGraphics.setIndex(index);
 
     startTimerHz(30);
@@ -211,7 +212,7 @@ void OperatorInterface::resized()
     sustainSlider->setBounds(x + width * 0.835f, y + height * 0.5f, width * 0.165f, height * 0.2f);
     releaseSlider->setBounds(x + width * 0.835f, y + height * 0.7f, width * 0.165f, height * 0.2f);
 
-    envGraphics.setBounds(x + width * 0.5f, y + height * 0.125f, width * 0.275f, height * 0.75f);
+    envGraphics->setBounds(x + width * 0.5f, y + height * 0.125f, width * 0.275f, height * 0.75f);
 }
 
 void OperatorInterface::setLabel(juce::Label &l, juce::String labelText, float size)
@@ -239,7 +240,7 @@ void OperatorInterface::timerCallback()
     float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
     float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
     float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
-    envGraphics.setEnvelope(attack, decay, sustain, release);
+    envGraphics->setEnvelope(attack, decay, sustain, release);
 
 }
 
@@ -297,22 +298,22 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         // op1 { 0.0, 0.0, 1.0, 0.0 };
         // op0 { 0.0, 1.0, 0.0, 0.0 };
         // output { 1.0f, 0.0f, 0.0f, 0.0f };
-        setParam(3, 1);
-        setParam(2, 8);
-        setParam(1, 4);
-        setParam(0, 2);
-        setParam(-1, 1);
+        setOperatorParam(3, 1);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 4);
+        setOperatorParam(0, 2);
+        setOutputParam(1);
     } else if (button == &algorithm[1]) {
         // op3 { 0.0, 0.0, 0.0, 0.0 };
         // op2 { 0.0, 0.0, 0.0, 1.0 };
         // op1 { 0.0, 0.0, 0.0, 0.0 };
         // op0 { 0.0, 1.0, 1.0, 0.0 };
         // output { 1.0f, 0.0f, 0.0f, 0.0f };
-        setParam(3, 0);
-        setParam(2, 8);
-        setParam(1, 0);
-        setParam(0, 6);
-        setParam(-1, 1);
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 6);
+        setOutputParam(1);
 
         
     } else if (button == &algorithm[2]) {
@@ -321,11 +322,11 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         // op1 { 0.0, 0.0, 0.0, 0.0 };
         // op0 { 0.0, 1.0, 1.0, 1.0 };
         // output { 1.0f, 0.0f, 0.0f, 0.0f };
-        setParam(3, 0);
-        setParam(2, 0);
-        setParam(1, 0);
-        setParam(0, 14);
-        setParam(-1, 1);
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 0);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 14);
+        setOutputParam(1);
         
     } else if (button == &algorithm[3]) {
         // op3 { 0.0, 0.0, 0.0, 0.0 };
@@ -333,11 +334,11 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         // op1 { 0.0, 0.0, 0.0, 1.0 };
         // op0 { 0.0, 1.0, 1.0, 0.0 };
         // output { 1.0f, 0.0f, 0.0f, 0.0f };
-        setParam(3, 0);
-        setParam(2, 8);
-        setParam(1, 8);
-        setParam(0, 6);
-        setParam(-1, 1);
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 8);
+        setOperatorParam(0, 6);
+        setOutputParam(1);
 
     } else if (button == &algorithm[4]) {
         // op3 { 0.0, 0.0, 0.0, 0.0 };
@@ -345,32 +346,55 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         // op1 { 0.0, 0.0, 0.0, 0.0 };
         // op0 { 0.0, 1.0, 0.0, 0.0 };
         // output { 1.0f, 1.0f, 0.0f, 0.0f };
-        setParam(3, 0);
-        setParam(2, 8);
-        setParam(1, 0);
-        setParam(0, 2);
-        setParam(-1, 1); // output
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 2);
+        setOutputParam(1); // output
 
     } else if (button == &algorithm[5]) {
-        
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 4);
+        setOperatorParam(0, 4);
+        setOutputParam(3); // output
+
     } else if (button == &algorithm[6]) {
-        
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 0);
+        setOutputParam(7); // output
+
     } else if (button == &algorithm[7]) {
-        
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 0);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 0);
+        setOutputParam(15); // output
+
     }
 }
 
-void AlgorithmSelectInterface::setParam(int index, int gainIndex)
+void AlgorithmSelectInterface::setOperatorParam(int index, int gainIndex)
+{
+    auto paramRange = audioProcessor.apvts.getParameterRange("operator0Routing");
+    float valueScaled = paramRange.convertTo0to1(gainIndex);
+    
+    juce::String parameterID = "operator" + juce::String(index) + "Routing";
+    audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
+        
+}
+
+void AlgorithmSelectInterface::setOutputParam(int gainIndex)
 {
     auto paramRange = audioProcessor.apvts.getParameterRange("outputRouting");
     float valueScaled = paramRange.convertTo0to1(gainIndex);
-    if (index < 0){
-        juce::String parameterID = "operator" + juce::String(gainIndex) + "Routing";
-        audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
-    } else {
-        audioProcessor.apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
-    }
+    
+    audioProcessor.apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
+
 }
+
 
 MacroControlsInterface::MacroControlsInterface()
 {
@@ -390,52 +414,52 @@ void MacroControlsInterface::resized()
     float width = bounds.getWidth();
     float height = bounds.getHeight();
 
-    globalFreqSlider.setBounds(x + width * 0.25f,
+    globalFreqSlider.setBounds(x + width * 0.15f,
                                y + height * 0.05f,
-                               height * 0.2f,
+                               height * 0.15f,
                                height * 0.2f);
     
     globalModIndexSlider.setBounds(x + width * 0.55f,
                                    y + height * 0.05f,
-                                   height * 0.2f,
+                                   height * 0.15f,
                                    height * 0.2f);
     
-    globalAttackSlider.setBounds(x + width * 0.25f,
-                                 y + height * 0.275f,
-                                 height * 0.2f,
+    globalAttackSlider.setBounds(x + width * 0.15f,
+                                 y + height * 0.375f,
+                                 height * 0.15f,
                                  height * 0.2f);
     
     globalDecaySlider.setBounds(x + width * 0.55f,
-                                y + height * 0.275f,
-                                height * 0.2f,
+                                y + height * 0.375f,
+                                height * 0.15f,
                                 height * 0.2f);
     
-    globalSustainSlider.setBounds(x + width * 0.25f,
-                                  y + height * 0.5f,
-                                  height * 0.2f,
+    globalSustainSlider.setBounds(x + width * 0.15f,
+                                  y + height * 0.6f,
+                                  height * 0.15f,
                                   height * 0.2f);
     
-    globalReleaseSlider.setBounds(x + width * 0.65f,
-                                  y + height * 0.5f,
-                                  height * 0.2f,
+    globalReleaseSlider.setBounds(x + width * 0.55f,
+                                  y + height * 0.6f,
+                                  height * 0.15f,
                                   height * 0.2f);
 
-    globalAttackLabel.setBounds(x + width * 0.25f,
+    globalAttackLabel.setBounds(x + width * 0.15f,
                                 y + height * 0.25f,
                                 height * 0.2f,
                                 height * 0.1f);
     
-    globalDecayLabel.setBounds(x + width * 0.65f,
+    globalDecayLabel.setBounds(x + width * 0.55f,
                                y + height * 0.25f,
                                height * 0.2f,
                                height * 0.1f);
     
-    globalSustainLabel.setBounds(x + width * 0.25f,
+    globalSustainLabel.setBounds(x + width * 0.15f,
                                  y + height * 0.45f,
                                  height * 0.2f,
                                  height * 0.1f);
     
-    globalReleaseLabel.setBounds(x + width * 0.65f,
+    globalReleaseLabel.setBounds(x + width * 0.55f,
                                  y + height * 0.45f,
                                  height * 0.2f,
                                  height * 0.1f);

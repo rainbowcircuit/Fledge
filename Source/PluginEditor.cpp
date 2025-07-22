@@ -88,7 +88,7 @@ void FledgeAudioProcessorEditor::resized()
 
     presetInterface->setBounds(5, 5, 760, 50);
     waveformDisplay.setBounds(5, 60, 280, 490);
-    algorithmGraphics.setBounds(5, 30, 280, 330);
+    algorithmGraphics.setBounds(5, 30, 280, 380);
     algorithmSelector->setBounds(5, 400, 280, 150);
     macroInterface.setBounds(5, 60, 280, 490);
 

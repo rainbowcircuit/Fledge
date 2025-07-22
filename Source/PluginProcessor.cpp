@@ -157,6 +157,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     float globalRelease = apvts.getRawParameterValue("globalRelease")->load();
     
     int outputRouting = apvts.getRawParameterValue("outputRouting")->load();
+    
     for (int oper = 0; oper < 4; oper++){
         juce::String attackID = "attack" + juce::String(oper);
         juce::String decayID = "decay" + juce::String(oper);
@@ -185,9 +186,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
-                voice->setOperatorGain(oper + 1, oper + 1);
-                voice->setOperatorGain(0, routing);
-
+                voice->setOperatorGain(oper, routing, outputRouting);
             }
         }
     }

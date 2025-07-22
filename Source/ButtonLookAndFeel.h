@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "LookAndFeel.h"
 
 class ButtonLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -26,8 +27,13 @@ public:
         float yPos = bounds.getY();
         float size = bounds.getHeight();
         float graphicWidth = bounds.getWidth();
-        float graphicHeight = bounds.getHeight();
 
+        // fill background
+        juce::Path bgPath;
+        bgPath.addRoundedRectangle(bounds, 5.0f, 5.0f);
+        g.setColour(juce::Colour(40, 42, 41));
+        g.fillPath(bgPath);
+        
         if (graphicIndex == 0)
         {
             drawSaveButton(g, xPos, yPos, size, size);
@@ -75,7 +81,7 @@ public:
         bodyPath.lineTo(botLeft);
         bodyPath.closeSubPath();
         bodyPath = bodyPath.createPathWithRoundedCorners(1.0f);
-        g.setColour(juce::Colour(70, 204, 164));
+        g.setColour(Colors::mainColors[0]);
         g.fillPath(bodyPath);
     }
 
@@ -110,7 +116,7 @@ public:
         }
 
         arrowPath = arrowPath.createPathWithRoundedCorners(1.0f);
-        g.setColour(juce::Colour(70, 204, 164));
+        g.setColour(Colors::mainColors[0]);
         g.fillPath(arrowPath);
     }
 
@@ -120,10 +126,7 @@ public:
         juce::Path blockPath, linePath;
         float offset = size * 0.175f;
         float blockSize = size * 0.225f;
-        
-        g.setColour(juce::Colour(70, 70, 70));
-        g.fillAll();
-        
+                
         juce::Point<float> centerCoords = {x + size/2, y + size/2};
         juce::Point<float> topCoords = {centerCoords.x, centerCoords.y - offset};
         juce::Point<float> botLeftCoords = {centerCoords.x - offset, centerCoords.y + offset};
@@ -142,19 +145,15 @@ public:
         blockPath.addRoundedRectangle(botLeftCoords.x - blockSize/2, botLeftCoords.y - blockSize/2, blockSize, blockSize, 2.0f);
         blockPath.addRoundedRectangle(botRightCoords.x - blockSize/2, botRightCoords.y - blockSize/2, blockSize, blockSize, 2.0f);
 
-        g.setColour(juce::Colour(70, 204, 164)); // different color here
+        g.setColour(Colors::mainColors[1]); // different color here
         g.fillPath(blockPath);
-        g.setColour(juce::Colour(70, 204, 164));
+        g.setColour(Colors::mainColors[1]);
         g.strokePath(blockPath, juce::PathStrokeType(1.0f));
     }
     
     void drawWaveIcon(juce::Graphics &g, float x, float y, float size, bool buttonDown)
     {
-        g.setColour(juce::Colour(70, 70, 70));
-        g.fillAll();
-
         juce::Path linePath;
-
         for (int i = 0; i < 3; i++)
         {
             float yIncr = (size/6) * (i + 3);
@@ -172,15 +171,13 @@ public:
             linePath.lineTo(midCoords.x + 2.0f, rightCoords.y);
             linePath.lineTo(rightCoords);
             linePath = linePath.createPathWithRoundedCorners(4.0f);
-            g.setColour(juce::Colour(70, 204, 164));
+            g.setColour(Colors::mainColors[0]);
             g.strokePath(linePath, juce::PathStrokeType(1.0f));
         }
     }
     
     void drawMacroIcon(juce::Graphics &g, float x, float y, float size, bool buttonDown)
     {
-        g.setColour(juce::Colour(70, 70, 70));
-        g.fillAll();
 
         juce::Path outlinePath, bodyPath, dotPath;
         juce::Point<float> centerCoords = { x + size/2, y + size/2 };
@@ -190,11 +187,11 @@ public:
         float dotRadius = size * 0.125f;
 
         outlinePath.addCentredArc(centerCoords.x, centerCoords.y, outlineRadius, outlineRadius, 0.0f, 1.25f * pi, 2.75f * pi, true);
-        g.setColour(juce::Colour(70, 204, 164));
+        g.setColour(Colors::mainColors[2]);
         g.strokePath(outlinePath, juce::PathStrokeType(1.0f));
 
         bodyPath.addCentredArc(centerCoords.x, centerCoords.y, bodyRadius, bodyRadius, 0.0f, 0.0f, 6.28f, true);
-        g.setColour(juce::Colour(70, 204, 164));
+        g.setColour(Colors::mainColors[2]);
         g.fillPath(bodyPath);
         
         dotPath.addCentredArc(centerCoords.x + dotRadius, centerCoords.y - dotRadius, 1.5f, 1.5f, 0.0f, 0.0f, 6.28f, true);

@@ -1,6 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include <cmath>
+#include "PluginProcessor.h"
 #include "LookAndFeel.h"
 
 //Takuma your waveforms look like a butt
@@ -104,11 +105,13 @@ private:
 class EnvelopeDisplayGraphics : public juce::Component
 {
 public:
-    EnvelopeDisplayGraphics() {}
+    EnvelopeDisplayGraphics(FledgeAudioProcessor &p, int index) : audioProcessor(p)
+    {
+        this->index = index;
+    }
     
     void setIndex(int index)
     {
-        this->index = index;
     }
 
     void paint(juce::Graphics &g) override
@@ -135,11 +138,11 @@ public:
     {
         calculateSegment();
         
-        points[0].yAdjustOnly = true;
-        points[1].yAdjustOnly = true;
+        points[0].yAdjustOnly = false;
+        points[1].yAdjustOnly = false;
         points[2].yAdjustOnly = false;
         points[3].yAdjustOnly = true;
-        points[4].yAdjustOnly = true;
+        points[4].yAdjustOnly = false;
     }
     
     
@@ -224,26 +227,38 @@ public:
     void mouseDown(const juce::MouseEvent &m) override
     {
         auto mouse = m.getPosition().toFloat();
-        for (int i = 0; i < 5; i++)
+        for (int i = 1; i < 5; i++) // ignore init segment
         {
             if (points[i].isOver(mouse))
             {
                 dragIndex = i;
+                dragStartPoint = mouse;
+                
+                auto segmentParameterID = (getSegmentParamID(*dragIndex));
+                initialParamValue = audioProcessor.apvts.getParameter(segmentParameterID)->getValue();
             }
         }
     }
     
     void mouseDrag(const juce::MouseEvent &m) override
     {
-        auto mouse = m.getPosition().toFloat();
+        auto mousePoint = m.getPosition().toFloat();
+        float sensitivity = 0.01f;
+
         if (dragIndex.has_value())
         {
-            if (!points[*dragIndex].yAdjustOnly)
+            if (points[*dragIndex].yAdjustOnly)
             {
-                points[*dragIndex].coords = { mouse.x, mouse.y };
+                float deltaY = mousePoint.y - dragStartPoint.y;
+                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
+                
+                setEnvelopeParam(*dragIndex, newValue);
             } else {
-                points[*dragIndex].coords.y = mouse.y;
-            } 
+                float deltaX = mousePoint.x - dragStartPoint.x;
+                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaX * sensitivity));
+                
+                setEnvelopeParam(*dragIndex, newValue);
+            }
             repaint();
         }
     }
@@ -253,11 +268,43 @@ public:
         dragIndex.reset();
     }
     
+    juce::String getSegmentParamID(int segmentDragged)
+    {
+        juce::String segmentParameterID;
+        switch(segmentDragged)
+        {
+            case 1:
+                segmentParameterID = "attack" + juce::String(index);
+                break;
+            case 2:
+                segmentParameterID = "decay" + juce::String(index);
+                break;
+            case 3:
+                segmentParameterID = "sustain" + juce::String(index);
+                break;
+            case 4:
+                segmentParameterID = "release" + juce::String(index);
+                break;
+        }
+        return segmentParameterID;
+    }
+    
+    void setEnvelopeParam(int segmentDragged, float adjustAmount)
+    {
+        auto segmentParameterID = getSegmentParamID(segmentDragged);
+        auto paramRange = audioProcessor.apvts.getParameterRange(segmentParameterID);
+        
+        audioProcessor.apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
+    }
+
+    
 private:
     int index;
     float attackPct, decayPct, releasePct, sustainPct;
     float attack, decay, sustain, release;
     float attackSegment, decaySegment, sustainSegment, releaseSegment;
+    juce::Point<float> dragStartPoint;
+    float initialParamValue;
     
     struct Handle
     {
@@ -282,6 +329,7 @@ private:
     
     std::array<Handle, 5> points;
     std::optional<int> dragIndex;
+    FledgeAudioProcessor& audioProcessor;
 };
 
 
