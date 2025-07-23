@@ -60,19 +60,19 @@ public:
             waveformDisplay.setVisible(true);
             algorithmGraphics.setVisible(false);
             algorithmSelector->setVisible(false);
-            macroInterface.setVisible(false);
+            macroInterface->setVisible(false);
 
         } else if (buttonClicked == &showAlgorithmButton) {
             waveformDisplay.setVisible(false);
             algorithmGraphics.setVisible(true);
             algorithmSelector->setVisible(true);
-            macroInterface.setVisible(false);
+            macroInterface->setVisible(false);
 
         } else if (buttonClicked == &showMacrosButton) {
             waveformDisplay.setVisible(false);
             algorithmGraphics.setVisible(false);
             algorithmSelector->setVisible(false);
-            macroInterface.setVisible(true);
+            macroInterface->setVisible(true);
         }
     }
 
@@ -82,7 +82,7 @@ private:
     
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     std::unique_ptr<PresetInterface>  presetInterface;
-    MacroControlsInterface macroInterface;
+    std::unique_ptr<MacroControlsInterface> macroInterface;
     
     juce::TextButton showWaveformButton, showAlgorithmButton, showMacrosButton;
     WaveformDisplayGraphics waveformDisplay;
@@ -90,7 +90,6 @@ private:
     std::unique_ptr<AlgorithmSelectInterface> algorithmSelector;
     
     FledgeAudioProcessor& audioProcessor;
-
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessorEditor)
 };

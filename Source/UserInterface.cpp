@@ -240,7 +240,13 @@ void OperatorInterface::timerCallback()
     float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
     float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
     float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
-    envGraphics->setEnvelope(attack, decay, sustain, release);
+    
+    float globalAttack = audioProcessor.apvts.getRawParameterValue("globalAttack")->load();
+    float globalDecay = audioProcessor.apvts.getRawParameterValue("globalDecay")->load();
+    float globalSustain = audioProcessor.apvts.getRawParameterValue("globalSustain")->load();
+    float globalRelease = audioProcessor.apvts.getRawParameterValue("globalRelease")->load();
+
+    envGraphics->setEnvelope(attack, decay, sustain, release, globalAttack, globalDecay, globalSustain, globalRelease);
 
 }
 
@@ -396,14 +402,23 @@ void AlgorithmSelectInterface::setOutputParam(int gainIndex)
 }
 
 
-MacroControlsInterface::MacroControlsInterface()
+MacroControlsInterface::MacroControlsInterface(FledgeAudioProcessor& p) : audioProcessor(p)
 {
     setSliderAndLabel(globalFreqSlider, globalFreqLabel, dialLAF, "Global Freq", "");
     setSliderAndLabel(globalModIndexSlider, globalModIndexLabel, dialLAF, "Global Freq", "");
+    
     setSliderAndLabel(globalAttackSlider, globalAttackLabel, dialLAF, "Global Attack", "%");
+    globalAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalAttack", globalAttackSlider);
+    
     setSliderAndLabel(globalDecaySlider, globalDecayLabel, dialLAF, "Global Decay", "%");
+    globalDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalDecay", globalDecaySlider);
+    
     setSliderAndLabel(globalSustainSlider, globalSustainLabel, dialLAF, "Global Sustain", "%");
+    globalSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalSustain", globalSustainSlider);
+
     setSliderAndLabel(globalReleaseSlider, globalReleaseLabel, dialLAF, "Global Release", "%");
+    globalReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalRelease", globalReleaseSlider);
+
 }
 
 void MacroControlsInterface::resized()

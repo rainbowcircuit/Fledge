@@ -105,7 +105,7 @@ private:
 class MacroControlsInterface : public juce::Component
 {
 public:
-    MacroControlsInterface();
+    MacroControlsInterface(FledgeAudioProcessor& p);
     void paint(juce::Graphics& g) override {}
     void resized() override;
     
@@ -141,10 +141,12 @@ private:
     globalSustainLabel,
     globalReleaseLabel;
     
-    std::unique_ptr<juce::SliderParameterAttachment> globalFreqAttachment,
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> globalFreqAttachment,
     globalModIndexAttachment,
     globalAttackAttachment,
     globalDecayAttachment,
     globalSustainAttachment,
     globalReleaseAttachment;
+    
+    FledgeAudioProcessor& audioProcessor;
 };
