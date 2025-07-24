@@ -1,13 +1,37 @@
 #pragma once
 #include <JuceHeader.h>
 #include <cmath>
+#include "PluginProcessor.h"
 #include "LookAndFeel.h"
 
 //Takuma your waveforms look like a butt
 
+
+class LevelMeterGraphics : public juce::Component
+{
+    void paint(juce::Graphics &g) override
+    {
+        
+    }
+    
+    void resized() override {}
+
+    void setLevel(float level)
+    {
+        this->level = level;
+    }
+    
+private:
+    float level = 0.0f;
+};
+
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
+    void setIndex(int index)
+    {
+        this->index = index;
+    }
     
     void paint(juce::Graphics &g) override
     {
@@ -16,7 +40,6 @@ public:
         juce::Path bgFill;
         bgFill.addRoundedRectangle(bounds, 5.0f);
         g.setColour(juce::Colour(12, 10, 11));
-      //  g.fillPath(bgFill);
 
         float x = bounds.getX();
         float y = bounds.getY();
@@ -39,7 +62,7 @@ public:
         
         
         juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
-        g.setColour(juce::Colour(90, 224, 184));
+        g.setColour(Colors::mainColors[index]);
         g.strokePath(fgWaveform, strokeType);
 
     }
@@ -73,6 +96,7 @@ public:
     }
 
 private:
+    int index;
     float ratio, fixed, modIndex;
 };
 
@@ -81,8 +105,15 @@ private:
 class EnvelopeDisplayGraphics : public juce::Component
 {
 public:
-    EnvelopeDisplayGraphics() {}
+    EnvelopeDisplayGraphics(FledgeAudioProcessor &p, int index) : audioProcessor(p)
+    {
+        this->index = index;
+    }
     
+    void setIndex(int index)
+    {
+    }
+
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
@@ -95,26 +126,32 @@ public:
         float heightMargin = bounds.getHeight() * 0.05f;
         
         calculateSegment();
-        drawSegment(g, x + widthMargin, y + heightMargin, width, height);
+        // unadjusted background
+        drawSegment(g, x + widthMargin, y + heightMargin, width, height, false);
+
+        // adjusted foreground
+        drawSegment(g, x + widthMargin, y + heightMargin, width, height, true);
         
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 5; i++)
         {
-            points[i].drawHandles(g);
+            pointsGlobalAdjusted[i].drawHandles(g);
         }
     }
     
     void resized() override
     {
         calculateSegment();
-        
-        points[0].yAdjustOnly = true;
-        points[1].yAdjustOnly = true;
-        points[2].yAdjustOnly = false;
-        points[3].yAdjustOnly = true;
-        points[4].yAdjustOnly = false;
-        points[5].yAdjustOnly = false;
-        points[6].yAdjustOnly = true;
-        points[7].yAdjustOnly = false;
+        pointsNoAdjusted[0].yAdjustOnly = false;
+        pointsNoAdjusted[1].yAdjustOnly = false;
+        pointsNoAdjusted[2].yAdjustOnly = false;
+        pointsNoAdjusted[3].yAdjustOnly = true;
+        pointsNoAdjusted[4].yAdjustOnly = false;
+
+        pointsGlobalAdjusted[0].yAdjustOnly = false;
+        pointsGlobalAdjusted[1].yAdjustOnly = false;
+        pointsGlobalAdjusted[2].yAdjustOnly = false;
+        pointsGlobalAdjusted[3].yAdjustOnly = true;
+        pointsGlobalAdjusted[4].yAdjustOnly = false;
     }
     
     
@@ -139,83 +176,130 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.05f;
 
-       points[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
-    points[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
-    points[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
-    points[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
-    points[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
+        pointsNoAdjusted[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
+        pointsNoAdjusted[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
+        pointsNoAdjusted[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
+        pointsNoAdjusted[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
+        pointsNoAdjusted[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
+        repaint();
+
+        
+        pointsGlobalAdjusted[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
+        pointsGlobalAdjusted[1].coords = { x + widthMargin + width * attackAdjPct, y + heightMargin }; // Top (1.0)
+        pointsGlobalAdjusted[2].coords = { x + widthMargin + width * (attackAdjPct + decayAdjPct), y + heightMargin + height * (1.0f - sustainLevelAdjusted) }; // Sustain level
+        pointsGlobalAdjusted[3].coords = { x + widthMargin + width * (attackAdjPct + decayAdjPct + sustainPct), y + heightMargin + height * (1.0f - sustainLevelAdjusted) }; // Same sustain level
+        pointsGlobalAdjusted[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
         repaint();
     }
     
   
-void setEnvelope(float attack, float decay, float sustain, float release)
-{
-    this->attack = attack;
-    this->decay = decay;
-    this->sustain = sustain / 100.0f;
-    this->release = release;
+    void setEnvelope(float attack, float decay, float sustain, float release, float attackAdj, float decayAdj, float sustainAdj, float releaseAdj)
+    {
+        this->attack = attack;
+        this->decay = decay;
+        this->sustain = sustain / 100.0f;
+        this->release = release;
+        
+        float attackAdjusted = attack * std::pow(2.0f, attackAdj / 100.0f);
+        float decayAdjusted = decay * std::pow(2.0f, decayAdj / 100.0f);
+        float releaseAdjusted = release * std::pow(2.0f, releaseAdj / 100.0f);
+        sustainLevelAdjusted = (sustain / 100.0) * std::pow(2.0f, sustainAdj / 100.0f);
+        sustainLevelAdjusted = juce::jlimit(0.0f, 1.0f, sustainLevelAdjusted);
+        // Sustain always takes 25% of width
+        sustainPct = 0.25f;
+        
+        // Calculate A+D+R proportions for remaining 75%
+        float adrSum = attack + decay + release;
+        float adrAdjSum = attackAdjusted * decayAdjusted * releaseAdjusted;
 
-    // Sustain always takes 25% of width
-    sustainPct = 0.25f;
-    
-    // Calculate A+D+R proportions for remaining 75%
-    float adrSum = attack + decay + release;
-    
-    if (adrSum > 0.0f) {
-        attackPct  = (attack / adrSum) * 0.75f;
-        decayPct   = (decay / adrSum) * 0.75f;
-        releasePct = (release / adrSum) * 0.75f;
-    } else {
-        attackPct  = 0.25f;
-        decayPct   = 0.25f;
-        releasePct = 0.25f;
+        if (adrSum > 0.0f) {
+            attackPct  = (attack / adrSum) * 0.75f;
+            decayPct   = (decay / adrSum) * 0.75f;
+            releasePct = (release / adrSum) * 0.75f;
+            
+        } else {
+            attackPct  = 0.25f;
+            decayPct   = 0.25f;
+            releasePct = 0.25f;
+        }
+        
+        if (adrAdjSum > 0.0f)
+        {
+            attackAdjPct = (attackAdjusted / adrAdjSum) * 0.75f;
+            decayAdjPct = (decayAdjusted / adrAdjSum) * 0.75f;
+            releaseAdjPct = (releaseAdjusted / adrAdjSum) * 0.75f;
+        } else {
+            attackAdjPct = 0.25f;
+            decayAdjPct = 0.25f;
+            releaseAdjPct = 0.25f;
+        }
+        
+        calculateSegment();
     }
     
-    calculateSegment();
-}
-    
-    void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
+    void drawSegment(juce::Graphics &g, float x, float y, float width, float height, bool drawAdjusted)
     {
+        auto points = drawAdjusted ? pointsGlobalAdjusted : pointsNoAdjusted;
+        auto envelopeColor = drawAdjusted ? Colors::mainColors[index] : juce::Colour(130, 130, 130);
+        
         juce::Path envelopePath;
         envelopePath.startNewSubPath(points[0].coords);
         envelopePath.lineTo(points[1].coords);
-        envelopePath.lineTo(points[2].coords);
+        envelopePath.cubicTo(points[1].coords.x, points[2].coords.y,
+                             points[1].coords.x + width * decayPct * 0.5f, points[2].coords.y,
+                             points[2].coords.x, points[2].coords.y);
         envelopePath.lineTo(points[3].coords);
-        envelopePath.lineTo(points[4].coords);
-      //  envelopePath.lineTo(points[5].coords);
-     //   envelopePath.lineTo(points[6].coords);
-     //   envelopePath.lineTo(points[7].coords);
-
-
-        g.setColour(juce::Colour(90, 224, 184));
+        envelopePath.cubicTo(points[3].coords.x, points[4].coords.y,
+                             points[3].coords.x + width * releasePct * 0.5f, points[4].coords.y,
+                             points[4].coords.x, points[4].coords.y);
+        
+        if (drawAdjusted){
+            g.setColour(Colors::mainColors[index].withAlpha((float)0.15f));
+            g.fillPath(envelopePath);
+        }
+        
+        g.setColour(envelopeColor);
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
+        
         
     }
 
     void mouseDown(const juce::MouseEvent &m) override
     {
         auto mouse = m.getPosition().toFloat();
-        for (int i = 0; i < 8; i++)
+        for (int i = 1; i < 5; i++) // ignore init segment
         {
-            if (points[i].isOver(mouse))
+            if (pointsGlobalAdjusted[i].isOver(mouse))
             {
                 dragIndex = i;
+                dragStartPoint = mouse;
+                
+                auto segmentParameterID = (getSegmentParamID(*dragIndex));
+                initialParamValue = audioProcessor.apvts.getParameter(segmentParameterID)->getValue();
             }
         }
     }
     
     void mouseDrag(const juce::MouseEvent &m) override
     {
-        auto mouse = m.getPosition().toFloat();
+        auto mousePoint = m.getPosition().toFloat();
+        float sensitivity = 0.01f;
+
         if (dragIndex.has_value())
         {
-            if (!points[*dragIndex].yAdjustOnly)
+            if (pointsGlobalAdjusted[*dragIndex].yAdjustOnly)
             {
-                points[*dragIndex].coords = { mouse.x, mouse.y };
+                float deltaY = mousePoint.y - dragStartPoint.y;
+                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
+                
+                setEnvelopeParam(*dragIndex, newValue);
             } else {
-                points[*dragIndex].coords.y = mouse.y;
-            } 
+                float deltaX = mousePoint.x - dragStartPoint.x;
+                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaX * sensitivity));
+                
+                setEnvelopeParam(*dragIndex, newValue);
+            }
             repaint();
         }
     }
@@ -225,10 +309,45 @@ void setEnvelope(float attack, float decay, float sustain, float release)
         dragIndex.reset();
     }
     
+    juce::String getSegmentParamID(int segmentDragged)
+    {
+        juce::String segmentParameterID;
+        switch(segmentDragged)
+        {
+            case 1:
+                segmentParameterID = "attack" + juce::String(index);
+                break;
+            case 2:
+                segmentParameterID = "decay" + juce::String(index);
+                break;
+            case 3:
+                segmentParameterID = "sustain" + juce::String(index);
+                break;
+            case 4:
+                segmentParameterID = "release" + juce::String(index);
+                break;
+        }
+        return segmentParameterID;
+    }
+    
+    void setEnvelopeParam(int segmentDragged, float adjustAmount)
+    {
+        auto segmentParameterID = getSegmentParamID(segmentDragged);
+        auto paramRange = audioProcessor.apvts.getParameterRange(segmentParameterID);
+        
+        audioProcessor.apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
+    }
+
+    
 private:
+    int index;
     float attackPct, decayPct, releasePct, sustainPct;
     float attack, decay, sustain, release;
-    float attackSegment, decaySegment, sustainSegment, releaseSegment;
+    float attackAdjPct, decayAdjPct, releaseAdjPct;
+    float sustainLevelAdjusted;
+    
+    juce::Point<float> dragStartPoint;
+    float initialParamValue;
     
     struct Handle
     {
@@ -251,9 +370,11 @@ private:
         }
     };
     
-    std::array<Handle, 8> points;
-    // initial, attack, peak, decay, sustain start, sustain end, release, final
+    std::array<Handle, 5> pointsNoAdjusted;
+    std::array<Handle, 5> pointsGlobalAdjusted;
+
     std::optional<int> dragIndex;
+    FledgeAudioProcessor& audioProcessor;
 };
 
 
@@ -268,13 +389,6 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
-
-        juce::Path boundsPath;
-        boundsPath.addRoundedRectangle(bounds, 10, 10);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(boundsPath);
-        g.setColour(juce::Colour(30, 32, 31));
-        g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
 
         float x = bounds.getX();
         float y = bounds.getY();
@@ -297,7 +411,7 @@ public:
             float amp2 = op[2].generateAmplitude(k);
             float amp1 = op[1].generateAmplitude(k);
             float amp0 = op[0].generateAmplitude(k);
-
+            
             float heightScaled = y + heightMargin + heightIncrement * j;
             
             float sin0Phase = fmodf(((0/40.7f) * op[0].ratio * 2.0f), 6.28318f);
@@ -305,9 +419,8 @@ public:
 
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
 
-            for (int i = 0; i < domainResolution; i++)
+            for (int i = 1; i <= domainResolution; i++)
             {
-             //   float sin2 = amp2 * op[1].modIndex * fastSin.sin((i/40.7f) * op[2].ratio);
                 
                 float sin2Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + 0.0f, 6.28318f);
                 float sin2 = amp2 * op[1].modIndex * fastSin.sin(sin2Phase);
@@ -320,15 +433,15 @@ public:
                 
                 graphicLines.lineTo(x + widthMargin + widthIncrement * i,
                                     (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
+             
             }
         }
         
         graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
-        g.setColour(juce::Colour(90, 224, 184));
+        g.setColour(Colors::mainColors[0]);
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
     }
-    
     
     void resized() override {};
     
@@ -338,6 +451,7 @@ public:
         op[index].decay = decay;
         op[index].sustain = sustain/10.0f;
         op[index].release = release;
+        calculateEnvelopeSegments();
         repaint();
     }
     
@@ -397,6 +511,7 @@ private:
             else if (segmentIndex > attackSegment + decaySegment + releaseSegment)
             {
                 amplitude = 0.0f;
+                
             }
             else
             {

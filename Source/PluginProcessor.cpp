@@ -156,6 +156,8 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
     float globalRelease = apvts.getRawParameterValue("globalRelease")->load();
     
+    int outputRouting = apvts.getRawParameterValue("outputRouting")->load();
+    
     for (int oper = 0; oper < 4; oper++){
         juce::String attackID = "attack" + juce::String(oper);
         juce::String decayID = "decay" + juce::String(oper);
@@ -184,13 +186,44 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
                 voice->setFMParameters(oper, ratio, fixed, false, modIndex);
-                voice->setOperatorGain(oper, routing);
+                voice->setOperatorGain(oper, routing, outputRouting);
             }
         }
     }
-     
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    
+    // Measure output levels
+const int numChannels = buffer.getNumChannels();
+const int numSamples = buffer.getNumSamples();
+
+if (numChannels >= 1) {
+    auto* leftData = buffer.getReadPointer(0);
+    float maxL = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxL = juce::jmax(maxL, std::abs(leftData[i]));
+    }
+    outputLevelL.updateIfGreater(maxL);
+}
+
+if (numChannels >= 2) {
+    auto* rightData = buffer.getReadPointer(1);
+    float maxR = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxR = juce::jmax(maxR, std::abs(rightData[i]));
+    }
+    outputLevelR.updateIfGreater(maxR);
+} else if (numChannels >= 1) {
+    auto* leftData = buffer.getReadPointer(0);
+    float maxL = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxL = juce::jmax(maxL, std::abs(leftData[i]));
+    }
+    outputLevelR.updateIfGreater(maxL);
+}
+
+
+    
 }
 
 //==============================================================================
@@ -232,13 +265,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
     
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 0.01f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 0.2f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f), 80.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(-100.0f, 100.0f, 0.1f), 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(50.0f, 200.0f, 0.1f), 100.0f));
+    
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
 
     for (int oper = 0; oper < 4; oper++)
     {
@@ -277,7 +312,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String opModeID = "opMode" + juce::String(oper);
         juce::String opModeName = "Mode " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { opModeID, 1 }, opModeName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
+        layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { opModeID, 1},
+                                                              opModeName,
+                                                               false));
 
         juce::String modIndexID = "amplitude" + juce::String(oper);
         juce::String modIndexName = "Modulation Amount " + juce::String(oper);
@@ -288,11 +325,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
         juce::String operatorRoutingName = "Operator " + juce::String(oper) + " Routing";
         
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, 0));
+        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, oper + 1 ));
         
     }
     
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 0));
 
     return layout;
 }

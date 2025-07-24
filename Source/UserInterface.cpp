@@ -10,164 +10,25 @@
 
 #include "UserInterface.h"
 
-OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audioProcessor(p)
-{
-    this->index = index;
-    
-    
-    setLabel(ratioLabel, "Ratio", 12.0f);
-    ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index), "");
-    addAndMakeVisible(*ratioSlider);
-    ratioSlider->setFontSize(24.0f);
-
-    setLabel(fixedLabel, "Fixed", 12.0f);
-    fixedSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "fixed" + juce::String(index), "");
-    addAndMakeVisible(*fixedSlider);
-    fixedSlider->setFontSize(24.0f);
-
-    setLabel(amplitudeLabel, "Amplitude", 12.0f);
-    amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index), "");
-    addAndMakeVisible(*amplitudeSlider);
-    amplitudeSlider->setFontSize(24.0f);
-
-    setLabel(attackLabel, "A", 12.0f);
-    attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index), " ms");
-    addAndMakeVisible(*attackSlider);
-    attackSlider->setFontSize(12.0f);
-    
-    setLabel(decayLabel, "D", 12.0f);
-    decaySlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "decay" + juce::String(index), " ms");
-    addAndMakeVisible(*decaySlider);
-    decaySlider->setFontSize(12.0f);
-
-    setLabel(sustainLabel, "S", 12.0f);
-    sustainSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "sustain" + juce::String(index), " %");
-    addAndMakeVisible(*sustainSlider);
-    sustainSlider->setFontSize(12.0f);
-
-    setLabel(releaseLabel, "R", 12.0f);
-    releaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "release" + juce::String(index), " ms");
-    addAndMakeVisible(*releaseSlider);
-    releaseSlider->setFontSize(12.0f);
-
-    addAndMakeVisible(envGraphics);
-    addAndMakeVisible(opGraphics);
-    startTimerHz(30);
-}
-
-void OperatorInterface::paint(juce::Graphics &g)
-{
-    auto bounds = getLocalBounds().toFloat();
-    bounds.reduce(5, 5);
-    
-    juce::Path boundsPath;
-    boundsPath.addRoundedRectangle(bounds, 5, 5);
-    g.setColour(juce::Colour(40, 42, 41));
-    g.fillPath(boundsPath);
-    g.setColour(juce::Colour(35, 37, 36));
-    g.strokePath(boundsPath, juce::PathStrokeType(2.0f));
-    
-}
-
-void OperatorInterface::resized()
-{
-    auto bounds = getLocalBounds().toFloat();
-    float x = bounds.getX();
-    float y = bounds.getY();
-    float width = bounds.getWidth();
-    float height = bounds.getHeight();
-
-    float sliderSize = width * 0.15f;
-    float heightMargin = height * 0.1f;
-    float labelHeight = height * 0.1f;
-    float textSliderHeight = height * 0.25f;
-
-    
-    ratioLabel.setBounds(x + width * 0.025f, y + height * 0.1f, width * 0.15f, height * 0.1f);
-    ratioSlider->setBounds(x + width * 0.025f, y + height * 0.1f + labelHeight, width * 0.15f, height * 0.25f);
-
-    amplitudeLabel.setBounds(x + width * 0.025f,  height * 0.6f, width * 0.15f, height * 0.1f);
-    amplitudeSlider->setBounds(x + width * 0.025f, height * 0.6f + labelHeight, width * 0.15f, height * 0.25f);
-
-    opGraphics.setBounds(x + 100, y + height * 0.125f, sliderSize * 2, height * 0.75f);
-
-    attackLabel.setBounds(x + width * 0.8f,
-                          y + height * 0.1f,
-                          width * 0.035f,
-                          height * 0.2f);
-    
-    decayLabel.setBounds(x + width * 0.8f,
-                         y + height * 0.3f,
-                         width * 0.035f,
-                         height * 0.2f);
-    
-    sustainLabel.setBounds(x + width * 0.8f,
-                           y + height * 0.5f,
-                           width * 0.035f,
-                           height * 0.2f);
-    
-    releaseLabel.setBounds(x + width * 0.8f,
-                           y + height * 0.7f,
-                           width * 0.035f,
-                           height * 0.2f);
-    
-    attackSlider->setBounds(x + width * 0.835f,  y + height * 0.1f, width * 0.165f, height * 0.2f);
-    decaySlider->setBounds(x + width * 0.835f,   y + height * 0.3f, width * 0.165f, height * 0.2f);
-    sustainSlider->setBounds(x + width * 0.835f, y + height * 0.5f, width * 0.165f, height * 0.2f);
-    releaseSlider->setBounds(x + width * 0.835f, y + height * 0.7f, width * 0.165f, height * 0.2f);
-
-    envGraphics.setBounds(x + sliderSize * 3.5 , y + height * 0.125f, sliderSize * 2, height * 0.75f);
-}
-
-void OperatorInterface::setLabel(juce::Label &l, juce::String labelText, float size)
-{
-    addAndMakeVisible(l);
-    l.setText(labelText, juce::NotificationType::dontSendNotification);
-    l.setFont(juce::FontOptions(size, juce::Font::plain));
-    l.setColour(juce::Label::textColourId, juce::Colour(150, 150, 150));
-}
-
-void OperatorInterface::setIndex(int index)
-{
-    this->index = index;
-}
-
-void OperatorInterface::timerCallback()
-{
-    float ratio = audioProcessor.apvts.getRawParameterValue("ratio" + juce::String(index))->load();
-    float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
-    float modIndex = audioProcessor.apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
-    bool opMode = audioProcessor.apvts.getRawParameterValue("opMode" + juce::String(index))->load();
-    opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
-    
-    float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
-    float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
-    float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
-    float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
-    envGraphics.setEnvelope(attack, decay, sustain, release);
-
-}
-
-
 PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts) : presetManager(apvts), audioProcessor(p)
 {
     juce::FontOptions font { 12.0f, juce::Font::plain };
 
     addAndMakeVisible(saveButton);
     saveButton.addListener(this);
- //   saveButton.setLookAndFeel(&saveLAF);
+    saveButton.setLookAndFeel(&saveLAF);
 
     addAndMakeVisible(nextButton);
     nextButton.addListener(this);
-//    nextButton.setLookAndFeel(&nextLAF);
+    nextButton.setLookAndFeel(&nextLAF);
 
     addAndMakeVisible(prevButton);
     prevButton.addListener(this);
- //   prevButton.setLookAndFeel(&prevLAF);
+    prevButton.setLookAndFeel(&prevLAF);
     
     addAndMakeVisible(presetComboBox);
     presetComboBox.addListener(this);
- //   presetComboBox.setLookAndFeel(&comboBoxLAF);
+    presetComboBox.setLookAndFeel(&presetComboBoxLAF);
     
     // refresh presets
     loadPresetList();
@@ -236,4 +97,386 @@ void PresetInterface::loadPresetList()
     presetComboBox.addItemList(allPresets, 1);
     presetComboBox.setTitle(currentPreset);
     presetComboBox.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
+}
+
+OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audioProcessor(p)
+{
+    this->index = index;
+    
+    setLabel(ratioLabel, "Ratio", 12.0f);
+    ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index), "");
+    addAndMakeVisible(*ratioSlider);
+    ratioSlider->setFontSize(24.0f);
+
+    setLabel(fixedLabel, "Fixed", 12.0f);
+    fixedSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "fixed" + juce::String(index), "");
+    addAndMakeVisible(*fixedSlider);
+    fixedSlider->setFontSize(24.0f);
+
+    setLabel(amplitudeLabel, "Amplitude", 12.0f);
+    amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index), "");
+    addAndMakeVisible(*amplitudeSlider);
+    amplitudeSlider->setFontSize(24.0f);
+
+    setLabel(attackLabel, "A", 12.0f);
+    attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index), " ms");
+    addAndMakeVisible(*attackSlider);
+    attackSlider->setFontSize(12.0f);
+    
+    setLabel(decayLabel, "D", 12.0f);
+    decaySlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "decay" + juce::String(index), " ms");
+    addAndMakeVisible(*decaySlider);
+    decaySlider->setFontSize(12.0f);
+
+    setLabel(sustainLabel, "S", 12.0f);
+    sustainSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "sustain" + juce::String(index), " %");
+    addAndMakeVisible(*sustainSlider);
+    sustainSlider->setFontSize(12.0f);
+
+    setLabel(releaseLabel, "R", 12.0f);
+    releaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "release" + juce::String(index), " ms");
+    addAndMakeVisible(*releaseSlider);
+    releaseSlider->setFontSize(12.0f);
+
+    envGraphics = std::make_unique<EnvelopeDisplayGraphics>(audioProcessor, index);
+    addAndMakeVisible(*envGraphics);
+    
+    addAndMakeVisible(opGraphics);
+    opGraphics.setIndex(index);
+
+    startTimerHz(30);
+}
+
+void OperatorInterface::paint(juce::Graphics &g)
+{
+    auto bounds = getLocalBounds().toFloat();
+    bounds.reduce(5, 5);
+    
+    juce::Path boundsPath;
+    boundsPath.addRoundedRectangle(bounds, 5, 5);
+    g.setColour(juce::Colour(40, 42, 41));
+    g.fillPath(boundsPath);
+    
+}
+
+void OperatorInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    float width = bounds.getWidth();
+    float height = bounds.getHeight();
+
+    float sliderSize = width * 0.15f;
+    float heightMargin = height * 0.1f;
+    float labelHeight = height * 0.1f;
+    float textSliderHeight = height * 0.25f;
+
+    
+    ratioLabel.setBounds(x + width * 0.025f, y + height * 0.1f, width * 0.15f, height * 0.1f);
+    ratioSlider->setBounds(x + width * 0.025f, y + height * 0.1f + labelHeight, width * 0.15f, height * 0.25f);
+
+    amplitudeLabel.setBounds(x + width * 0.025f,  height * 0.6f, width * 0.15f, height * 0.1f);
+    amplitudeSlider->setBounds(x + width * 0.025f, height * 0.6f + labelHeight, width * 0.15f, height * 0.25f);
+
+    opGraphics.setBounds(x + width * 0.2f, y + height * 0.125f, width * 0.275f, height * 0.75f);
+
+    attackLabel.setBounds(x + width * 0.8f,
+                          y + height * 0.1f,
+                          width * 0.035f,
+                          height * 0.2f);
+    
+    decayLabel.setBounds(x + width * 0.8f,
+                         y + height * 0.3f,
+                         width * 0.035f,
+                         height * 0.2f);
+    
+    sustainLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.5f,
+                           width * 0.035f,
+                           height * 0.2f);
+    
+    releaseLabel.setBounds(x + width * 0.8f,
+                           y + height * 0.7f,
+                           width * 0.035f,
+                           height * 0.2f);
+    
+    attackSlider->setBounds(x + width * 0.835f,
+                            y + height * 0.1f,
+                            width * 0.165f,
+                            height * 0.2f);
+    decaySlider->setBounds(x + width * 0.835f,
+                           y + height * 0.3f,
+                           width * 0.165f,
+                           height * 0.2f);
+    sustainSlider->setBounds(x + width * 0.835f, y + height * 0.5f, width * 0.165f, height * 0.2f);
+    releaseSlider->setBounds(x + width * 0.835f, y + height * 0.7f, width * 0.165f, height * 0.2f);
+
+    envGraphics->setBounds(x + width * 0.5f, y + height * 0.125f, width * 0.275f, height * 0.75f);
+}
+
+void OperatorInterface::setLabel(juce::Label &l, juce::String labelText, float size)
+{
+    addAndMakeVisible(l);
+    l.setText(labelText, juce::NotificationType::dontSendNotification);
+    l.setFont(juce::FontOptions(size, juce::Font::plain));
+    l.setColour(juce::Label::textColourId, juce::Colour(150, 150, 150));
+}
+
+void OperatorInterface::setIndex(int index)
+{
+    this->index = index;
+}
+
+void OperatorInterface::timerCallback()
+{
+    float ratio = audioProcessor.apvts.getRawParameterValue("ratio" + juce::String(index))->load();
+    float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
+    float modIndex = audioProcessor.apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
+    bool opMode = audioProcessor.apvts.getRawParameterValue("opMode" + juce::String(index))->load();
+    opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
+    
+    float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
+    float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
+    float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
+    float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
+    
+    float globalAttack = audioProcessor.apvts.getRawParameterValue("globalAttack")->load();
+    float globalDecay = audioProcessor.apvts.getRawParameterValue("globalDecay")->load();
+    float globalSustain = audioProcessor.apvts.getRawParameterValue("globalSustain")->load();
+    float globalRelease = audioProcessor.apvts.getRawParameterValue("globalRelease")->load();
+
+    envGraphics->setEnvelope(attack, decay, sustain, release, globalAttack, globalDecay, globalSustain, globalRelease);
+
+}
+
+AlgorithmSelectInterface::AlgorithmSelectInterface(FledgeAudioProcessor& p) : audioProcessor(p)
+{
+    for(int i = 0; i < 8; i++)
+    {
+        addAndMakeVisible(algorithm[i]);
+        algorithmGraphics[i].setIndex(i);
+        algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
+        algorithm[i].addListener(this);
+
+    }
+}
+    
+AlgorithmSelectInterface::~AlgorithmSelectInterface()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        algorithm[i].setLookAndFeel(nullptr);
+        algorithm[i].removeListener(this);
+
+    }
+}
+    
+void AlgorithmSelectInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    
+    float width = bounds.getWidth() * 0.95f;
+    float height = bounds.getHeight() * 0.8f;
+    float widthMargin = bounds.getWidth() * 0.025f;
+    float heightMargin = bounds.getHeight() * 0.1f;
+
+    float blockWidth = width * 0.25f;
+    float blockHeight = height * 0.5f;
+
+    for(int i = 0; i < 8; i++)
+    {
+        algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
+                               y + heightMargin + blockWidth * (i / 4),
+                               blockHeight,
+                               blockHeight);
+    }
+}
+    
+
+void AlgorithmSelectInterface::buttonClicked(juce::Button* button) 
+{
+    if (button == &algorithm[0]){
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 1.0, 0.0 };
+        // op0 { 0.0, 1.0, 0.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setOperatorParam(3, 1);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 4);
+        setOperatorParam(0, 2);
+        setOutputParam(1);
+    } else if (button == &algorithm[1]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 1.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 6);
+        setOutputParam(1);
+
+        
+    } else if (button == &algorithm[2]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 0.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 1.0, 1.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 0);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 14);
+        setOutputParam(1);
+        
+    } else if (button == &algorithm[3]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 1.0 };
+        // op0 { 0.0, 1.0, 1.0, 0.0 };
+        // output { 1.0f, 0.0f, 0.0f, 0.0f };
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 8);
+        setOperatorParam(0, 6);
+        setOutputParam(1);
+
+    } else if (button == &algorithm[4]) {
+        // op3 { 0.0, 0.0, 0.0, 0.0 };
+        // op2 { 0.0, 0.0, 0.0, 1.0 };
+        // op1 { 0.0, 0.0, 0.0, 0.0 };
+        // op0 { 0.0, 1.0, 0.0, 0.0 };
+        // output { 1.0f, 1.0f, 0.0f, 0.0f };
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 2);
+        setOutputParam(1); // output
+
+    } else if (button == &algorithm[5]) {
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 4);
+        setOperatorParam(0, 4);
+        setOutputParam(3); // output
+
+    } else if (button == &algorithm[6]) {
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 8);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 0);
+        setOutputParam(7); // output
+
+    } else if (button == &algorithm[7]) {
+        setOperatorParam(3, 0);
+        setOperatorParam(2, 0);
+        setOperatorParam(1, 0);
+        setOperatorParam(0, 0);
+        setOutputParam(15); // output
+
+    }
+}
+
+void AlgorithmSelectInterface::setOperatorParam(int index, int gainIndex)
+{
+    auto paramRange = audioProcessor.apvts.getParameterRange("operator0Routing");
+    float valueScaled = paramRange.convertTo0to1(gainIndex);
+    
+    juce::String parameterID = "operator" + juce::String(index) + "Routing";
+    audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
+        
+}
+
+void AlgorithmSelectInterface::setOutputParam(int gainIndex)
+{
+    auto paramRange = audioProcessor.apvts.getParameterRange("outputRouting");
+    float valueScaled = paramRange.convertTo0to1(gainIndex);
+    
+    audioProcessor.apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
+
+}
+
+
+MacroControlsInterface::MacroControlsInterface(FledgeAudioProcessor& p) : audioProcessor(p)
+{
+    setSliderAndLabel(globalFreqSlider, globalFreqLabel, dialLAF, "Global Freq", "");
+    setSliderAndLabel(globalModIndexSlider, globalModIndexLabel, dialLAF, "Global Freq", "");
+    
+    setSliderAndLabel(globalAttackSlider, globalAttackLabel, dialLAF, "Global Attack", "%");
+    globalAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalAttack", globalAttackSlider);
+    
+    setSliderAndLabel(globalDecaySlider, globalDecayLabel, dialLAF, "Global Decay", "%");
+    globalDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalDecay", globalDecaySlider);
+    
+    setSliderAndLabel(globalSustainSlider, globalSustainLabel, dialLAF, "Global Sustain", "%");
+    globalSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalSustain", globalSustainSlider);
+
+    setSliderAndLabel(globalReleaseSlider, globalReleaseLabel, dialLAF, "Global Release", "%");
+    globalReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalRelease", globalReleaseSlider);
+
+}
+
+void MacroControlsInterface::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    float x = bounds.getX();
+    float y = bounds.getY();
+    float width = bounds.getWidth();
+    float height = bounds.getHeight();
+
+    globalFreqSlider.setBounds(x + width * 0.15f,
+                               y + height * 0.05f,
+                               height * 0.15f,
+                               height * 0.2f);
+    
+    globalModIndexSlider.setBounds(x + width * 0.55f,
+                                   y + height * 0.05f,
+                                   height * 0.15f,
+                                   height * 0.2f);
+    
+    globalAttackSlider.setBounds(x + width * 0.15f,
+                                 y + height * 0.375f,
+                                 height * 0.15f,
+                                 height * 0.2f);
+    
+    globalDecaySlider.setBounds(x + width * 0.55f,
+                                y + height * 0.375f,
+                                height * 0.15f,
+                                height * 0.2f);
+    
+    globalSustainSlider.setBounds(x + width * 0.15f,
+                                  y + height * 0.6f,
+                                  height * 0.15f,
+                                  height * 0.2f);
+    
+    globalReleaseSlider.setBounds(x + width * 0.55f,
+                                  y + height * 0.6f,
+                                  height * 0.15f,
+                                  height * 0.2f);
+
+    globalAttackLabel.setBounds(x + width * 0.15f,
+                                y + height * 0.25f,
+                                height * 0.2f,
+                                height * 0.1f);
+    
+    globalDecayLabel.setBounds(x + width * 0.55f,
+                               y + height * 0.25f,
+                               height * 0.2f,
+                               height * 0.1f);
+    
+    globalSustainLabel.setBounds(x + width * 0.15f,
+                                 y + height * 0.45f,
+                                 height * 0.2f,
+                                 height * 0.1f);
+    
+    globalReleaseLabel.setBounds(x + width * 0.55f,
+                                 y + height * 0.45f,
+                                 height * 0.2f,
+                                 height * 0.1f);
+
 }

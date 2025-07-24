@@ -10,38 +10,55 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "Graphics.h"
 #include "PluginProcessor.h"
-#include "LookAndFeel.h"
-#include "DialLookAndFeel.h"
-#include "AlgorithmGraphics.h"
 #include "Presets.h"
+#include "Graphics.h"
+#include "AlgorithmGraphics.h"
+#include "DialLookAndFeel.h"
+#include "ButtonLookAndFeel.h"
+#include "ComboBoxLookAndFeel.h"
+#include "LookAndFeel.h"
 
-class MainInterface : public juce::Component
+class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
 {
 public:
+    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
+    ~PresetInterface();
     
+    void paint(juce::Graphics& g) override {}
+    
+    void resized() override;
+    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
+    void buttonClicked(juce::Button* buttonClicked) override;
+    void loadPresetList();
     
 private:
-    juce::Slider modIndexSlider, attackSlider, decaySlider, sustainSlider, releaseSlider;
     
-};
+    ButtonLookAndFeel saveLAF { 0 }, prevLAF{ 1 }, nextLAF { 2 };
+    ComboBoxGraphics presetComboBoxLAF;
+    juce::TextButton saveButton, nextButton, prevButton;
+    juce::ComboBox presetComboBox;
+    juce::Label rateLabel, rateValueLabel;
+    
+    std::unique_ptr<juce::FileChooser> fileChooser;
 
+    PresetManager presetManager;
+    FledgeAudioProcessor& audioProcessor;
+};
 
 class OperatorInterface : public juce::Component, juce::Timer
 {
 public:
     OperatorInterface(FledgeAudioProcessor& p, int index);
-    
+    void setIndex(int index);
+
     void paint(juce::Graphics &g) override;
     void resized() override;
-    void setLabel(juce::Label &l, juce::String labelText, float size);
-    
-    void setIndex(int index);
-    
-    void timerCallback() override;
     
 private:
+    void setLabel(juce::Label &l, juce::String labelText, float size);
+    void timerCallback() override;
+
     int index;
     
     juce::Label ratioLabel,
@@ -63,142 +80,73 @@ private:
     releaseSlider;
 
     OperatorDisplayGraphics opGraphics;
-    EnvelopeDisplayGraphics envGraphics;
+    std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 
-
-class AlgorithmSelectInterface : public juce::Component
+class AlgorithmSelectInterface : public juce::Component, public juce::Button::Listener
 {
 public:
-    AlgorithmSelectInterface()
-    {
-        for(int i = 0; i < 8; i++)
-        {
-            addAndMakeVisible(algorithm[i]);
-            algorithmGraphics[i].setIndex(i);
-            algorithm[i].setLookAndFeel(&algorithmGraphics[i]);
-        }
-    }
-    
-    
+    AlgorithmSelectInterface(FledgeAudioProcessor& p);
+    ~AlgorithmSelectInterface();
     void paint(juce::Graphics& g) override {}
-    
-    void resized() override
-    {
-        auto bounds = getLocalBounds().toFloat();
-        float x = bounds.getX();
-        float y = bounds.getY();
-        
-        float width = bounds.getWidth() * 0.8f;
-        float height = bounds.getHeight() * 0.8f;
-        float widthMargin = bounds.getWidth() * 0.1f;
-        float heightMargin = bounds.getHeight() * 0.1f;
+    void resized() override;
+    void buttonClicked(juce::Button* button) override;
+    void setOperatorParam(int index, int gainIndex);
+    void setOutputParam(int gainIndex);
 
-        float blockWidth = width * 0.2f;
-        float blockHeight = height/2;
-
-        for(int i = 0; i < 8; i++)
-        {
-            algorithm[i].setBounds(x + widthMargin + blockWidth * (i % 4),
-                                   y + heightMargin + blockWidth * (i / 4),
-                                   blockWidth,
-                                   blockHeight);
-        }
-    }
-    
-/*
-    void buttonClicked(juce::Button* buttonClicked) override
-    {
-        if (buttonClicked == &algorithm[0]){
-
-        } else if (buttonClicked == &algorithm[1]) {
-
-        } else if (buttonClicked == &algorithm[2]) {
-            
-        } else if (buttonClicked == &algorithm[3]) {
-            
-        } else if (buttonClicked == &algorithm[4]) {
-            
-        } else if (buttonClicked == &algorithm[5]) {
-            
-        } else if (buttonClicked == &algorithm[6]) {
-            
-        } else if (buttonClicked == &algorithm[7]) {
-            
-        }
-    }
-*/
-    
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
     std::array<juce::ToggleButton, 8> algorithm;
-};
-
-
-class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
-{
-public:
-    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
-    ~PresetInterface();
     
-    void paint(juce::Graphics& g) override {}
-    
-    void resized() override;
-    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
-    void buttonClicked(juce::Button* buttonClicked) override;
-    void loadPresetList();
-    
-private:     
-    juce::TextButton saveButton, nextButton, prevButton;
-    juce::ComboBox presetComboBox;
-    juce::Label rateLabel, rateValueLabel;
-    
-    std::unique_ptr<juce::FileChooser> fileChooser;
-
-    PresetManager presetManager;
     FledgeAudioProcessor& audioProcessor;
 };
 
-
-
-
-
-
-
-
-class PracticeDialGraphics : public juce::LookAndFeel_V4
+class MacroControlsInterface : public juce::Component
 {
 public:
-    void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override
+    MacroControlsInterface(FledgeAudioProcessor& p);
+    void paint(juce::Graphics& g) override {}
+    void resized() override;
+    
+    void setSliderAndLabel(juce::Slider &s, juce::Label &l, DialLookAndFeel &lookAndFeel, juce::String labelText, juce::String suffix)
     {
-        g.fillAll(juce::Colour(255, 255, 255));
+        addAndMakeVisible(l);
+        l.setText(labelText, juce::dontSendNotification);
+        l.setJustificationType(juce::Justification::centred);
+        l.setColour(juce::Label::textColourId, Colors::textColor);
         
-        for (int i = 0 ; i < 6; i++)
-        {
-            float lineIncr = (height/6) * sliderPosProportional * i;
-            
-            juce::Point<float> leftCoords = { (float)x, (float)y + lineIncr };
-            juce::Point<float> rightCoords = { (float)x + width, (float)y + lineIncr };
-            
-            juce::Path linePath;
-            linePath.startNewSubPath(leftCoords);
-            linePath.lineTo(rightCoords);
-            
-            g.setColour(juce::Colour(155, 155, 155));
-            
-            if (slider.isMouseOverOrDragging())
-            {
-                g.setColour(juce::Colour(200, 200, 200));
-            }
-            
-            g.strokePath(linePath, juce::PathStrokeType(1.0f));
-        }
+        addAndMakeVisible(s);
+        s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 20);
+        s.setLookAndFeel(&lookAndFeel);
+        s.setTextValueSuffix(suffix);
     }
-
+    
 private:
+    // look and feel
+    DialLookAndFeel dialLAF;
     
+    juce::Slider globalFreqSlider,
+    globalModIndexSlider,
+    globalAttackSlider,
+    globalDecaySlider,
+    globalSustainSlider,
+    globalReleaseSlider;
     
+    juce::Label globalFreqLabel,
+    globalModIndexLabel,
+    globalAttackLabel,
+    globalDecayLabel,
+    globalSustainLabel,
+    globalReleaseLabel;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> globalFreqAttachment,
+    globalModIndexAttachment,
+    globalAttackAttachment,
+    globalDecayAttachment,
+    globalSustainAttachment,
+    globalReleaseAttachment;
+    
+    FledgeAudioProcessor& audioProcessor;
 };
-
-
