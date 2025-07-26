@@ -102,16 +102,13 @@ private:
 
 
 
-class EnvelopeDisplayGraphics : public juce::Component
+class EnvelopeDisplayGraphics : public juce::Component, juce::Timer
 {
 public:
     EnvelopeDisplayGraphics(FledgeAudioProcessor &p, int index) : audioProcessor(p)
     {
         this->index = index;
-    }
-    
-    void setIndex(int index)
-    {
+        startTimerHz(60);
     }
 
     void paint(juce::Graphics &g) override
@@ -126,11 +123,9 @@ public:
         float heightMargin = bounds.getHeight() * 0.05f;
         
         calculateSegment();
-        // unadjusted background
-        drawSegment(g, x + widthMargin, y + heightMargin, width, height, false);
 
         // adjusted foreground
-        drawSegment(g, x + widthMargin, y + heightMargin, width, height, true);
+        drawSegment(g, x + widthMargin, y + heightMargin, width, height);
         
         for (int i = 0; i < 5; i++)
         {
@@ -141,19 +136,7 @@ public:
     void resized() override
     {
         calculateSegment();
-        pointsNoAdjusted[0].yAdjustOnly = false;
-        pointsNoAdjusted[1].yAdjustOnly = false;
-        pointsNoAdjusted[2].yAdjustOnly = false;
-        pointsNoAdjusted[3].yAdjustOnly = true;
-        pointsNoAdjusted[4].yAdjustOnly = false;
-
-        pointsGlobalAdjusted[0].yAdjustOnly = false;
-        pointsGlobalAdjusted[1].yAdjustOnly = false;
-        pointsGlobalAdjusted[2].yAdjustOnly = false;
-        pointsGlobalAdjusted[3].yAdjustOnly = true;
-        pointsGlobalAdjusted[4].yAdjustOnly = false;
     }
-    
     
     float calculateScaledPercentage(float segment, float total)
     {
@@ -176,19 +159,20 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.05f;
 
-        pointsNoAdjusted[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
-        pointsNoAdjusted[1].coords = { x + widthMargin + width * attackPct, y + heightMargin }; // Top (1.0)
-        pointsNoAdjusted[2].coords = { x + widthMargin + width * (attackPct + decayPct), y + heightMargin + height * (1.0f - sustain) }; // Sustain level
-        pointsNoAdjusted[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct), y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
-        pointsNoAdjusted[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
-        repaint();
-
+        pointsGlobalAdjusted[0].coords = { x + widthMargin,
+            y + height + heightMargin }; // Bottom (0)
         
-        pointsGlobalAdjusted[0].coords = { x + widthMargin, y + height + heightMargin }; // Bottom (0)
-        pointsGlobalAdjusted[1].coords = { x + widthMargin + width * attackAdjPct, y + heightMargin }; // Top (1.0)
-        pointsGlobalAdjusted[2].coords = { x + widthMargin + width * (attackAdjPct + decayAdjPct), y + heightMargin + height * (1.0f - sustainLevelAdjusted) }; // Sustain level
-        pointsGlobalAdjusted[3].coords = { x + widthMargin + width * (attackAdjPct + decayAdjPct + sustainPct), y + heightMargin + height * (1.0f - sustainLevelAdjusted) }; // Same sustain level
-        pointsGlobalAdjusted[4].coords = { x + widthMargin + width, y + height + heightMargin }; // Bottom (0)
+        pointsGlobalAdjusted[1].coords = { x + widthMargin + width * attackPct,
+            y + heightMargin }; // Top (1.0)
+        
+        pointsGlobalAdjusted[2].coords = { x + widthMargin + width * (attackPct + decayPct),
+            y + heightMargin + height * (1.0f - sustain) }; // Sustain level
+        
+        pointsGlobalAdjusted[3].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct),
+            y + heightMargin + height * (1.0f - sustain) }; // Same sustain level
+        
+        pointsGlobalAdjusted[4].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct + releasePct),
+            y + height + heightMargin };
         repaint();
     }
     
@@ -205,6 +189,7 @@ public:
         float releaseAdjusted = release * std::pow(2.0f, releaseAdj / 100.0f);
         sustainLevelAdjusted = (sustain / 100.0) * std::pow(2.0f, sustainAdj / 100.0f);
         sustainLevelAdjusted = juce::jlimit(0.0f, 1.0f, sustainLevelAdjusted);
+        
         // Sustain always takes 25% of width
         sustainPct = 0.25f;
         
@@ -223,24 +208,22 @@ public:
             releasePct = 0.25f;
         }
         
-        if (adrAdjSum > 0.0f)
-        {
+        if (adrAdjSum > 0.0f){
             attackAdjPct = (attackAdjusted / adrAdjSum) * 0.75f;
             decayAdjPct = (decayAdjusted / adrAdjSum) * 0.75f;
             releaseAdjPct = (releaseAdjusted / adrAdjSum) * 0.75f;
+            
         } else {
             attackAdjPct = 0.25f;
             decayAdjPct = 0.25f;
             releaseAdjPct = 0.25f;
         }
-        
         calculateSegment();
     }
     
-    void drawSegment(juce::Graphics &g, float x, float y, float width, float height, bool drawAdjusted)
+    void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
     {
-        auto points = drawAdjusted ? pointsGlobalAdjusted : pointsNoAdjusted;
-        auto envelopeColor = drawAdjusted ? Colors::mainColors[index] : juce::Colour(130, 130, 130);
+        auto points = pointsGlobalAdjusted;
         
         juce::Path envelopePath;
         envelopePath.startNewSubPath(points[0].coords);
@@ -253,18 +236,25 @@ public:
                              points[3].coords.x + width * releasePct * 0.5f, points[4].coords.y,
                              points[4].coords.x, points[4].coords.y);
         
-        if (drawAdjusted){
-            g.setColour(Colors::mainColors[index].withAlpha((float)0.15f));
-            g.fillPath(envelopePath);
-        }
+        g.setColour(Colors::mainColors[index].withAlpha((float)0.15f));
+        g.fillPath(envelopePath);
         
-        g.setColour(envelopeColor);
+        g.setColour(Colors::mainColors[index]);
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
         
         
     }
 
+    void timerCallback() override
+    {
+        auto mouse = getMouseXYRelative().toFloat();
+        for (int i = 1; i < 5; i++) // ignore init segment
+        {
+            pointsGlobalAdjusted[i].isMouseOver = pointsGlobalAdjusted[i].isOver(mouse);
+        }
+    }
+    
     void mouseDown(const juce::MouseEvent &m) override
     {
         auto mouse = m.getPosition().toFloat();
@@ -288,17 +278,23 @@ public:
 
         if (dragIndex.has_value())
         {
-            if (pointsGlobalAdjusted[*dragIndex].yAdjustOnly)
-            {
-                float deltaY = mousePoint.y - dragStartPoint.y;
-                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
-                
-                setEnvelopeParam(*dragIndex, newValue);
-            } else {
-                float deltaX = mousePoint.x - dragStartPoint.x;
-                float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaX * sensitivity));
-                
-                setEnvelopeParam(*dragIndex, newValue);
+            float deltaX = mousePoint.x - dragStartPoint.x;
+            float newValueX = juce::jlimit(0.0f, 1.0f, initialParamValue + (deltaX * sensitivity));
+
+            float deltaY = mousePoint.y - dragStartPoint.y;
+            float newValueY = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
+
+            if (*dragIndex == 1) {
+                setEnvelopeParam(1, newValueX);
+
+            } else if (*dragIndex == 2){
+                setEnvelopeParam(2, newValueX);
+
+            } else if (*dragIndex == 3){
+                setEnvelopeParam(3, newValueY);
+
+            } else if (*dragIndex == 4){
+                setEnvelopeParam(4, newValueX);
             }
             repaint();
         }
@@ -312,21 +308,20 @@ public:
     juce::String getSegmentParamID(int segmentDragged)
     {
         juce::String segmentParameterID;
-        switch(segmentDragged)
-        {
-            case 1:
-                segmentParameterID = "attack" + juce::String(index);
-                break;
-            case 2:
-                segmentParameterID = "decay" + juce::String(index);
-                break;
-            case 3:
-                segmentParameterID = "sustain" + juce::String(index);
-                break;
-            case 4:
-                segmentParameterID = "release" + juce::String(index);
-                break;
+        if (segmentDragged == 1){
+            segmentParameterID = "attack" + juce::String(index);
+            
+        } else if (segmentDragged == 2){
+            segmentParameterID = "decay" + juce::String(index);
+            
+        } else if (segmentDragged == 3){
+            segmentParameterID = "sustain" + juce::String(index);
+        
+        } else if (segmentDragged == 4){
+            segmentParameterID = "release" + juce::String(index);
+
         }
+    
         return segmentParameterID;
     }
     
@@ -336,6 +331,7 @@ public:
         auto paramRange = audioProcessor.apvts.getParameterRange(segmentParameterID);
         
         audioProcessor.apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
+        
     }
 
     
@@ -352,20 +348,23 @@ private:
     struct Handle
     {
         juce::Point<float> coords;
-        bool isMouseOver;
-        bool yAdjustOnly;
+        bool isMouseOver = false;
+        bool xyAdjust;
         
         bool isOver(juce::Point<float>& m)
         {
-            juce::Rectangle point(coords.x - 5.0f, coords.y - 5.0f, 10.0f, 10.0f);
+            juce::Rectangle point(coords.x - 6.0f, coords.y - 6.0f, 12.0f, 12.0f);
             return (point.contains(m));
         }
         
         void drawHandles(juce::Graphics &g)
         {
             juce::Path handlePath;
-            handlePath.addRoundedRectangle(coords.x - 3.0f, coords.y - 3.0f, 6.0f, 6.0f, 1.5f);
-            g.setColour(juce::Colour(200, 200, 200));  // change via hover
+            float size = isMouseOver ? 8.0f : 6.0f;
+            juce::Colour color = isMouseOver ? juce::Colour(200, 200, 200) : juce::Colour(150, 150, 150);
+
+            handlePath.addRoundedRectangle(coords.x - size/2, coords.y - size/2, size, size, size/4);
+            g.setColour(color);
             g.strokePath(handlePath, juce::PathStrokeType(1.0f));
         }
     };
