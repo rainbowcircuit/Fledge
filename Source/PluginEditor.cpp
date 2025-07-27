@@ -98,5 +98,5 @@ void FledgeAudioProcessorEditor::resized()
     showWaveformButton.setBounds(5, 555, 94, 40);
     showAlgorithmButton.setBounds(100, 560, 94, 40);
     showMacrosButton.setBounds(200, 555, 94, 40);
-
+    
 }

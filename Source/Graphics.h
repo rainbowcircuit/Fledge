@@ -393,9 +393,9 @@ public:
         float y = bounds.getY();
         float height = bounds.getHeight();
         float graphicWidth = bounds.getWidth() * 0.9f;
-        float graphicHeight = bounds.getHeight() * 0.9f;
+        float graphicHeight = bounds.getHeight() * 0.85f;
         float widthMargin = bounds.getWidth() * 0.05f;
-        float heightMargin = bounds.getHeight() * 0.05f;
+        float heightMargin = bounds.getHeight() * 0.075f;
 
         int envelopeSegments = 72;
         int domainResolution = 128;
@@ -407,6 +407,7 @@ public:
         for (int j = 0; j < envelopeSegments; j++){
             int k = envelopeSegments - j;
             
+            float amp3 = op[3].generateAmplitude(k);
             float amp2 = op[2].generateAmplitude(k);
             float amp1 = op[1].generateAmplitude(k);
             float amp0 = op[0].generateAmplitude(k);
@@ -420,23 +421,25 @@ public:
 
             for (int i = 1; i <= domainResolution; i++)
             {
-                
-                float sin2Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + 0.0f, 6.28318f);
-                float sin2 = amp2 * op[1].modIndex * fastSin.sin(sin2Phase);
+                float sin3Phase = fmodf(((i/40.7f) * op[3].ratio * 2.0f) + 0.0f, 6.28318f);
+                float sin3 = amp3 * op[3].modIndex * fastSin.sin(sin3Phase);
+
+                float sin2Phase = fmodf(((i/40.7f) * op[2].ratio * 2.0f) + sin3, 6.28318f);
+                float sin2 = amp2 * op[2].modIndex * fastSin.sin(sin2Phase);
                 
                 float sin1Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + sin2, 6.28318f);
-                float sin1 = amp1 * op[0].modIndex * fastSin.sin(sin1Phase);
+                float sin1 = amp1 * op[1].modIndex * fastSin.sin(sin1Phase);
                 
                 float sin0Phase = fmodf(((i/40.7f) * op[0].ratio * 2.0f) + sin1, 6.28318f);
-                float sin = amp0 * fastSin.sin(sin0Phase);
+                float sin = amp0 * op[0].modIndex * fastSin.sin(sin0Phase);
                 
                 graphicLines.lineTo(x + widthMargin + widthIncrement * i,
-                                    (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
+                                    (heightScaled + height/envelopeSegments) + sin * height * 0.05f);
              
             }
         }
         
-        graphicLines = graphicLines.createPathWithRoundedCorners(10.0f);
+        graphicLines = graphicLines.createPathWithRoundedCorners(20.0f);
         g.setColour(Colors::mainColors[0]);
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
@@ -448,7 +451,7 @@ public:
     {
         op[index].attack = attack;
         op[index].decay = decay;
-        op[index].sustain = sustain/10.0f;
+        op[index].sustain = sustain/100.0f;
         op[index].release = release;
         calculateEnvelopeSegments();
         repaint();
@@ -462,7 +465,7 @@ public:
         op[index].isRatio = isRatio;
         repaint();
     }
-    
+    /*
     void calculateEnvelopeSegments()
     {
         for (int index = 0; index < 4; index++)
@@ -475,6 +478,26 @@ public:
             op[index].releaseSegment = releaseTime;
         }
     }
+    */
+    void calculateEnvelopeSegments()
+    {
+        
+        /*
+         25% sustain portion
+         scale attack and decay accordingly
+         sustain can start at different points
+         release time together
+         
+         */
+        for (int index = 0; index < 4; index++)
+        {
+            float attackDecayTime = (op[index].attack + op[index].decay);
+            op[index].attackSegment = (op[index].attack/attackDecayTime) * 36;
+            op[index].decaySegment = (op[index].decay/attackDecayTime) * 36;
+            op[index].releaseSegment = (op[index].release/20.0) * 24; // 20 is the total time
+        }
+    }
+
     
 private:
     int envelopeSegments = 72;
@@ -485,36 +508,34 @@ private:
         float ratio, fixed, modIndex;
         bool isRatio;
         float attack = 3000.0f, decay = 1000.0f, sustain = 1.0f, release = 5000.0f;
-        float attackSegment, decaySegment, releaseSegment;
+        float attackSegment, decaySegment, sustainSegment = 12, releaseSegment;
         
         float generateAmplitude(float segmentIndex)
         {
             float amplitude = 0.0f;
-
-            if (segmentIndex <= attackSegment && attackSegment > 0)
+            
+            if (attackSegment > 0 && segmentIndex <= attackSegment) // attack portion
             {
-                amplitude = segmentIndex / attackSegment;
-            }
-            else if (segmentIndex > attackSegment && segmentIndex <= attackSegment + decaySegment && decaySegment > 0)
+                amplitude = (1.0 / attackSegment) * segmentIndex;
+                
+            } else if (segmentIndex > attackSegment && segmentIndex <= attackSegment + decaySegment)
             {
                 int decayIndex = segmentIndex - attackSegment;
                 float decayProgress = decayIndex / decaySegment;
-                amplitude = 1.0f + decayProgress * (sustain - 1.0f); // linear interpolation from 1 to sustain
-            }
-            else if (segmentIndex > attackSegment + decaySegment && segmentIndex <= attackSegment + decaySegment + releaseSegment && releaseSegment > 0)
+                amplitude = 1.0f + decayProgress * (sustain - 1.0f);
+                
+            } else if (segmentIndex > attackSegment + decaySegment && segmentIndex <= attackSegment + decaySegment + sustainSegment) {
+                amplitude = sustain;
+
+            } else if (segmentIndex > attackSegment + decaySegment + sustainSegment && segmentIndex <= attackSegment + decaySegment + sustainSegment + releaseSegment)
+                // release portion
             {
-                int releaseIndex = segmentIndex - attackSegment - decaySegment;
+                int releaseIndex = segmentIndex - (attackSegment + decaySegment + sustainSegment);
                 float releaseProgress = releaseIndex / releaseSegment;
                 amplitude = sustain * (1.0f - releaseProgress);
-            }
-            else if (segmentIndex > attackSegment + decaySegment + releaseSegment)
-            {
+
+            } else {
                 amplitude = 0.0f;
-                
-            }
-            else
-            {
-                amplitude = sustain;
             }
             return amplitude;
         }

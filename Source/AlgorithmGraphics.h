@@ -509,6 +509,53 @@ public:
         }
         
     }
+    
+    void setFromAlgorithmSelection(int selectionIndex)
+    {
+        switch(selectionIndex)
+        {
+            case 0:
+                op[0].setBlockCenter(x + blockIncr, y + blockIncr * 3);
+                op[1].setBlockCenter(x + blockIncr, y + blockIncr * 2);
+                op[2].setBlockCenter(x + blockIncr, y + blockIncr);
+                op[3].setBlockCenter(x + blockIncr, y);
+                break;
+            case 1:
+                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
+                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
+                op[2].setBlockCenter(x + blockIncr, y + blockIncr * 2);
+                op[3].setBlockCenter(x + blockIncr * 3, y + blockIncr);
+                break;
+
+            case 2:
+                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
+                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
+                op[2].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
+                op[3].setBlockCenter(x + blockIncr, y + blockIncr * 2);
+                break;
+
+            case 3:
+                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
+                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
+                op[2].setBlockCenter(x + blockIncr, y + blockIncr * 2);
+                op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr);
+                break;
+                
+            case 4:
+                
+            case 5:
+                
+            case 6:
+                
+            case 7: ;
+                
+                
+        };
+        
+        
+        
+    }
+    
 
     void mouseDown(const juce::MouseEvent& m) override
     {

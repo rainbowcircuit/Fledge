@@ -299,85 +299,68 @@ void AlgorithmSelectInterface::resized()
 void AlgorithmSelectInterface::buttonClicked(juce::Button* button) 
 {
     if (button == &algorithm[0]){
-        // op3 { 0.0, 0.0, 0.0, 0.0 };
-        // op2 { 0.0, 0.0, 0.0, 1.0 };
-        // op1 { 0.0, 0.0, 1.0, 0.0 };
-        // op0 { 0.0, 1.0, 0.0, 0.0 };
-        // output { 1.0f, 0.0f, 0.0f, 0.0f };
         setOperatorParam(3, 1);
         setOperatorParam(2, 8);
         setOperatorParam(1, 4);
         setOperatorParam(0, 2);
         setOutputParam(1);
+        setPresetParam(0);
+        
     } else if (button == &algorithm[1]) {
-        // op3 { 0.0, 0.0, 0.0, 0.0 };
-        // op2 { 0.0, 0.0, 0.0, 1.0 };
-        // op1 { 0.0, 0.0, 0.0, 0.0 };
-        // op0 { 0.0, 1.0, 1.0, 0.0 };
-        // output { 1.0f, 0.0f, 0.0f, 0.0f };
         setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 0);
         setOperatorParam(0, 6);
         setOutputParam(1);
+        setPresetParam(1);
 
-        
     } else if (button == &algorithm[2]) {
-        // op3 { 0.0, 0.0, 0.0, 0.0 };
-        // op2 { 0.0, 0.0, 0.0, 0.0 };
-        // op1 { 0.0, 0.0, 0.0, 0.0 };
-        // op0 { 0.0, 1.0, 1.0, 1.0 };
-        // output { 1.0f, 0.0f, 0.0f, 0.0f };
         setOperatorParam(3, 0);
         setOperatorParam(2, 0);
         setOperatorParam(1, 0);
         setOperatorParam(0, 14);
         setOutputParam(1);
-        
+        setPresetParam(2);
+
     } else if (button == &algorithm[3]) {
-        // op3 { 0.0, 0.0, 0.0, 0.0 };
-        // op2 { 0.0, 0.0, 0.0, 1.0 };
-        // op1 { 0.0, 0.0, 0.0, 1.0 };
-        // op0 { 0.0, 1.0, 1.0, 0.0 };
-        // output { 1.0f, 0.0f, 0.0f, 0.0f };
         setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 8);
         setOperatorParam(0, 6);
         setOutputParam(1);
+        setPresetParam(3);
 
     } else if (button == &algorithm[4]) {
-        // op3 { 0.0, 0.0, 0.0, 0.0 };
-        // op2 { 0.0, 0.0, 0.0, 1.0 };
-        // op1 { 0.0, 0.0, 0.0, 0.0 };
-        // op0 { 0.0, 1.0, 0.0, 0.0 };
-        // output { 1.0f, 1.0f, 0.0f, 0.0f };
         setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 0);
         setOperatorParam(0, 2);
-        setOutputParam(1); // output
+        setOutputParam(1); 
+        setPresetParam(4);
 
     } else if (button == &algorithm[5]) {
         setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 4);
         setOperatorParam(0, 4);
-        setOutputParam(3); // output
+        setOutputParam(3);
+        setPresetParam(5);
 
     } else if (button == &algorithm[6]) {
         setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 0);
         setOperatorParam(0, 0);
-        setOutputParam(7); // output
+        setOutputParam(7);
+        setPresetParam(6);
 
     } else if (button == &algorithm[7]) {
         setOperatorParam(3, 0);
         setOperatorParam(2, 0);
         setOperatorParam(1, 0);
         setOperatorParam(0, 0);
-        setOutputParam(15); // output
+        setOutputParam(15);
+        setPresetParam(7);
 
     }
 }
@@ -401,6 +384,13 @@ void AlgorithmSelectInterface::setOutputParam(int gainIndex)
 
 }
 
+void AlgorithmSelectInterface::setPresetParam(int index)
+{
+    auto paramRange = audioProcessor.apvts.getParameterRange("algorithmPreset");
+    float valueScaled = paramRange.convertTo0to1(index);
+    
+    audioProcessor.apvts.getParameter("algorithmPreset")->setValueNotifyingHost(valueScaled);
+}
 
 MacroControlsInterface::MacroControlsInterface(FledgeAudioProcessor& p) : audioProcessor(p)
 {

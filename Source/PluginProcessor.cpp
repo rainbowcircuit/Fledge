@@ -244,6 +244,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
     
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
 
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "algorithmPreset", 1 }, "Algorithm Preset", 0, 7, 1));
+
     for (int oper = 0; oper < 4; oper++)
     {
         //******** Envelope Controls ********//

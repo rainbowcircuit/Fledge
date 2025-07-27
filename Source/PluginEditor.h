@@ -27,6 +27,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+    
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
         for (int oper = 0; oper < 4; oper++)
@@ -50,6 +51,10 @@ public:
 
             waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, modIndex);
         }
+        
+        float algoPreset = audioProcessor.apvts.getRawParameterValue("algorithmPreset")->load();
+        algorithmGraphics.setFromAlgorithmSelection(algoPreset);
+        
     }
     
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
