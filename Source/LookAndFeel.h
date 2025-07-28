@@ -14,6 +14,10 @@ namespace Colors
 {
 inline juce::Colour textColor = juce::Colour(130, 130, 130);
 
+    inline juce::Colour cableColor = juce::Colour(221, 221, 221);
+    inline juce::Colour cableSelectColor = juce::Colour(251, 251, 251);
+    inline juce::Colour cableHoverColor = juce::Colour(67, 242, 247);
+
 
     inline std::array<juce::Colour, 5> mainColors {
     juce::Colour(47, 222, 227),

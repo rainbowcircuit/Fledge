@@ -25,7 +25,14 @@ public:
     void paint(juce::Graphics& g) override
     {
         juce::Path cablePath, cableEndPath;
-        g.setColour(juce::Colour(200, 200, 200));
+        juce::Colour cableColor = Colors::cableColor;
+        
+        if (isSelected) {
+            cableColor = Colors::cableSelectColor;
+        } else if (isHoveredOn){
+            cableColor = Colors::cableHoverColor;
+        }
+        g.setColour(cableColor);
 
         if (isInUse){
             // draw output arc and path start
@@ -89,7 +96,7 @@ public:
         repaint();
     }
     
-    bool setIsCableSelected(bool isSelected)
+    void setIsCableSelected(bool isSelected)
     {
         this->isSelected = isSelected;
     }
@@ -99,6 +106,10 @@ public:
         return cableSelectPath.contains(mouse, 3.0f);
     }
     
+    void setIsCableHoveredOn(bool isHoveredOn)
+    {
+        this->isHoveredOn = isHoveredOn;
+    }
     
     void setIsConnected(bool isConnected)
     {
@@ -145,7 +156,7 @@ public:
 private:
     juce::Path cableSelectPath;
     int outputIndex, inputIndex;
-    bool isConnected = false, isInUse = false, isSelected = false;
+    bool isConnected = false, isInUse = false, isSelected = false, isHoveredOn = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
 };
 
@@ -316,6 +327,11 @@ public:
         blockCenterCoords.y = y;
         repaint();
     }
+    
+    juce::Point<float> getBlockCenter()
+    {
+        return blockCenterCoords;
+    }
 
     bool isOverBlock(juce::Point<float> mouse)
     {
@@ -478,11 +494,12 @@ public:
         auto bounds = getLocalBounds().toFloat();
         calculateCoordinates(bounds);
         
-        juce::Point<float> vp = bounds.getCentre();
         op[0].setVanishingPoint(vp, 0.1f);
         op[1].setVanishingPoint(vp, 0.1f);
         op[2].setVanishingPoint(vp, 0.1f);
         op[3].setVanishingPoint(vp, 0.1f);
+        
+        drawGridBox(g);
     }
     
     void resized() override
@@ -497,7 +514,8 @@ public:
         op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
         op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 5.25); // output
-
+        averageVanishingPoint();
+        
         for (int i = 0; i <= 4; i++){
             op[i].setBounds(bounds);
             op[i].setVanishingPoint(vp, 0.1f);
@@ -507,7 +525,54 @@ public:
                 cable[i][j].setBounds(bounds);
             }
         }
+    }
+    
+    void drawGridBox(juce::Graphics& g)
+    {
+        juce::Path backPath, frontPath, sidePath;
+        float backBoxWidth = width * 0.85f;
+        float backBoxHeight = height * 0.85f;
+        g.setColour(juce::Colour(80, 80, 80));
+
+        juce::Rectangle<float> backRectangle = {vp.x - backBoxWidth/2,
+            vp.y - backBoxHeight/2,
+            backBoxWidth,
+            backBoxHeight};
         
+        backPath.addRoundedRectangle(backRectangle, 1.0f);
+        g.strokePath(backPath, juce::PathStrokeType(1.0f));
+
+        juce::Rectangle<float> frontRectangle = getLocalBounds().toFloat();
+        frontRectangle.reduce(5.0f, 5.0f);
+        frontPath.addRoundedRectangle(frontRectangle, 1.0f);
+        g.strokePath(frontPath, juce::PathStrokeType(1.0f));
+        
+        sidePath.startNewSubPath(backRectangle.getTopLeft());
+        sidePath.lineTo(frontRectangle.getTopLeft());
+        
+        sidePath.startNewSubPath(backRectangle.getTopRight());
+        sidePath.lineTo(frontRectangle.getTopRight());
+
+        sidePath.startNewSubPath(backRectangle.getBottomLeft());
+        sidePath.lineTo(frontRectangle.getBottomLeft());
+
+        sidePath.startNewSubPath(backRectangle.getBottomRight());
+        sidePath.lineTo(frontRectangle.getBottomRight());
+
+        g.strokePath(sidePath, juce::PathStrokeType(1.0f));
+    }
+    
+    void averageVanishingPoint()
+    {
+        float x = 0.0f, y = 0.0f;
+        for (int i = 0; i < 4; i++)
+        {
+            x += op[i].getBlockCenter().x;
+            y += op[i].getBlockCenter().y;
+
+        }
+        vp.x = x/4;
+        vp.y = y/4;
     }
     
     void setFromAlgorithmSelection(int selectionIndex)
@@ -515,23 +580,24 @@ public:
         switch(selectionIndex)
         {
             case 0:
-                op[0].setBlockCenter(x + blockIncr, y + blockIncr * 3);
-                op[1].setBlockCenter(x + blockIncr, y + blockIncr * 2);
-                op[2].setBlockCenter(x + blockIncr, y + blockIncr);
-                op[3].setBlockCenter(x + blockIncr, y);
+                dragBlock(0, {x + width/2, y + heightMargin + blockIncr});
+                dragBlock(1, {x + width/2, y + heightMargin + blockIncr * 2});
+                dragBlock(2, {x + width/2, y + heightMargin + blockIncr * 3});
+                dragBlock(3, {x + width/2, y + heightMargin + blockIncr * 4});
                 break;
+
             case 1:
-                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
-                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
-                op[2].setBlockCenter(x + blockIncr, y + blockIncr * 2);
-                op[3].setBlockCenter(x + blockIncr * 3, y + blockIncr);
+                dragBlock(0, {x + blockIncr * 2, y + blockIncr * 3});
+                dragBlock(1, {x + blockIncr * 3, y + blockIncr * 2});
+                dragBlock(2, {x + blockIncr, y + blockIncr * 2});
+                dragBlock(3, {x + width/2, y + heightMargin + blockIncr * 4});
                 break;
 
             case 2:
-                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
-                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
-                op[2].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
-                op[3].setBlockCenter(x + blockIncr, y + blockIncr * 2);
+                dragBlock(0, {x + blockIncr * 2, y + blockIncr * 3});
+                dragBlock(1, {x + blockIncr * 3, y + blockIncr * 2});
+                dragBlock(2, {x + blockIncr * 2, y + blockIncr * 2});
+                dragBlock(3, {x + blockIncr, y + blockIncr * 2});
                 break;
 
             case 3:
@@ -659,6 +725,8 @@ public:
             {
                 mouse = limitBlockDrag(mouse);
                 dragBlock(blk, mouse);
+                
+                averageVanishingPoint();
             }
 
             
@@ -818,19 +886,17 @@ public:
         width = bounds.getWidth() * 0.9f;
         blockIncr = width * 0.25f;
     }
-    
-    float getSnappedPosition(float coords)
-    {
-        int roundedCoords = coords/blockIncr;
-      //  return roundedCoords * blockIncr;
-        return coords;
-    }
-    
+        
     void timerCallback() override
     {
-        if (juce::KeyPress::isKeyCurrentlyDown(juce::KeyPress::deleteKey))
-        {
-            DBG("Space is currently held down");
+        auto mouse = getMouseXYRelative().toFloat();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                
+                // hovering on cable
+                cable[i][j].setIsCableHoveredOn(cable[i][j].getIsCableSelected(mouse));
+                
+            }
         }
     }
     
@@ -865,6 +931,7 @@ private:
     }
     
     juce::Rectangle<float> bounds;
+    juce::Point<float> vp;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
     
     

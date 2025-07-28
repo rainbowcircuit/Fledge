@@ -12,6 +12,8 @@
 #include <JuceHeader.h>
 #include "Operator.h"
 
+
+
 class SynthSound : public juce::SynthesiserSound
 {
 public:
@@ -67,9 +69,9 @@ public:
                               releaseScaled, false);
     }
     
-    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float modIndex)
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude)
     {
-        op[index].setOperator(ratio, fixed, isFixed, modIndex);
+        op[index].setOperator(ratio, fixed, isFixed, amplitude);
     }
     
     void pitchWheelMoved(int newPitchWheelValue) override {}
@@ -142,14 +144,14 @@ public:
     }
     
 private:
-    std::array<float, 4> toBinary4(int input)
+    inline std::array<float, 4> toBinary4(int input)
    {
        std::array<float, 4> bits;
        for (int i = 0; i < 4; ++i)
            bits[i] = (input >> i) & 1;
        return bits;
    }
-    
+
     double sampleRate;
     juce::AudioBuffer<float> synthBuffer;
     float outputSample;

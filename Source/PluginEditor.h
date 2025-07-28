@@ -49,11 +49,18 @@ public:
             float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
             float modIndex = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
 
+            juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
+            float gainIndex = audioProcessor.apvts.getRawParameterValue(gainIndexID)->load();
+            float outputGainIndex = audioProcessor.apvts.getRawParameterValue("outputRouting")->load();
+
             waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, modIndex);
+            waveformDisplay.setGainCoefficients(oper, gainIndex, outputGainIndex);
+
         }
         
         float algoPreset = audioProcessor.apvts.getRawParameterValue("algorithmPreset")->load();
         algorithmGraphics.setFromAlgorithmSelection(algoPreset);
+        
         
     }
     
@@ -81,6 +88,15 @@ public:
         }
     }
 
+    
+    
+    void initializeEditorState()
+    {
+        editorState.setProperty("width", 0.5f, nullptr);
+        editorState.setProperty("height", 0.5f, nullptr);
+    }
+
+
 private:
     ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
     
@@ -95,6 +111,6 @@ private:
     std::unique_ptr<AlgorithmSelectInterface> algorithmSelector;
     
     FledgeAudioProcessor& audioProcessor;
-    
+    juce::ValueTree editorState;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessorEditor)
 };

@@ -171,12 +171,12 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String fixedID = "fixed" + juce::String(oper);
-        juce::String modIndexID = "amplitude" + juce::String(oper);
+        juce::String amplitudeID = "amplitude" + juce::String(oper);
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
 
         float ratio = apvts.getRawParameterValue(ratioID)->load();
         float fixed = apvts.getRawParameterValue(fixedID)->load();
-        float modIndex = apvts.getRawParameterValue(modIndexID)->load();
+        float amplitude = apvts.getRawParameterValue(amplitudeID)->load();
         float routing = apvts.getRawParameterValue(operatorRoutingID)->load();
 
         for (int v = 0; v < synth.getNumVoices(); v++)
@@ -185,7 +185,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             {
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
-                voice->setFMParameters(oper, ratio, fixed, false, modIndex);
+                voice->setFMParameters(oper, ratio, fixed, false, amplitude);
                 voice->setOperatorGain(oper, routing, outputRouting);
             }
         }
@@ -287,10 +287,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
                                                               opModeName,
                                                                false));
 
-        juce::String modIndexID = "amplitude" + juce::String(oper);
-        juce::String modIndexName = "Modulation Amount " + juce::String(oper);
+        juce::String amplitudeID = "amplitude" + juce::String(oper);
+        juce::String amplitudeName = "Amplitude " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { modIndexID, 1 }, modIndexName, juce::NormalisableRange<float>(0.0f, 10.0f, 0.1f, 0.5f), 0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), 0.0f));
         
         //******** Operator Input ********//
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";

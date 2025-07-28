@@ -18,7 +18,7 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
     
     ratioSmoothed.reset(sampleRate, 0.001);
     fixedSmoothed.reset(sampleRate, 0.001);
-    modIndexSmoothed.reset(sampleRate, 0.001);
+    amplitudeSmoothed.reset(sampleRate, 0.001);
 }
 
 void FMOperator::startNote()
@@ -53,7 +53,7 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float modIn
 {
     ratioSmoothed.setTargetValue(ratio);
     fixedSmoothed.setTargetValue(fixed);
-    modIndexSmoothed.setTargetValue(modIndex);
+    amplitudeSmoothed.setTargetValue(modIndex/100.0f);
     this->isFixed = isFixed;
 }
 
@@ -66,11 +66,11 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     float modulatorPhase = phase1 + phase2 + phase3 + phase4;
     float twopi = juce::MathConstants<float>::twoPi;
     float envelope = ampEnvelope.getNextSample();
-    float waveform = std::sin(operatorPhase * twopi + (modulatorPhase * modIndexSmoothed.getNextValue())) * envelope;
+    float waveform = std::sin(operatorPhase * twopi + (modulatorPhase * 8.0f)) * envelope; // 8 is the mod index
 
     // accumulate and wrap
     operatorPhase += operatorAngle;
     if (operatorPhase >= 1.0) operatorPhase -= 1.0;
 
-    return waveform;
+    return waveform * amplitudeSmoothed.getNextValue();
 }

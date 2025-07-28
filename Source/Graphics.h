@@ -6,25 +6,6 @@
 
 //Takuma your waveforms look like a butt
 
-
-class LevelMeterGraphics : public juce::Component
-{
-    void paint(juce::Graphics &g) override
-    {
-        
-    }
-    
-    void resized() override {}
-
-    void setLevel(float level)
-    {
-        this->level = level;
-    }
-    
-private:
-    float level = 0.0f;
-};
-
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
@@ -59,7 +40,6 @@ public:
         juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
         g.setColour(juce::Colour(80, 82, 81));
         g.strokePath(bgWaveform, strokeType);
-        
         
         juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
         g.setColour(Colors::mainColors[index]);
@@ -388,7 +368,7 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
-
+        float twopi = juce::MathConstants<float>::twoPi;
         float x = bounds.getX();
         float y = bounds.getY();
         float height = bounds.getHeight();
@@ -399,7 +379,8 @@ public:
 
         int envelopeSegments = 72;
         int domainResolution = 128;
-        
+        float phaseScale = domainResolution/twopi;
+
         juce::Path graphicLines;
         float widthIncrement = graphicWidth/domainResolution;
         float heightIncrement = graphicHeight/envelopeSegments;
@@ -414,27 +395,51 @@ public:
             
             float heightScaled = y + heightMargin + heightIncrement * j;
             
-            float sin0Phase = fmodf(((0/40.7f) * op[0].ratio * 2.0f), 6.28318f);
+            float sin0Phase = fmodf(((0/phaseScale) * op[0].ratio * 2.0f), twopi);
             float sin = amp0 * fastSin.sin(sin0Phase);
 
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
-
             for (int i = 1; i <= domainResolution; i++)
             {
-                float sin3Phase = fmodf(((i/40.7f) * op[3].ratio * 2.0f) + 0.0f, 6.28318f);
-                float sin3 = amp3 * op[3].modIndex * fastSin.sin(sin3Phase);
+                float op3Sin = fastSin.sin(fmodf(((i/phaseScale) * op[3].ratio * 2.0f)
+                                                 + ((op0Phase * op[3].gain[0])
+                                                 + (op1Phase * op[3].gain[1])
+                                                 + (op2Phase * op[3].gain[2])
+                                                 + (op3Phase * op[3].gain[3])) * 8.0f, twopi));
 
-                float sin2Phase = fmodf(((i/40.7f) * op[2].ratio * 2.0f) + sin3, 6.28318f);
-                float sin2 = amp2 * op[2].modIndex * fastSin.sin(sin2Phase);
-                
-                float sin1Phase = fmodf(((i/40.7f) * op[1].ratio * 2.0f) + sin2, 6.28318f);
-                float sin1 = amp1 * op[1].modIndex * fastSin.sin(sin1Phase);
-                
-                float sin0Phase = fmodf(((i/40.7f) * op[0].ratio * 2.0f) + sin1, 6.28318f);
-                float sin = amp0 * op[0].modIndex * fastSin.sin(sin0Phase);
-                
+                op3Phase = amp3 * op[3].modIndex * op3Sin;
+
+                float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio * 2.0f)
+                                                 + ((op0Phase * op[2].gain[0])
+                                                 + (op1Phase * op[2].gain[1])
+                                                 + (op2Phase * op[2].gain[2])
+                                                 + (op3Phase * op[2].gain[3])) * 8.0f, twopi));
+
+                op2Phase = amp2 * op[2].modIndex * op2Sin;
+
+                float op1Sin = fastSin.sin(fmodf(((i/phaseScale) * op[1].ratio * 2.0f)
+                                                 + ((op0Phase * op[1].gain[0])
+                                                 + (op1Phase * op[1].gain[1])
+                                                 + (op2Phase * op[1].gain[2])
+                                                 + (op3Phase * op[1].gain[3])) * 8.0f, twopi));
+
+                op1Phase = amp1 * op[1].modIndex * op1Sin;
+
+                float op0Sin = fastSin.sin(fmodf(((i/phaseScale) * op[0].ratio * 2.0f)
+                                                 + ((op0Phase * op[0].gain[0])
+                                                 + (op1Phase * op[0].gain[1])
+                                                 + (op2Phase * op[0].gain[2])
+                                                 + (op3Phase * op[0].gain[3])) * 8.0f, twopi));
+                                                 
+                op0Phase = amp0 * op[0].modIndex * op0Sin;
+
+                float outputPhase = ((op0Phase * outputGain[0])
+                            + (op1Phase * outputGain[1])
+                            + (op2Phase * outputGain[2])
+                            + (op3Phase * outputGain[3]));
+
                 graphicLines.lineTo(x + widthMargin + widthIncrement * i,
-                                    (heightScaled + height/envelopeSegments) + sin * height * 0.05f);
+                                    (heightScaled + height/envelopeSegments) + outputPhase * height * 0.05f);
              
             }
         }
@@ -444,6 +449,35 @@ public:
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
     }
+    
+    void setGainCoefficients(int index, int gainIndex, int outputGainIndex)
+    {
+        outputGain = toBinary4(outputGainIndex);
+
+        switch(index){
+            case 0:
+                op[0].gain = toBinary4(gainIndex);
+                break;
+            case 1:
+                op[1].gain = toBinary4(gainIndex);
+                break;
+            case 2:
+                op[2].gain = toBinary4(gainIndex);
+                break;
+            case 3:
+                op[3].gain = toBinary4(gainIndex);
+                break;
+        }
+    }
+    
+    inline std::array<float, 4> toBinary4(int input)
+   {
+       std::array<float, 4> bits;
+       for (int i = 0; i < 4; ++i)
+           bits[i] = (input >> i) & 1;
+       return bits;
+   }
+
     
     void resized() override {};
     
@@ -461,34 +495,14 @@ public:
     {
         op[index].ratio = ratio;
         op[index].fixed = fixed;
-        op[index].modIndex = modIndex/10.0f;
+        op[index].modIndex = modIndex/100.0f;
         op[index].isRatio = isRatio;
         repaint();
     }
-    /*
-    void calculateEnvelopeSegments()
-    {
-        for (int index = 0; index < 4; index++)
-        {
-            float attackDecayTime = (op[index].attack + op[index].decay);
-            op[index].attackSegment = (op[index].attack/attackDecayTime) * 36;
-            op[index].decaySegment = (op[index].decay/attackDecayTime) * 36;
 
-            float releaseTime = op[index].release/20.0f; // 20 total release segment
-            op[index].releaseSegment = releaseTime;
-        }
-    }
-    */
+
     void calculateEnvelopeSegments()
     {
-        
-        /*
-         25% sustain portion
-         scale attack and decay accordingly
-         sustain can start at different points
-         release time together
-         
-         */
         for (int index = 0; index < 4; index++)
         {
             float attackDecayTime = (op[index].attack + op[index].decay);
@@ -498,9 +512,9 @@ public:
         }
     }
 
-    
 private:
     int envelopeSegments = 72;
+    float op0Phase, op1Phase, op2Phase, op3Phase;
     std::vector<float> segmentAmplitude;
     juce::dsp::FastMathApproximations fastSin;
     struct operatorValues
@@ -509,7 +523,8 @@ private:
         bool isRatio;
         float attack = 3000.0f, decay = 1000.0f, sustain = 1.0f, release = 5000.0f;
         float attackSegment, decaySegment, sustainSegment = 12, releaseSegment;
-        
+        std::array<float, 4> gain = { 0.0f, 0.0f, 0.0f, 0.0f };
+
         float generateAmplitude(float segmentIndex)
         {
             float amplitude = 0.0f;
@@ -541,5 +556,6 @@ private:
         }
     };
     
+    std::array<float, 4> outputGain = { 1.0f, 0.0f, 0.0f, 0.0f };
     std::array<operatorValues, 4> op;
 };
