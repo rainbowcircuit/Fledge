@@ -152,6 +152,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     juce::ScopedNoDenormals noDenormals;
         
     for (int oper = 0; oper < 4; oper++){
+ 
 
         for (int v = 0; v < synth.getNumVoices(); v++)
         {
@@ -159,13 +160,47 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             {
                 voice->setEnvelope(oper, attack[oper], decay[oper], sustain[oper], release[oper],
                                    globalAttack, globalDecay, globalSustain, globalRelease);
-                voice->setFMParameters(oper, ratio[oper], fixed[oper], false, amplitude[oper], phase[oper]);
+
+              voice->setFMParameters(oper, ratio[oper], fixed[oper], false, amplitude[oper], phase[oper]);
                 voice->setOperatorGain(oper, routing[oper], outputRouting);
+
             }
         }
     }
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    
+    // Measure output levels
+const int numChannels = buffer.getNumChannels();
+const int numSamples = buffer.getNumSamples();
+
+if (numChannels >= 1) {
+    auto* leftData = buffer.getReadPointer(0);
+    float maxL = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxL = juce::jmax(maxL, std::abs(leftData[i]));
+    }
+    outputLevelL.updateIfGreater(maxL);
+}
+
+if (numChannels >= 2) {
+    auto* rightData = buffer.getReadPointer(1);
+    float maxR = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxR = juce::jmax(maxR, std::abs(rightData[i]));
+    }
+    outputLevelR.updateIfGreater(maxR);
+} else if (numChannels >= 1) {
+    auto* leftData = buffer.getReadPointer(0);
+    float maxL = 0.0f;
+    for (int i = 0; i < numSamples; ++i) {
+        maxL = juce::jmax(maxL, std::abs(leftData[i]));
+    }
+    outputLevelR.updateIfGreater(maxL);
+}
+
+
+    
 }
 
 //==============================================================================
@@ -218,6 +253,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
 
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "algorithmPreset", 1 }, "Algorithm Preset", 0, 7, 1));
+
 
     for (int oper = 0; oper < 4; oper++)
     {

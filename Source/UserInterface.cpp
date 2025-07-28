@@ -189,6 +189,7 @@ void OperatorInterface::resized()
     phaseLabel.setBounds(x + width * 0.315f,  height * 0.025f, width * 0.15f, height * 0.2f);
     phaseSlider->setBounds(x + width * 0.385f, height * 0.025f, width * 0.15f, height * 0.2f);
     
+
     attackLabel.setBounds(x + width * 0.8f,
                           y + height * 0.1f,
                           width * 0.035f,
@@ -204,6 +205,7 @@ void OperatorInterface::resized()
                            width * 0.035f,
                            height * 0.2f);
     
+
     releaseLabel.setBounds(x + width * 0.8f,
                            y + height * 0.7f,
                            width * 0.035f,
@@ -421,6 +423,7 @@ MacroControlsInterface::MacroControlsInterface(FledgeAudioProcessor& p) : audioP
 
 void MacroControlsInterface::resized()
 {
+
     auto bounds = getLocalBounds().toFloat();
     float x = bounds.getX();
     float y = bounds.getY();

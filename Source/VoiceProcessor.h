@@ -145,6 +145,7 @@ public:
     
 private:
     inline std::array<float, 4> toBinary4(int input)
+
    {
        std::array<float, 4> bits;
        for (int i = 0; i < 4; ++i)

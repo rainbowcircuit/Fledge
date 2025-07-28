@@ -6,6 +6,25 @@
 
 //Takuma your waveforms look like a butt
 
+
+class LevelMeterGraphics : public juce::Component
+{
+    void paint(juce::Graphics &g) override
+    {
+        
+    }
+    
+    void resized() override {}
+
+    void setLevel(float level)
+    {
+        this->level = level;
+    }
+    
+private:
+    float level = 0.0f;
+};
+
 class OperatorDisplayGraphics : public juce::Component
 {
 public:
@@ -89,6 +108,7 @@ public:
     {
         this->index = index;
         startTimerHz(60);
+
     }
 
     void paint(juce::Graphics &g) override
@@ -106,6 +126,7 @@ public:
 
         // adjusted foreground
         drawSegment(g, x + widthMargin, y + heightMargin, width, height);
+
         
         for (int i = 0; i < 5; i++)
         {
@@ -116,6 +137,7 @@ public:
     void resized() override
     {
         calculateSegment();
+
     }
     
     float calculateScaledPercentage(float segment, float total)
@@ -139,6 +161,7 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.05f;
 
+
         pointsGlobalAdjusted[0].coords = { x + widthMargin,
             y + height + heightMargin }; // Bottom (0)
         
@@ -153,6 +176,7 @@ public:
         
         pointsGlobalAdjusted[4].coords = { x + widthMargin + width * (attackPct + decayPct + sustainPct + releasePct),
             y + height + heightMargin };
+
         repaint();
     }
     
@@ -169,7 +193,7 @@ public:
         float releaseAdjusted = release * std::pow(2.0f, releaseAdj / 100.0f);
         sustainLevelAdjusted = (sustain / 100.0) * std::pow(2.0f, sustainAdj / 100.0f);
         sustainLevelAdjusted = juce::jlimit(0.0f, 1.0f, sustainLevelAdjusted);
-        
+
         // Sustain always takes 25% of width
         sustainPct = 0.25f;
         
@@ -193,17 +217,20 @@ public:
             decayAdjPct = (decayAdjusted / adrAdjSum) * 0.75f;
             releaseAdjPct = (releaseAdjusted / adrAdjSum) * 0.75f;
             
+
         } else {
             attackAdjPct = 0.25f;
             decayAdjPct = 0.25f;
             releaseAdjPct = 0.25f;
         }
+
         calculateSegment();
     }
     
-    void drawSegment(juce::Graphics &g, float x, float y, float width, float height)
+    void drawSegment(juce::Graphics &g, float x, float y, float width, float height, bool drawAdjusted)
     {
         auto points = pointsGlobalAdjusted;
+
         
         juce::Path envelopePath;
         envelopePath.startNewSubPath(points[0].coords);
@@ -220,6 +247,7 @@ public:
         g.fillPath(envelopePath);
         
         g.setColour(Colors::mainColors[index]);
+
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(envelopePath, strokeType);
         
@@ -275,6 +303,7 @@ public:
 
             } else if (*dragIndex == 4){
                 setEnvelopeParam(4, newValueX);
+
             }
             repaint();
         }
@@ -288,7 +317,8 @@ public:
     juce::String getSegmentParamID(int segmentDragged)
     {
         juce::String segmentParameterID;
-        if (segmentDragged == 1){
+
+if (segmentDragged == 1){
             segmentParameterID = "attack" + juce::String(index);
             
         } else if (segmentDragged == 2){
@@ -302,6 +332,7 @@ public:
 
         }
     
+
         return segmentParameterID;
     }
     
@@ -311,7 +342,7 @@ public:
         auto paramRange = audioProcessor.apvts.getParameterRange(segmentParameterID);
         
         audioProcessor.apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
-        
+
     }
 
     
@@ -368,7 +399,9 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
-        float twopi = juce::MathConstants<float>::twoPi;
+
+float twopi = juce::MathConstants<float>::twoPi;
+
         float x = bounds.getX();
         float y = bounds.getY();
         float height = bounds.getHeight();
@@ -449,6 +482,7 @@ public:
         }
         
         graphicLines = graphicLines.createPathWithRoundedCorners(20.0f);
+
         g.setColour(Colors::mainColors[0]);
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
@@ -483,7 +517,7 @@ public:
        return bits;
    }
 
-    
+
     void resized() override {};
     
     void setEnvelope(int index, float attack, float decay, float sustain, float release)
@@ -491,12 +525,14 @@ public:
         op[index].attack = attack;
         op[index].decay = decay;
         op[index].sustain = sustain/100.0f;
+
         op[index].release = release;
         calculateEnvelopeSegments();
         repaint();
     }
     
     void setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float phase)
+
     {
         op[index].ratio = ratio;
         op[index].fixed = fixed;
@@ -506,6 +542,7 @@ public:
 
         repaint();
     }
+
 
     void calculateEnvelopeSegments()
     {
@@ -559,6 +596,7 @@ private:
 
             } else {
                 amplitude = 0.0f;
+                
             }
             return amplitude;
         }

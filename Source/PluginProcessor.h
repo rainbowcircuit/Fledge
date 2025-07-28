@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "VoiceProcessor.h"
+#include "Measurement.h"
 
 //==============================================================================
 /**
@@ -17,6 +18,11 @@
 class FledgeAudioProcessor  : public juce::AudioProcessor, juce::AudioProcessorParameter::Listener
 {
 public:
+
+
+    Measurement& getOutputLevelL() { return outputLevelL; }
+    Measurement& getOutputLevelR() { return outputLevelR; }
+
     //==============================================================================
     FledgeAudioProcessor();
     ~FledgeAudioProcessor() override;
@@ -144,10 +150,15 @@ private:
     std::array<float, 4> attack, decay, sustain, release, ratio, fixed, amplitude, phase, routing;
     
     
+
     float outputLevel;
     std::atomic<float> levelAtomic;
     
     juce::Synthesiser synth;
+    
+    Measurement outputLevelL;
+    Measurement outputLevelR;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessor)
 };

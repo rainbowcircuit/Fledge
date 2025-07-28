@@ -149,12 +149,14 @@ public:
         return inputIndex;
     }
 
+
     
     
 private:
     juce::Path cableSelectPath;
     int outputIndex, inputIndex;
     bool isConnected = false, isInUse = false, isSelected = false, isHoveredOn = false;
+
     juce::Point<float> outputPoint, inputPoint, mousePoint;
 };
 
@@ -188,6 +190,7 @@ public:
             drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() + blockRectangle.getHeight() + 8.0f);
             drawBlockForeground(g);
             g.setColour(juce::Colour(120, 120, 120));
+
             g.drawText(juce::String(operatorIndex + 1), blockRectangle, juce::Justification::centred);
 
         } else {
@@ -452,6 +455,7 @@ private:
 };
 
 class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener
+
 {
 public:
     
@@ -501,12 +505,15 @@ public:
         auto bounds = getLocalBounds().toFloat();
         calculateCoordinates(bounds);
         
+
         op[0].setVanishingPoint(vp, 0.1f);
         op[1].setVanishingPoint(vp, 0.1f);
         op[2].setVanishingPoint(vp, 0.1f);
         op[3].setVanishingPoint(vp, 0.1f);
+
         
         drawGridBox(g);
+
     }
     
     void resized() override
@@ -529,6 +536,7 @@ public:
         op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 5.25); // output
         averageVanishingPoint();
         
+
         for (int i = 0; i <= 4; i++){
             op[i].setBounds(bounds);
             op[i].setVanishingPoint(vp, 0.1f);
@@ -645,6 +653,7 @@ public:
     {
         grabKeyboardFocus();
 
+
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
@@ -699,7 +708,6 @@ public:
             
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);
-
             
             
             /*
@@ -746,8 +754,10 @@ public:
                 dragBlock(blk, mouse);
                 
                 averageVanishingPoint();
+
             }
 
+            
             
             if (currentCableIndex.has_value() && *dragState == 2)
             {
@@ -958,6 +968,8 @@ public:
     }
 
     
+    
+    
 private:
     std::array<float, 4> toBinary4(int input)
    {
@@ -984,6 +996,7 @@ private:
     juce::TextButton clearCablesButton;
 
     
+
     std::array<OperatorBlock, 5> op;
     std::array<std::array<PatchCable, 4>, 5> cable;
     std::optional<int> currentCableIndex, currentOutputBlockIndex;

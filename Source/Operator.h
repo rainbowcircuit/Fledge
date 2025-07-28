@@ -15,6 +15,7 @@ public:
     void setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase);
     float processOperator(float phase1, float phase2, float phase3, float phase4);
     
+
     juce::ADSR ampEnvelope;
     juce::ADSR::Parameters envParameters;
 private:
@@ -32,4 +33,5 @@ private:
     
     
     juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, amplitudeSmoothed, phaseSmoothed;
+
 };

@@ -14,6 +14,7 @@
 #include "AlgorithmGraphics.h"
 #include "ButtonLookAndFeel.h"
 #include "LookAndFeel.h"
+#include "LevelMeter.h"
 
 //==============================================================================
 /**
@@ -100,6 +101,7 @@ public:
     }
 
 
+
 private:
     ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
     
@@ -112,6 +114,11 @@ private:
     WaveformDisplayGraphics waveformDisplay;
     AlgorithmGraphics algorithmGraphics;
     std::unique_ptr<AlgorithmSelectInterface> algorithmSelector;
+
+    
+    FledgeAudioProcessor& audioProcessor;
+    
+    std::unique_ptr<LevelMeter> outputLevelMeter;
     
     FledgeAudioProcessor& audioProcessor;
     juce::ValueTree editorState;

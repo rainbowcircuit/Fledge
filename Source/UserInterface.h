@@ -96,6 +96,7 @@ public:
     void setOutputParam(int gainIndex);
     void setPresetParam(int index);
     
+
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
     std::array<juce::ToggleButton, 8> algorithm;

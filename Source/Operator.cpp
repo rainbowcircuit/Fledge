@@ -71,9 +71,11 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     float phaseOffset = phaseSmoothed.getNextValue();
     float waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * 8.0f)) * envelope; // 8 is the mod index
 
+
     // accumulate and wrap
     operatorPhase += operatorAngle;
     if (operatorPhase >= 1.0) operatorPhase -= 1.0;
 
     return waveform * amplitudeSmoothed.getNextValue();
+
 }
