@@ -59,7 +59,7 @@ public:
     {
         float attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
         float decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
-        float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * sustain;
+        float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * (sustain/100.0f);
         sustainScaled = juce::jlimit(0.0f, 1.0f, sustainScaled);
         float releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
 

@@ -401,7 +401,7 @@ public:
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
             for (int i = 1; i <= domainResolution; i++)
             {
-                float op3Sin = fastSin.sin(fmodf(((i/phaseScale) * op[3].ratio * 2.0f)
+                float op3Sin = fastSin.sin(fmodf(((i/phaseScale) * op[3].ratio)
                                                  + (op[3].phase * twopi)
                                                  + ((op0Phase * op[3].gain[0])
                                                  + (op1Phase * op[3].gain[1])
@@ -410,7 +410,7 @@ public:
 
                 op3Phase = amp3 * op[3].amplitude * op3Sin;
 
-                float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio * 2.0f)
+                float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio)
                                                  + (op[2].phase * twopi)
                                                  + ((op0Phase * op[2].gain[0])
                                                  + (op1Phase * op[2].gain[1])
@@ -419,7 +419,7 @@ public:
 
                 op2Phase = amp2 * op[2].amplitude * op2Sin;
 
-                float op1Sin = fastSin.sin(fmodf(((i/phaseScale) * op[1].ratio * 2.0f)
+                float op1Sin = fastSin.sin(fmodf(((i/phaseScale) * op[1].ratio)
                                                  + (op[1].phase * twopi)
                                                  + ((op0Phase * op[1].gain[0])
                                                  + (op1Phase * op[1].gain[1])
@@ -428,7 +428,7 @@ public:
 
                 op1Phase = amp1 * op[1].amplitude * op1Sin;
 
-                float op0Sin = fastSin.sin(fmodf(((i/phaseScale) * op[0].ratio * 2.0f)
+                float op0Sin = fastSin.sin(fmodf(((i/phaseScale) * op[0].ratio)
                                                  + (op[0].phase * twopi)
                                                  + ((op0Phase * op[0].gain[0])
                                                  + (op1Phase * op[0].gain[1])
@@ -472,6 +472,7 @@ public:
                 op[3].gain = toBinary4(gainIndex);
                 break;
         }
+        repaint();
     }
     
     inline std::array<float, 4> toBinary4(int input)
@@ -513,7 +514,9 @@ public:
             float attackDecayTime = (op[index].attack + op[index].decay);
             op[index].attackSegment = (op[index].attack/attackDecayTime) * 36;
             op[index].decaySegment = (op[index].decay/attackDecayTime) * 36;
-            op[index].releaseSegment = (op[index].release/20.0) * 24; // 20 is the total time
+            
+            float releaseClamped = juce::jlimit(0.0f, 20.0f, op[index].release);
+            op[index].releaseSegment = std::pow(releaseClamped/20.0f, 0.5f) * 24;
         }
     }
 

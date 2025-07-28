@@ -25,14 +25,7 @@ public:
     void paint(juce::Graphics& g) override
     {
         juce::Path cablePath, cableEndPath;
-        juce::Colour cableColor = Colors::cableColor;
-        
-        if (isSelected) {
-            cableColor = Colors::cableSelectColor;
-        } else if (isHoveredOn){
-            cableColor = Colors::cableHoverColor;
-        }
-        g.setColour(cableColor);
+        g.setColour(Colors::cableColor);
 
         if (isInUse){
             // draw output arc and path start
@@ -40,7 +33,7 @@ public:
             g.fillPath(cableEndPath);
             cablePath.startNewSubPath(outputPoint);
             
-            float cableWidth = isSelected ? 2.0f : 1.0f;
+            float cableWidth = isSelected || isHoveredOn ? 2.0f : 1.0f;
 
             if (isConnected)
             {
@@ -650,7 +643,6 @@ public:
 
     void mouseDown(const juce::MouseEvent& m) override
     {
-        bool modifier = m.mods.isCommandDown();
         grabKeyboardFocus();
 
         for (int i = 0; i < 4; i++)
@@ -669,7 +661,6 @@ public:
                 //********** CREATE NEW CABLES **********//
                 int cableIndex = op[i].getNumCableAvailable();
                 auto outputPoint = op[i].getOutputPoint();
-                
                 cable[i][cableIndex].setOutputPoint(outputPoint);
                 cable[i][cableIndex].setMousePoint(mouse);
                 cable[i][cableIndex].setIsInUse(true);
@@ -926,6 +917,8 @@ public:
                 {
                     cable[i][j].setIsInUse(false);
                     cable[i][j].setIsConnected(false);
+                    int outputIndex = cable[i][j].getCableOutputIndex();
+                    op[outputIndex].setNumCableAvailable(1);
                 }
             }
         }

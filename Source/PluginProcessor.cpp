@@ -23,6 +23,7 @@ FledgeAudioProcessor::FledgeAudioProcessor()
                        )
 #endif
 {
+    initializeParameters();
     const auto params = this->getParameters();
     for (auto param : params){
         param->addListener(this);
@@ -150,52 +151,21 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 {
     juce::ScopedNoDenormals noDenormals;
         
-    
-    float globalAttack = apvts.getRawParameterValue("globalAttack")->load();
-    float globalDecay = apvts.getRawParameterValue("globalDecay")->load();
-    float globalSustain = apvts.getRawParameterValue("globalSustain")->load();
-    float globalRelease = apvts.getRawParameterValue("globalRelease")->load();
-    
-    int outputRouting = apvts.getRawParameterValue("outputRouting")->load();
-    
     for (int oper = 0; oper < 4; oper++){
-        juce::String attackID = "attack" + juce::String(oper);
-        juce::String decayID = "decay" + juce::String(oper);
-        juce::String sustainID = "sustain" + juce::String(oper);
-        juce::String releaseID = "release" + juce::String(oper);
-
-        float attack = apvts.getRawParameterValue(attackID)->load();
-        float decay = apvts.getRawParameterValue(decayID)->load();
-        float sustain = apvts.getRawParameterValue(sustainID)->load();
-        float release = apvts.getRawParameterValue(releaseID)->load();
-
-        juce::String ratioID = "ratio" + juce::String(oper);
-        juce::String fixedID = "fixed" + juce::String(oper);
-        juce::String amplitudeID = "amplitude" + juce::String(oper);
-        juce::String phaseID = "phase" + juce::String(oper);
-
-        juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
-
-        float ratio = apvts.getRawParameterValue(ratioID)->load();
-        float fixed = apvts.getRawParameterValue(fixedID)->load();
-        float amplitude = apvts.getRawParameterValue(amplitudeID)->load();
-        float phase = apvts.getRawParameterValue(phaseID)->load();
-        float routing = apvts.getRawParameterValue(operatorRoutingID)->load();
 
         for (int v = 0; v < synth.getNumVoices(); v++)
         {
             if(auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(v)))
             {
-                voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
+                voice->setEnvelope(oper, attack[oper], decay[oper], sustain[oper], release[oper],
                                    globalAttack, globalDecay, globalSustain, globalRelease);
-                voice->setFMParameters(oper, ratio, fixed, false, amplitude, phase);
-                voice->setOperatorGain(oper, routing, outputRouting);
+                voice->setFMParameters(oper, ratio[oper], fixed[oper], false, amplitude[oper], phase[oper]);
+                voice->setOperatorGain(oper, routing[oper], outputRouting);
             }
         }
     }
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-    
 }
 
 //==============================================================================
