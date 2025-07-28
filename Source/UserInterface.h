@@ -94,6 +94,8 @@ public:
     void buttonClicked(juce::Button* button) override;
     void setOperatorParam(int index, int gainIndex);
     void setOutputParam(int gainIndex);
+    void setPresetParam(int index);
+    
 
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;

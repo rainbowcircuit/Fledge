@@ -26,6 +26,14 @@
             file="Source/VoiceProcessor.h"/>
     </GROUP>
     <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics">
+      <FILE id="uPT0cd" name="ComboBoxLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/ComboBoxLookAndFeel.cpp"/>
+      <FILE id="toom2y" name="ComboBoxLookAndFeel.h" compile="0" resource="0"
+            file="Source/ComboBoxLookAndFeel.h"/>
+      <FILE id="vuCbu5" name="ButtonLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/ButtonLookAndFeel.cpp"/>
+      <FILE id="X9j7F5" name="ButtonLookAndFeel.h" compile="0" resource="0"
+            file="Source/ButtonLookAndFeel.h"/>
       <FILE id="fQlZcJ" name="AlgorithmGraphics.cpp" compile="1" resource="0"
             file="Source/AlgorithmGraphics.cpp"/>
       <FILE id="DyMJCt" name="AlgorithmGraphics.h" compile="0" resource="0"

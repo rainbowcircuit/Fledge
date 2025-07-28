@@ -12,10 +12,10 @@ public:
     
     void setEnvelope(float attack, float decay, float sustain, float release, bool isLooping);
     void setNoteNumber(float noteNumber);
-    void setOperator(float ratio, float fixed, bool isFixed, float modIndex);
+    void setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase);
     float processOperator(float phase1, float phase2, float phase3, float phase4);
     
-    
+
     juce::ADSR ampEnvelope;
     juce::ADSR::Parameters envParameters;
 private:
@@ -32,5 +32,6 @@ private:
     float frequencySmoothingCoeff = 0.0f;
     
     
-    juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, modIndexSmoothed;
+    juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, amplitudeSmoothed, phaseSmoothed;
+
 };

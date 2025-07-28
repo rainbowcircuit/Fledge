@@ -12,6 +12,8 @@
 #include <JuceHeader.h>
 #include "Operator.h"
 
+
+
 class SynthSound : public juce::SynthesiserSound
 {
 public:
@@ -57,7 +59,7 @@ public:
     {
         float attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
         float decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
-        float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * sustain;
+        float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * (sustain/100.0f);
         sustainScaled = juce::jlimit(0.0f, 1.0f, sustainScaled);
         float releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
 
@@ -67,9 +69,9 @@ public:
                               releaseScaled, false);
     }
     
-    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float modIndex)
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase)
     {
-        op[index].setOperator(ratio, fixed, isFixed, modIndex);
+        op[index].setOperator(ratio, fixed, isFixed, amplitude, phase);
     }
     
     void pitchWheelMoved(int newPitchWheelValue) override {}
@@ -142,14 +144,15 @@ public:
     }
     
 private:
-    std::array<float, 4> toBinary4(int input)
+    inline std::array<float, 4> toBinary4(int input)
+
    {
        std::array<float, 4> bits;
        for (int i = 0; i < 4; ++i)
            bits[i] = (input >> i) & 1;
        return bits;
    }
-    
+
     double sampleRate;
     juce::AudioBuffer<float> synthBuffer;
     float outputSample;
