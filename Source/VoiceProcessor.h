@@ -69,9 +69,9 @@ public:
                               releaseScaled, false);
     }
     
-    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude)
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase)
     {
-        op[index].setOperator(ratio, fixed, isFixed, amplitude);
+        op[index].setOperator(ratio, fixed, isFixed, amplitude, phase);
     }
     
     void pitchWheelMoved(int newPitchWheelValue) override {}

@@ -117,6 +117,11 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index), "");
     addAndMakeVisible(*amplitudeSlider);
     amplitudeSlider->setFontSize(24.0f);
+    
+    setLabel(phaseLabel, "Phase", 12.0f);
+    phaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "phase" + juce::String(index), "%");
+    addAndMakeVisible(*phaseSlider);
+    phaseSlider->setFontSize(12.0f);
 
     setLabel(attackLabel, "A", 12.0f);
     attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index), " ms");
@@ -179,8 +184,11 @@ void OperatorInterface::resized()
     amplitudeLabel.setBounds(x + width * 0.025f,  height * 0.6f, width * 0.15f, height * 0.1f);
     amplitudeSlider->setBounds(x + width * 0.025f, height * 0.6f + labelHeight, width * 0.15f, height * 0.25f);
 
-    opGraphics.setBounds(x + width * 0.2f, y + height * 0.125f, width * 0.275f, height * 0.75f);
+    opGraphics.setBounds(x + width * 0.2f, y + height * 0.25f, width * 0.275f, height * 0.75f);
 
+    phaseLabel.setBounds(x + width * 0.315f,  height * 0.025f, width * 0.15f, height * 0.2f);
+    phaseSlider->setBounds(x + width * 0.385f, height * 0.025f, width * 0.15f, height * 0.2f);
+    
     attackLabel.setBounds(x + width * 0.8f,
                           y + height * 0.1f,
                           width * 0.035f,

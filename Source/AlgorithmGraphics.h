@@ -101,9 +101,14 @@ public:
         this->isSelected = isSelected;
     }
 
-    bool getIsCableSelected(juce::Point<float> mouse)
+    bool getIsMouseOver(juce::Point<float> mouse)
     {
         return cableSelectPath.contains(mouse, 3.0f);
+    }
+    
+    bool getIsCableSelected()
+    {
+        return isSelected;
     }
     
     void setIsCableHoveredOn(bool isHoveredOn)
@@ -453,7 +458,7 @@ private:
     perspectiveBotRight;
 };
 
-class AlgorithmGraphics : public juce::Component, juce::Timer, juce::KeyListener
+class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener
 {
 public:
     
@@ -486,7 +491,16 @@ public:
             cable[k][j].setInterceptsMouseClicks(false, false);
         }
         
+        addAndMakeVisible(clearCablesButton);
+        clearCablesButton.addListener(this);
+        
+        setWantsKeyboardFocus(true);
         startTimerHz(60);
+    }
+    
+    ~AlgorithmGraphics()
+    {
+        clearCablesButton.removeListener(this);
     }
     
     void paint(juce::Graphics& g) override
@@ -507,6 +521,12 @@ public:
         auto bounds = getBounds();
         juce::Point<float> vp = bounds.getCentre().toFloat();
         calculateCoordinates(bounds.toFloat());
+        
+        auto localBounds = getLocalBounds().toFloat();
+        clearCablesButton.setBounds(localBounds.getX() + localBounds.getWidth() * 0.75f,
+                                    localBounds.getY(),
+                                    localBounds.getWidth() * 0.15f,
+                                    localBounds.getHeight() * 0.05f);
         
         op[0].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
         op[1].setBlockCenter(x + blockIncr * 2, y);
@@ -617,15 +637,22 @@ public:
                 
                 
         };
-        
-        
-        
     }
     
+    void buttonClicked(juce::Button* button) override
+    {
+        if (button == &clearCablesButton)
+        {
+            deleteAllCables();
+        }
+    }
+
 
     void mouseDown(const juce::MouseEvent& m) override
     {
         bool modifier = m.mods.isCommandDown();
+        grabKeyboardFocus();
+
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
@@ -634,8 +661,7 @@ public:
             
             for (int j = 0; j < 4; j++)
             {
-                if (cable[i][j].getIsCableSelected(mouse)) { cable[i][j].setIsCableSelected(true); }
-                else { cable[i][j].setIsCableSelected(false); }
+                 cable[i][j].setIsCableSelected(cable[i][j].getIsMouseOver(mouse));
             }
             
             if (op[i].isOverOutputPoint(mouse) && op[i].getNumCableAvailable() != 0)
@@ -665,6 +691,8 @@ public:
                 DBG("mousedown with modifier");
             }
              */
+            
+            
         }
     }
     
@@ -870,12 +898,39 @@ public:
     {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                bool cableSelected = cable[i][j].getIsCableSelected(mouse);
+                bool cableSelected = cable[i][j].getIsMouseOver(mouse);
                 cable[i][j].setIsCableSelected(cableSelected);
             }
         }
     }
     
+    void deleteAllCables()
+    {
+        for (int i = 0; i < 4; i++) {
+
+            for (int j = 0; j < 4; j++) {
+                cable[i][j].setIsInUse(false);
+                cable[i][j].setIsConnected(false);
+                cable[i][j].setCableInputIndex(-1);
+                cable[i][j].setCableOutputIndex(-1);
+                op[i].setInput(j, 0);
+            }
+        }
+    }
+
+    void deleteSelectedCable()
+    {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(cable[i][j].getIsCableSelected())
+                {
+                    cable[i][j].setIsInUse(false);
+                    cable[i][j].setIsConnected(false);
+                }
+            }
+        }
+    }
+
     void calculateCoordinates(juce::Rectangle<float> bounds)
     {
         x = bounds.getX();
@@ -894,19 +949,19 @@ public:
             for (int j = 0; j < 4; j++) {
                 
                 // hovering on cable
-                cable[i][j].setIsCableHoveredOn(cable[i][j].getIsCableSelected(mouse));
+                cable[i][j].setIsCableHoveredOn(cable[i][j].getIsMouseOver(mouse));
                 
             }
         }
     }
     
-    bool keyPressed(const juce::KeyPress& key, Component* /*originatingComponent*/) override
+    bool keyPressed(const juce::KeyPress& key) override
     {
-        bool deleteKey = (key.getKeyCode() == juce::KeyPress::deleteKey);
-        juce::String dbg = deleteKey ? "yes" : "no";
-        DBG(dbg);
-        
-        return deleteKey;
+        if (key.getKeyCode() == juce::KeyPress::backspaceKey)
+        {
+            deleteSelectedCable();
+        }
+        return true;
     }
 
     
@@ -933,7 +988,8 @@ private:
     juce::Rectangle<float> bounds;
     juce::Point<float> vp;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
-    
+    juce::TextButton clearCablesButton;
+
     
     std::array<OperatorBlock, 5> op;
     std::array<std::array<PatchCable, 4>, 5> cable;

@@ -172,11 +172,14 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String fixedID = "fixed" + juce::String(oper);
         juce::String amplitudeID = "amplitude" + juce::String(oper);
+        juce::String phaseID = "phase" + juce::String(oper);
+
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
 
         float ratio = apvts.getRawParameterValue(ratioID)->load();
         float fixed = apvts.getRawParameterValue(fixedID)->load();
         float amplitude = apvts.getRawParameterValue(amplitudeID)->load();
+        float phase = apvts.getRawParameterValue(phaseID)->load();
         float routing = apvts.getRawParameterValue(operatorRoutingID)->load();
 
         for (int v = 0; v < synth.getNumVoices(); v++)
@@ -185,7 +188,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             {
                 voice->setEnvelope(oper, attack, decay, sustain/100.0f, release,
                                    globalAttack, globalDecay, globalSustain, globalRelease);
-                voice->setFMParameters(oper, ratio, fixed, false, amplitude);
+                voice->setFMParameters(oper, ratio, fixed, false, amplitude, phase);
                 voice->setOperatorGain(oper, routing, outputRouting);
             }
         }
@@ -291,6 +294,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String amplitudeName = "Amplitude " + juce::String(oper);
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), 0.0f));
+        
+        juce::String phaseID = "phase" + juce::String(oper);
+        juce::String phaseName = "Phase " + juce::String(oper);
+        
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { phaseID, 1 }, phaseName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f, 0.5f), 0.0f));
         
         //******** Operator Input ********//
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";

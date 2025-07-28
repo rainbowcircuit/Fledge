@@ -402,36 +402,40 @@ public:
             for (int i = 1; i <= domainResolution; i++)
             {
                 float op3Sin = fastSin.sin(fmodf(((i/phaseScale) * op[3].ratio * 2.0f)
+                                                 + (op[3].phase * twopi)
                                                  + ((op0Phase * op[3].gain[0])
                                                  + (op1Phase * op[3].gain[1])
                                                  + (op2Phase * op[3].gain[2])
                                                  + (op3Phase * op[3].gain[3])) * 8.0f, twopi));
 
-                op3Phase = amp3 * op[3].modIndex * op3Sin;
+                op3Phase = amp3 * op[3].amplitude * op3Sin;
 
                 float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio * 2.0f)
+                                                 + (op[2].phase * twopi)
                                                  + ((op0Phase * op[2].gain[0])
                                                  + (op1Phase * op[2].gain[1])
                                                  + (op2Phase * op[2].gain[2])
                                                  + (op3Phase * op[2].gain[3])) * 8.0f, twopi));
 
-                op2Phase = amp2 * op[2].modIndex * op2Sin;
+                op2Phase = amp2 * op[2].amplitude * op2Sin;
 
                 float op1Sin = fastSin.sin(fmodf(((i/phaseScale) * op[1].ratio * 2.0f)
+                                                 + (op[1].phase * twopi)
                                                  + ((op0Phase * op[1].gain[0])
                                                  + (op1Phase * op[1].gain[1])
                                                  + (op2Phase * op[1].gain[2])
                                                  + (op3Phase * op[1].gain[3])) * 8.0f, twopi));
 
-                op1Phase = amp1 * op[1].modIndex * op1Sin;
+                op1Phase = amp1 * op[1].amplitude * op1Sin;
 
                 float op0Sin = fastSin.sin(fmodf(((i/phaseScale) * op[0].ratio * 2.0f)
+                                                 + (op[0].phase * twopi)
                                                  + ((op0Phase * op[0].gain[0])
                                                  + (op1Phase * op[0].gain[1])
                                                  + (op2Phase * op[0].gain[2])
                                                  + (op3Phase * op[0].gain[3])) * 8.0f, twopi));
                                                  
-                op0Phase = amp0 * op[0].modIndex * op0Sin;
+                op0Phase = amp0 * op[0].amplitude * op0Sin;
 
                 float outputPhase = ((op0Phase * outputGain[0])
                             + (op1Phase * outputGain[1])
@@ -491,15 +495,16 @@ public:
         repaint();
     }
     
-    void setFMParameter(int index, float ratio, float fixed, bool isRatio, float modIndex)
+    void setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float phase)
     {
         op[index].ratio = ratio;
         op[index].fixed = fixed;
-        op[index].modIndex = modIndex/100.0f;
+        op[index].amplitude = amplitude/100.0f;
         op[index].isRatio = isRatio;
+        op[index].phase = phase/100.0f;
+
         repaint();
     }
-
 
     void calculateEnvelopeSegments()
     {
@@ -519,7 +524,7 @@ private:
     juce::dsp::FastMathApproximations fastSin;
     struct operatorValues
     {
-        float ratio, fixed, modIndex;
+        float ratio, fixed, amplitude, phase;
         bool isRatio;
         float attack = 3000.0f, decay = 1000.0f, sustain = 1.0f, release = 5000.0f;
         float attackSegment, decaySegment, sustainSegment = 12, releaseSegment;

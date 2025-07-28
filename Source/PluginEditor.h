@@ -46,14 +46,17 @@ public:
 
             juce::String ratioID = "ratio" + juce::String(oper);
             juce::String amplitudeID = "amplitude" + juce::String(oper);
+            juce::String phaseID = "phase" + juce::String(oper);
+
             float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
-            float modIndex = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
+            float amplitude = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
+            float phase = audioProcessor.apvts.getRawParameterValue(phaseID)->load();
 
             juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
             float gainIndex = audioProcessor.apvts.getRawParameterValue(gainIndexID)->load();
             float outputGainIndex = audioProcessor.apvts.getRawParameterValue("outputRouting")->load();
 
-            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, modIndex);
+            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude, phase);
             waveformDisplay.setGainCoefficients(oper, gainIndex, outputGainIndex);
 
         }
