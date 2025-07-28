@@ -20,7 +20,7 @@ void LevelMeter::paint (juce::Graphics& g)
     const auto bounds = getLocalBounds();
 
     // Fill background first
-    g.fillAll(Colors::LevelMeter::background);
+    g.fillAll(juce::Colour(35, 37, 36));
 
     // Draw levels horizontally - top and bottom channels
     drawLevel(g, dbLevelL, 0, bounds.getHeight() / 2 - 1);  // Top channel

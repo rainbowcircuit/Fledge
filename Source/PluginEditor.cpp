@@ -107,7 +107,7 @@ void FledgeAudioProcessorEditor::resized()
     showAlgorithmButton.setBounds(100, 555, 94, 40);
     showMacrosButton.setBounds(200, 555, 94, 40);
     
-    outputLevelMeter->setBounds(285, 605, 480, 25);
+    outputLevelMeter->setBounds(555, 20, 200, 25);
 
 
 }
