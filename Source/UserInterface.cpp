@@ -258,7 +258,7 @@ void OperatorInterface::timerCallback()
 
 }
 
-AlgorithmSelectInterface::AlgorithmSelectInterface(FledgeAudioProcessor& p) : audioProcessor(p)
+AlgorithmSelectInterface::AlgorithmSelectInterface(FledgeAudioProcessor& p, AlgorithmGraphics& a) : algoGraphics(a), audioProcessor(p)
 {
     for(int i = 0; i < 8; i++)
     {
@@ -313,6 +313,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 2);
         setOutputParam(1);
         setPresetParam(0);
+        algoGraphics.setFromAlgorithmSelection(0);
         
     } else if (button == &algorithm[1]) {
         setOperatorParam(3, 0);
@@ -321,6 +322,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 6);
         setOutputParam(1);
         setPresetParam(1);
+        algoGraphics.setFromAlgorithmSelection(1);
 
     } else if (button == &algorithm[2]) {
         setOperatorParam(3, 0);
@@ -329,6 +331,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 14);
         setOutputParam(1);
         setPresetParam(2);
+        algoGraphics.setFromAlgorithmSelection(2);
 
     } else if (button == &algorithm[3]) {
         setOperatorParam(3, 0);
@@ -337,6 +340,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 6);
         setOutputParam(1);
         setPresetParam(3);
+        algoGraphics.setFromAlgorithmSelection(3);
 
     } else if (button == &algorithm[4]) {
         setOperatorParam(3, 0);
@@ -345,6 +349,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 2);
         setOutputParam(1); 
         setPresetParam(4);
+        algoGraphics.setFromAlgorithmSelection(4);
 
     } else if (button == &algorithm[5]) {
         setOperatorParam(3, 0);
@@ -353,6 +358,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 4);
         setOutputParam(3);
         setPresetParam(5);
+        algoGraphics.setFromAlgorithmSelection(5);
 
     } else if (button == &algorithm[6]) {
         setOperatorParam(3, 0);
@@ -361,6 +367,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 0);
         setOutputParam(7);
         setPresetParam(6);
+        algoGraphics.setFromAlgorithmSelection(6);
 
     } else if (button == &algorithm[7]) {
         setOperatorParam(3, 0);
@@ -369,6 +376,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 0);
         setOutputParam(15);
         setPresetParam(7);
+        algoGraphics.setFromAlgorithmSelection(7);
 
     }
 }

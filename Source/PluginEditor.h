@@ -62,8 +62,6 @@ public:
         }
         
         float algoPreset = audioProcessor.apvts.getRawParameterValue("algorithmPreset")->load();
-        algorithmGraphics.setFromAlgorithmSelection(algoPreset);
-        
         
     }
     

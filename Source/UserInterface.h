@@ -87,7 +87,7 @@ private:
 class AlgorithmSelectInterface : public juce::Component, public juce::Button::Listener
 {
 public:
-    AlgorithmSelectInterface(FledgeAudioProcessor& p);
+    AlgorithmSelectInterface(FledgeAudioProcessor& p, AlgorithmGraphics& a);
     ~AlgorithmSelectInterface();
     void paint(juce::Graphics& g) override {}
     void resized() override;
@@ -100,6 +100,7 @@ private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
     std::array<juce::ToggleButton, 8> algorithm;
     
+    AlgorithmGraphics& algoGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 

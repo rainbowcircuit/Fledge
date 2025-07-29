@@ -174,7 +174,7 @@ public:
         auto bounds = getLocalBounds().toFloat();
         bounds.reduce(5, 5);
         
-        blockSize = bounds.getWidth() * 0.2f;
+        blockSize = bounds.getWidth() * 0.165f;
         blockRectangle = { blockCenterCoords.x - blockSize/2,
             blockCenterCoords.y - blockSize/2,
             blockSize, blockSize };
@@ -550,11 +550,14 @@ public:
         float backBoxHeight = height * 0.85f;
         g.setColour(juce::Colour(80, 80, 80));
 
-        juce::Rectangle<float> backRectangle = {juce::jlimit(frontRectangle.getX(), frontRectangle.getX() + frontRectangle.getWidth(), vp.x - backBoxWidth/2),
-            juce::jlimit(frontRectangle.getY(), frontRectangle.getY() + frontRectangle.getHeight(), vp.y - backBoxWidth/2),
-            backBoxWidth,
-            backBoxHeight };
-        
+        float maxY = frontRectangle.getBottom() - backBoxHeight;
+        float constrainedY = juce::jlimit(frontRectangle.getY(), maxY, vp.y - backBoxHeight / 2);
+        float constrainedX = juce::jlimit(frontRectangle.getX(),
+                                           frontRectangle.getRight() - backBoxWidth,
+                                           vp.x - backBoxWidth / 2);
+
+        juce::Rectangle<float> backRectangle = { constrainedX, constrainedY, backBoxWidth, backBoxHeight };
+
         backPath.addRoundedRectangle(backRectangle, 1.0f);
         g.strokePath(backPath, juce::PathStrokeType(1.0f));
         
@@ -579,59 +582,87 @@ public:
 
     void averageVanishingPoint()
     {
-        float x = 0.0f, y = 0.0f;
+        juce::Point<float> point = { 0.0f, 0.0f };
         for (int i = 0; i < 4; i++)
         {
-            x += op[i].getBlockCenter().x;
-            y += op[i].getBlockCenter().y;
+            point.x += op[i].getBlockCenter().x;
+            point.y += op[i].getBlockCenter().y;
 
         }
-        vp.x = x/4;
-        vp.y = y/4;
+        point /= 4.0f;
+        auto limitBounds = getLocalBounds().toFloat();
+        limitBounds.reduce(limitBounds.getWidth() * 0.2f, limitBounds.getHeight() * 0.2f);
+        
+        if (limitBounds.contains(point)){
+            vp = point;
+        } else {
+            vp = limitBounds.getConstrainedPoint(point);
+        }
     }
     
     void setFromAlgorithmSelection(int selectionIndex)
     {
+        float widthScale = x + widthMargin;
+        float heightScale = y + heightMargin + height;
         switch(selectionIndex)
         {
             case 0:
-                dragBlock(0, {x + width/2, y + heightMargin + blockIncr});
-                dragBlock(1, {x + width/2, y + heightMargin + blockIncr * 2});
-                dragBlock(2, {x + width/2, y + heightMargin + blockIncr * 3});
-                dragBlock(3, {x + width/2, y + heightMargin + blockIncr * 4});
+                moveBlock(3, { widthScale + width * 0.5f, heightScale * 0.125f });
+                moveBlock(2, { widthScale + width * 0.5f, heightScale * 0.35f });
+                moveBlock(1, { widthScale + width * 0.5f, heightScale * 0.575f });
+                moveBlock(0, { widthScale + width * 0.5f, heightScale * 0.8f });
                 break;
 
             case 1:
-                dragBlock(0, {x + blockIncr * 2, y + blockIncr * 3});
-                dragBlock(1, {x + blockIncr * 3, y + blockIncr * 2});
-                dragBlock(2, {x + blockIncr, y + blockIncr * 2});
-                dragBlock(3, {x + width/2, y + heightMargin + blockIncr * 4});
+                moveBlock(3, {widthScale + width * 0.775f, heightScale * 0.175f });
+                moveBlock(2, {widthScale + width * 0.775f, heightScale * 0.475f });
+                moveBlock(1, {widthScale + width * 0.225f, heightScale * 0.475f });
+                moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.775f });
                 break;
 
             case 2:
-                dragBlock(0, {x + blockIncr * 2, y + blockIncr * 3});
-                dragBlock(1, {x + blockIncr * 3, y + blockIncr * 2});
-                dragBlock(2, {x + blockIncr * 2, y + blockIncr * 2});
-                dragBlock(3, {x + blockIncr, y + blockIncr * 2});
+                moveBlock(3, {widthScale + width * 0.225f, heightScale * 0.4f });
+                moveBlock(2, {widthScale + width * 0.5f, heightScale * 0.4f });
+                moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.4f });
+                moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.65f });
                 break;
 
             case 3:
-                op[0].setBlockCenter(x + blockIncr * 2, y + blockIncr * 3);
-                op[1].setBlockCenter(x + blockIncr * 3, y + blockIncr * 2);
-                op[2].setBlockCenter(x + blockIncr, y + blockIncr * 2);
-                op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr);
+                moveBlock(3, {widthScale + width * 0.5f, heightScale * 0.15f });
+                moveBlock(2, {widthScale + width * 0.225f, heightScale * 0.4f });
+                moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.4f });
+                moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.65f });
                 break;
                 
             case 4:
-                
+                moveBlock(3, {widthScale + width * 0.75f, heightScale * 0.3f });
+                moveBlock(2, {widthScale + width * 0.75f, heightScale * 0.65f });
+                moveBlock(1, {widthScale + width * 0.25f, heightScale * 0.3f });
+                moveBlock(0, {widthScale + width * 0.25f, heightScale * 0.65f });
+                break;
+
             case 5:
-                
+                moveBlock(3, {widthScale + width * 0.5f, heightScale * 0.15f });
+                moveBlock(2, {widthScale + width * 0.5f, heightScale * 0.4f });
+                moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.65f });
+                moveBlock(0, {widthScale + width * 0.225f, heightScale * 0.65f });
+                break;
+
             case 6:
-                
-            case 7: ;
-                
-                
+                moveBlock(3, {widthScale + width * 0.775f, heightScale * 0.4f });
+                moveBlock(2, {widthScale + width * 0.775f, heightScale * 0.65f });
+                moveBlock(1, {widthScale + width * 0.5f, heightScale * 0.65f });
+                moveBlock(0, {widthScale + width * 0.225f, heightScale * 0.65f });
+                break;
+            case 7:
+                moveBlock(3, {widthScale + width * 0.9f, heightScale * 0.6f });
+                moveBlock(2, {widthScale + width * 0.625f, heightScale * 0.6f });
+                moveBlock(1, {widthScale + width * 0.375f, heightScale * 0.6f });
+                moveBlock(0, {widthScale + width * 0.1f, heightScale * 0.6f });
+                break;
         };
+        
+        averageVanishingPoint();
     }
     
     void buttonClicked(juce::Button* button) override
@@ -673,7 +704,8 @@ public:
                 
             } else if (op[i].isOverBlock(mouse)) {
                 op[i].setBlockInFocus(true);
-                dragBlock(i, mouse);
+                moveBlock(i, mouse);
+                followCable(i);
                 currentOutputBlockIndex = i;
                 dragState = 1; // dragging block
                 
@@ -745,7 +777,8 @@ public:
             if (*dragState == 1) // dragging block
             {
                 mouse = limitBlockDrag(mouse);
-                dragBlock(blk, mouse);
+                moveBlock(blk, mouse);
+                followCable(blk);
                 
                 averageVanishingPoint();
             }
@@ -821,18 +854,33 @@ public:
         }
     }
 
-    void dragBlock(int blockDragged, juce::Point<float> mousePoint)
+    void moveBlock(int blockToMove, juce::Point<float> newPoint)
     {
         // drag block
-        op[blockDragged].setBlockCenter(mousePoint.x, mousePoint.y);
-        op[blockDragged].setBlockInFocus(true);
+        op[blockToMove].setBlockCenter(newPoint.x, newPoint.y);
+        op[blockToMove].setBlockInFocus(true);
+    
+    }
+    
+    void followCable(int blockToMove)
+    {
+        auto outputPoint = op[blockToMove].getOutputPoint();
+        setCableOutputCoords(blockToMove, outputPoint);
         
-        auto outputPoint = op[blockDragged].getOutputPoint();
-        setCableOutputCoords(blockDragged, outputPoint);
-        
-        auto inputPoint = op[blockDragged].getInputPoint();
-        setCableInputCoords(blockDragged, inputPoint);
+        auto inputPoint = op[blockToMove].getInputPoint();
+        setCableInputCoords(blockToMove, inputPoint);
+    }
+    
+    void setCable(int originBlock, int cableIndex, int destBlock)
+    {
+        auto outputPoint = op[originBlock].getOutputPoint();
+        cable[originBlock][cableIndex].setOutputPoint(outputPoint);
 
+        auto inputPoint = op[destBlock].getInputPoint();
+        cable[originBlock][cableIndex].setInputPoint(inputPoint);
+        
+        cable[originBlock][cableIndex].setIsInUse(true);
+        cable[originBlock][cableIndex].setIsConnected(true);
     }
     
     void setCableOutputCoords(int originBlock, juce::Point<float> newOutputPoint)
@@ -934,7 +982,7 @@ public:
         heightMargin = bounds.getHeight() * 0.05f;
         height = bounds.getHeight() * 0.9f;
         width = bounds.getWidth() * 0.9f;
-        blockIncr = width * 0.2f;
+        blockIncr = width * 0.15f;
     }
         
     void timerCallback() override

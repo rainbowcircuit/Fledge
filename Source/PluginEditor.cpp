@@ -38,9 +38,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     waveformDisplay.setVisible(true);
 
     addAndMakeVisible(algorithmGraphics);
-    
-    
-    algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor);
+    algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, algorithmGraphics);
     addAndMakeVisible(*algorithmSelector);
     
     macroInterface = std::make_unique<MacroControlsInterface>(audioProcessor);
