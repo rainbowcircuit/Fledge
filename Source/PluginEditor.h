@@ -103,7 +103,6 @@ public:
 private:
     ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
     
-    
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
     std::unique_ptr<PresetInterface>  presetInterface;
     std::unique_ptr<MacroControlsInterface> macroInterface;

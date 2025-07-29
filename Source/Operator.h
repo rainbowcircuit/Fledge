@@ -31,5 +31,5 @@ private:
     float frequencySmoothingCoeff = 0.0f;
     
     
-    juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, amplitudeSmoothed, phaseSmoothed;
+    juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, amplitudeSmoothed, phaseSmoothed, sustainSmoothed;
 };

@@ -76,7 +76,7 @@ public:
 };
 
 
-class EditableTextBoxSlider : public juce::Component , juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
+class EditableTextBoxSlider : public juce::Component, juce::Timer, juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
 public:
     EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID, juce::String parameterSuffix) : audioProcessor(p)
@@ -90,7 +90,7 @@ public:
         
         // initialize displayed value
         auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
-        juce::String formattedValue = juce::String(value, 2) + parameterSuffix;
+        juce::String formattedValue = juce::String(value, numDecimals) + parameterSuffix;
         textBox.setText(formattedValue, juce::dontSendNotification);
         textBox.addListener(this);
         
@@ -103,8 +103,10 @@ public:
         const auto params = audioProcessor.getParameters();
         for (auto param : params){
             param->addListener(this);
-            
         }
+        
+        // start timer
+        startTimerHz(30);
     }
     
     ~EditableTextBoxSlider()
@@ -128,16 +130,15 @@ public:
         auto mousePoint = m.getPosition().toFloat();
         dragStartPoint.y = mousePoint.y;
         
-        // Get the normalized parameter value (0.0-1.0)
         initialParamValue = audioProcessor.apvts.getParameter(parameterID)->getValue();
     }
 
     void mouseDrag(const juce::MouseEvent& m) override
     {
         auto mousePoint = m.getPosition().toFloat();
-        float deltaY = mousePoint.y - dragStartPoint.y; // Remove std::abs to allow bidirectional dragging
+        float deltaY = mousePoint.y - dragStartPoint.y;
         
-        float sensitivity = 0.01f;
+        float sensitivity = 0.005f;
         float newValue = juce::jlimit(0.0f, 1.0f, initialParamValue + (-deltaY * sensitivity));
         textValueToParamValue(newValue);
     }
@@ -161,7 +162,7 @@ public:
         auto value = l->getText().getFloatValue();
         float valueLimited = juce::jlimit(rangeStart, rangeEnd, value);
         
-        l->setText(juce::String(valueLimited, 3), juce::dontSendNotification);
+        l->setText(juce::String(valueLimited, numDecimals), juce::dontSendNotification);
         textBox.setInterceptsMouseClicks(false, false);
         
         float normalized = (valueLimited - rangeStart) / (rangeEnd - rangeStart);
@@ -202,7 +203,7 @@ public:
         
         if (newParameterID == parameterID)
         {
-            juce::String formattedValue = juce::String(scaledValue, 3) + parameterSuffix;
+            juce::String formattedValue = juce::String(scaledValue, numDecimals) + parameterSuffix;
             textBox.setText(formattedValue, juce::dontSendNotification);
         }
     }
@@ -210,6 +211,21 @@ public:
     void setFontSize(float size)
     {
         textBox.setFont(juce::FontOptions(size, juce::Font::plain));
+    }
+    
+    void setNumDecimals(int numDecimals)
+    {
+        this->numDecimals = numDecimals;
+    }
+    
+    void timerCallback() override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        auto mouse = getMouseXYRelative().toFloat();
+        if (bounds.contains(mouse))
+        {
+            setMouseCursor(juce::MouseCursor::UpDownResizeCursor);
+        }
     }
     
 private:
@@ -220,6 +236,7 @@ private:
     
     juce::Point<float> dragStartPoint;
     juce::Label textBox;
+    int numDecimals = 1;
     juce::String parameterID, parameterSuffix = "";
     
     FledgeAudioProcessor& audioProcessor;

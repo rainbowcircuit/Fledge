@@ -357,12 +357,20 @@ private:
 };
 
 
-class WaveformDisplayGraphics : public juce::Component
+class WaveformDisplayGraphics : public juce::Component, juce::Timer
 {
 public:
     WaveformDisplayGraphics()
     {
         calculateEnvelopeSegments();
+        
+        for (int i = 0; i < 4; i++) {
+            for (int k = 0; k < 72; k++) {
+                ampSmooth[i][k].reset(5);
+            }
+        }
+        
+        startTimerHz(60);
     }
     
     void paint(juce::Graphics &g) override
@@ -377,8 +385,6 @@ public:
         float widthMargin = bounds.getWidth() * 0.05f;
         float heightMargin = bounds.getHeight() * 0.075f;
 
-        int envelopeSegments = 72;
-        int domainResolution = 128;
         float phaseScale = domainResolution/twopi;
 
         juce::Path graphicLines;
@@ -387,11 +393,10 @@ public:
 
         for (int j = 0; j < envelopeSegments; j++){
             int k = envelopeSegments - j;
-            
-            float amp3 = op[3].generateAmplitude(k);
-            float amp2 = op[2].generateAmplitude(k);
-            float amp1 = op[1].generateAmplitude(k);
-            float amp0 = op[0].generateAmplitude(k);
+            float amp3 = ampSmooth[3][k].getNextValue();
+            float amp2 = ampSmooth[2][k].getNextValue();
+            float amp1 = ampSmooth[1][k].getNextValue();
+            float amp0 = ampSmooth[0][k].getNextValue();
             
             float heightScaled = y + heightMargin + heightIncrement * j;
             
@@ -483,7 +488,6 @@ public:
        return bits;
    }
 
-    
     void resized() override {};
     
     void setEnvelope(int index, float attack, float decay, float sustain, float release)
@@ -493,6 +497,7 @@ public:
         op[index].sustain = sustain/100.0f;
         op[index].release = release;
         calculateEnvelopeSegments();
+        calculateAmplutude();
         repaint();
     }
     
@@ -503,7 +508,7 @@ public:
         op[index].amplitude = amplitude/100.0f;
         op[index].isRatio = isRatio;
         op[index].phase = phase/100.0f;
-
+        calculateAmplutude();
         repaint();
     }
 
@@ -519,11 +524,29 @@ public:
             op[index].releaseSegment = std::pow(releaseClamped/20.0f, 0.5f) * 24;
         }
     }
+    
+    void calculateAmplutude()
+    {
+        for (int j = 0; j < envelopeSegments; j++){
+            int k = envelopeSegments - j;
+            ampSmooth[3][k].setTargetValue(op[3].generateAmplitude(k));
+            ampSmooth[2][k].setTargetValue(op[2].generateAmplitude(k));
+            ampSmooth[1][k].setTargetValue(op[1].generateAmplitude(k));
+            ampSmooth[0][k].setTargetValue(op[0].generateAmplitude(k));
+        }
+    }
+    
+    void timerCallback() override
+    {
+        repaint();
+    }
 
 private:
+    int domainResolution = 128;
     int envelopeSegments = 72;
     float op0Phase, op1Phase, op2Phase, op3Phase;
     std::vector<float> segmentAmplitude;
+    std::array<std::array<juce::SmoothedValue<float>, 72>, 4> ampSmooth;
     juce::dsp::FastMathApproximations fastSin;
     struct operatorValues
     {

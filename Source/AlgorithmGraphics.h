@@ -511,7 +511,7 @@ public:
     
     void resized() override
     {
-        auto bounds = getBounds();
+        auto bounds = getLocalBounds();
         juce::Point<float> vp = bounds.getCentre().toFloat();
         calculateCoordinates(bounds.toFloat());
         
@@ -526,7 +526,7 @@ public:
         op[2].setBlockCenter(x + blockIncr, y + blockIncr);
         op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
-        op[4].setBlockCenter(x + blockIncr * 2, y + blockIncr * 5.25); // output
+        op[4].setBlockCenter(x + widthMargin + width/2, y + height * 1.075f); // output
         averageVanishingPoint();
         
         for (int i = 0; i <= 4; i++){
@@ -542,21 +542,22 @@ public:
     
     void drawGridBox(juce::Graphics& g)
     {
+        juce::Rectangle<float> frontRectangle = getLocalBounds().toFloat();
+        frontRectangle.reduce(5.0f, 5.0f);
+        
         juce::Path backPath, frontPath, sidePath;
         float backBoxWidth = width * 0.85f;
         float backBoxHeight = height * 0.85f;
         g.setColour(juce::Colour(80, 80, 80));
 
-        juce::Rectangle<float> backRectangle = {vp.x - backBoxWidth/2,
-            vp.y - backBoxHeight/2,
+        juce::Rectangle<float> backRectangle = {juce::jlimit(frontRectangle.getX(), frontRectangle.getX() + frontRectangle.getWidth(), vp.x - backBoxWidth/2),
+            juce::jlimit(frontRectangle.getY(), frontRectangle.getY() + frontRectangle.getHeight(), vp.y - backBoxWidth/2),
             backBoxWidth,
-            backBoxHeight};
+            backBoxHeight };
         
         backPath.addRoundedRectangle(backRectangle, 1.0f);
         g.strokePath(backPath, juce::PathStrokeType(1.0f));
-
-        juce::Rectangle<float> frontRectangle = getLocalBounds().toFloat();
-        frontRectangle.reduce(5.0f, 5.0f);
+        
         frontPath.addRoundedRectangle(frontRectangle, 1.0f);
         g.strokePath(frontPath, juce::PathStrokeType(1.0f));
         
@@ -575,6 +576,7 @@ public:
         g.strokePath(sidePath, juce::PathStrokeType(1.0f));
     }
     
+
     void averageVanishingPoint()
     {
         float x = 0.0f, y = 0.0f;
@@ -860,9 +862,9 @@ public:
     juce::Point<float> limitBlockDrag(juce::Point<float> mousePoint)
     {
         auto bounds = getLocalBounds().toFloat();
-        float xOffset = bounds.getWidth() * 0.15f;
-        float yOffset = bounds.getHeight() * 0.15f;
-        float widthScaled = bounds.getWidth() * 0.7f;
+        float xOffset = bounds.getX() + bounds.getWidth() * 0.05f;
+        float yOffset = bounds.getY() + bounds.getHeight() * 0.15f;
+        float widthScaled = bounds.getWidth() * 0.9f;
         float heightOffset = bounds.getWidth() * 0.85f;
 
         bounds.setX(xOffset);
@@ -932,7 +934,7 @@ public:
         heightMargin = bounds.getHeight() * 0.05f;
         height = bounds.getHeight() * 0.9f;
         width = bounds.getWidth() * 0.9f;
-        blockIncr = width * 0.25f;
+        blockIncr = width * 0.2f;
     }
         
     void timerCallback() override

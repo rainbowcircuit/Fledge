@@ -81,7 +81,9 @@ public:
     {
         if (op[0].ampEnvelope.isActive())
         {
-            for (int sample = 0; sample < outputBuffer.getNumSamples(); ++sample) {
+//            for (int sample = start; sample < outputBuffer.getNumSamples(); ++sample) {
+
+            for (int sample = startSample; sample < startSample + numSamples; ++sample) {
                 op3 = op[3].processOperator(op0 * op3Gain[0],
                                             op1 * op3Gain[1],
                                             op2 * op3Gain[2],
@@ -155,7 +157,7 @@ private:
     double sampleRate;
     juce::AudioBuffer<float> synthBuffer;
     float outputSample;
-
+    
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm
     
     std::array<float, 4> op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f };

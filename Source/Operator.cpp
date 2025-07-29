@@ -20,6 +20,7 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
     fixedSmoothed.reset(sampleRate, 0.001);
     amplitudeSmoothed.reset(sampleRate, 0.001);
     phaseSmoothed.reset(sampleRate, 0.001);
+    sustainSmoothed.reset(sampleRate, 0.001);
 }
 
 void FMOperator::startNote()
@@ -39,10 +40,9 @@ void FMOperator::setEnvelope(float attackInMs, float decayInMs, float sustainInF
 {
     envParameters.attack = attackInMs;
     envParameters.decay = decayInMs;
-    envParameters.sustain = sustainInFloat;
+    sustainSmoothed.setTargetValue(sustainInFloat);
     envParameters.release = releaseInMs;
     
-    ampEnvelope.setParameters(envParameters);
 }
 
 void FMOperator::setNoteNumber(float noteNumber)
@@ -61,6 +61,9 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float ampli
 
 float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4)
 {
+    envParameters.sustain = sustainSmoothed.getNextValue();
+    ampEnvelope.setParameters(envParameters);
+    
     frequency = noteFrequency * ratioSmoothed.getNextValue();
     if (isFixed) frequency = fixedSmoothed.getNextValue();
     operatorAngle = frequency/sampleRate;

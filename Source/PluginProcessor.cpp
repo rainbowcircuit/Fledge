@@ -182,6 +182,9 @@ juce::AudioProcessorEditor* FledgeAudioProcessor::createEditor()
 //==============================================================================
 void FledgeAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
+    float myvalue = 200.0f;
+    apvts.state.setProperty("testValue", myvalue, nullptr);
+    
     copyXmlToBinary(*apvts.copyState().createXml(), destData);
 }
 

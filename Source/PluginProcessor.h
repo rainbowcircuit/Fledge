@@ -66,7 +66,6 @@ public:
         globalDecay = apvts.getRawParameterValue("globalDecay")->load();
         globalSustain = apvts.getRawParameterValue("globalSustain")->load();
         globalRelease = apvts.getRawParameterValue("globalRelease")->load();
-        
         outputRouting = apvts.getRawParameterValue("outputRouting")->load();
         
         for (int oper = 0; oper < 4; oper++){

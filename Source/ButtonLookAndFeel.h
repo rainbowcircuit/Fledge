@@ -23,6 +23,7 @@ public:
     void drawButtonBackground (juce::Graphics &g, juce::Button &button, const juce::Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         auto bounds = button.getLocalBounds().toFloat();
+        bounds.reduce(5, 5);
         float xPos = bounds.getX();
         float yPos = bounds.getY();
         float size = bounds.getHeight();
@@ -145,9 +146,9 @@ public:
         blockPath.addRoundedRectangle(botLeftCoords.x - blockSize/2, botLeftCoords.y - blockSize/2, blockSize, blockSize, 2.0f);
         blockPath.addRoundedRectangle(botRightCoords.x - blockSize/2, botRightCoords.y - blockSize/2, blockSize, blockSize, 2.0f);
 
-        g.setColour(Colors::mainColors[1]); // different color here
-        g.fillPath(blockPath);
-        g.setColour(Colors::mainColors[1]);
+     //   g.setColour(Colors::mainColors[1]); // different color here
+     //   g.fillPath(blockPath);
+        g.setColour(Colors::mainColors[0]);
         g.strokePath(blockPath, juce::PathStrokeType(1.0f));
     }
     
@@ -191,7 +192,7 @@ public:
         g.strokePath(outlinePath, juce::PathStrokeType(1.0f));
 
         bodyPath.addCentredArc(centerCoords.x, centerCoords.y, bodyRadius, bodyRadius, 0.0f, 0.0f, 6.28f, true);
-        g.setColour(Colors::mainColors[2]);
+        g.setColour(Colors::mainColors[0]);
         g.fillPath(bodyPath);
         
         dotPath.addCentredArc(centerCoords.x + dotRadius, centerCoords.y - dotRadius, 1.5f, 1.5f, 0.0f, 0.0f, 6.28f, true);
