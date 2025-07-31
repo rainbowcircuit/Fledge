@@ -6,9 +6,27 @@
 
 //Takuma your waveforms look like a butt
 
-class OperatorDisplayGraphics : public juce::Component
+class OperatorDisplayGraphics : public juce::Component, juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Timer
 {
 public:
+    OperatorDisplayGraphics(FledgeAudioProcessor& p) : audioProcessor(p)
+    {
+        startTimerHz(30);
+        
+        const auto params = audioProcessor.getParameters();
+        for (auto param : params){
+            param->addListener(this);
+        }
+    }
+    
+    ~OperatorDisplayGraphics()
+    {
+        const auto params = audioProcessor.getParameters();
+        for (auto param : params){
+            param->removeListener(this);
+        }
+    }
+    
     void setIndex(int index)
     {
         this->index = index;
@@ -16,8 +34,8 @@ public:
     
     void paint(juce::Graphics &g) override
     {
-        auto bounds = getLocalBounds().toFloat();
-        
+        bounds = getLocalBounds().toFloat();
+        bounds.reduce(5, 5);
         juce::Path bgFill;
         bgFill.addRoundedRectangle(bounds, 5.0f);
         g.setColour(juce::Colour(12, 10, 11));
@@ -28,23 +46,28 @@ public:
         float height = bounds.getHeight();
 
         juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
-        
-        float bgAmpScale = 1.0f;
-        float fgAmpScale = modIndex;
-        if (modIndex >= 1.0f)
-        {
-            bgAmpScale = (9.0f - (modIndex - 1.0f))/9.0f;
-            fgAmpScale = 1.0f;
-        }
-        
-        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, 1.0f, bgAmpScale);
-        g.setColour(juce::Colour(80, 82, 81));
-        g.strokePath(bgWaveform, strokeType);
-        
-        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f, y + height * 0.125f, width * 0.9f, height * 0.75f, ratio, fgAmpScale);
         g.setColour(Colors::mainColors[index]);
-        g.strokePath(fgWaveform, strokeType);
+        
+        juce::Path macroX, macroY;
+        float sliderWidth = width * 0.1f;
+        float sliderHeight = height * 0.05f;
 
+        float macroYPosition = juce::jlimit(y, y + height - sliderWidth - sliderHeight, macroPosition.y);
+        macroY.addRoundedRectangle(x, macroYPosition, sliderHeight, sliderWidth, 2);
+        g.fillPath(macroY);
+
+        float macroXPosition = juce::jlimit(x + sliderHeight, x + width - sliderWidth, macroPosition.x);
+        macroX.addRoundedRectangle(macroXPosition, height * 0.95f, sliderWidth, sliderHeight, 2);
+        g.fillPath(macroX);
+        
+        juce::Path waveform = waveformPath(g, x + width * 0.1f,
+                                           y,
+                                           width * 0.9f,
+                                           height * 0.9f,
+                                           ratio, amplitude);
+        
+        g.strokePath(waveform, strokeType);
+        
     }
     
     juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp)
@@ -65,19 +88,87 @@ public:
     
     void resized() override {}
     
-     
     
-    void setRatioAndAmplitude(float ratio, float fixed, float modIndex, bool isRatio)
+    void setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio)
     {
         this->ratio = ratio;
         this->fixed = fixed;
-        this->modIndex = modIndex;
+        this->amplitude = amplitude/100.0f;
         repaint();
     }
+    
+    void mouseDrag(const juce::MouseEvent& m) override
+    {
+        auto mouse = m.getPosition().toFloat();
+        macroPosition = mouse;
+        setParameter(mouse.x, mouse.y);
+        repaint();
+    }
+    
+    void setParameter(float x, float y)
+    {
+        float ratio = juce::jlimit(0.0f, 1.0f, x/100.0f);
+        audioProcessor.apvts.getParameter("ratio" + juce::String(index))->setValueNotifyingHost(ratio);
+        
+        float amplitude = juce::jlimit(0.0f, 1.0f, 1.0f - (y/100.0f));
+        audioProcessor.apvts.getParameter("amplitude" + juce::String(index))->setValueNotifyingHost(amplitude);
+    }
+    
+    void timerCallback() override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        auto mouse = getMouseXYRelative().toFloat();
+        
+        if (bounds.contains(mouse))
+        {
+            setMouseCursor(juce::MouseCursor::UpDownLeftRightResizeCursor);
+        }
+    }
+    
+    void parameterValueChanged (int parameterIndex, float newValue) override
+    {
+        newValueAtomic.store(newValue);
+        parameterIndexAtomic.store(parameterIndex);
+        triggerAsyncUpdate();
+    }
+    
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
+    
+    void handleAsyncUpdate() override
+    {
+        float newValue = newValueAtomic.load();
+        int parameterIndex = parameterIndexAtomic.load();
+        juce::String newParameterID;
+        
+        if (auto* param = dynamic_cast<juce::AudioProcessorParameterWithID*>(audioProcessor.getParameters()[parameterIndex]))
+        {
+            if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(param))
+            {
+                newParameterID = param->paramID;
+            }
+        }
+        
+        if (newParameterID == "ratio" + juce::String(index))
+        {
+            macroPosition.x = newValue * bounds.getWidth();
+        } else if (newParameterID == "amplitude" + juce::String(index))
+        {
+            macroPosition.y = (1.0f - newValue) * bounds.getHeight();
+        }
+    }
+
 
 private:
+    juce::Rectangle<float> bounds;
+    juce::Point<float> macroPosition;
+    
+    std::atomic<float> newValueAtomic;
+    std::atomic<int> parameterIndexAtomic;
+    
     int index;
-    float ratio, fixed, modIndex;
+    float ratio, fixed, amplitude;
+    
+    FledgeAudioProcessor& audioProcessor;
 };
 
 

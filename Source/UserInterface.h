@@ -79,7 +79,7 @@ private:
     sustainSlider,
     releaseSlider;
 
-    OperatorDisplayGraphics opGraphics;
+    std::unique_ptr<OperatorDisplayGraphics> opGraphics;
     std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };

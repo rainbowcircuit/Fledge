@@ -147,8 +147,9 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     envGraphics = std::make_unique<EnvelopeDisplayGraphics>(audioProcessor, index);
     addAndMakeVisible(*envGraphics);
     
-    addAndMakeVisible(opGraphics);
-    opGraphics.setIndex(index);
+    opGraphics = std::make_unique<OperatorDisplayGraphics>(audioProcessor);
+    addAndMakeVisible(*opGraphics);
+    opGraphics->setIndex(index);
 
     startTimerHz(30);
 }
@@ -184,7 +185,7 @@ void OperatorInterface::resized()
     ratioLabel.setBounds(x + width * 0.025f, y + height * 0.65f, width * 0.15f, height * 0.1f);
     ratioSlider->setBounds(x + width * 0.025f, y + height * 0.65f + labelHeight, width * 0.15f, height * 0.25f);
 
-    opGraphics.setBounds(x + width * 0.25f, y + height * 0.25f, width * 0.275f, height * 0.75f);
+    opGraphics->setBounds(x + width * 0.25f, y + height * 0.25f, width * 0.275f, height * 0.75f);
 
     phaseLabel.setBounds(x + width * 0.365f,  height * 0.025f, width * 0.15f, height * 0.2f);
     phaseSlider->setBounds(x + width * 0.435f, height * 0.025f, width * 0.15f, height * 0.2f);
@@ -242,7 +243,7 @@ void OperatorInterface::timerCallback()
     float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
     float modIndex = audioProcessor.apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
     bool opMode = audioProcessor.apvts.getRawParameterValue("opMode" + juce::String(index))->load();
-    opGraphics.setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
+    opGraphics->setRatioAndAmplitude(ratio, fixed, modIndex, opMode);
     
     float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
     float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
@@ -440,7 +441,7 @@ void MacroControlsInterface::resized()
                                height * 0.15f,
                                height * 0.2f);
     
-    globalModIndexSlider.setBounds(x + width * 0.55f,
+    globalModIndexSlider.setBounds(x + width * 0.65f,
                                    y + height * 0.05f,
                                    height * 0.15f,
                                    height * 0.2f);
@@ -450,7 +451,7 @@ void MacroControlsInterface::resized()
                                  height * 0.15f,
                                  height * 0.2f);
     
-    globalDecaySlider.setBounds(x + width * 0.55f,
+    globalDecaySlider.setBounds(x + width * 0.65f,
                                 y + height * 0.375f,
                                 height * 0.15f,
                                 height * 0.2f);
@@ -460,7 +461,7 @@ void MacroControlsInterface::resized()
                                   height * 0.15f,
                                   height * 0.2f);
     
-    globalReleaseSlider.setBounds(x + width * 0.55f,
+    globalReleaseSlider.setBounds(x + width * 0.65f,
                                   y + height * 0.6f,
                                   height * 0.15f,
                                   height * 0.2f);
@@ -470,7 +471,7 @@ void MacroControlsInterface::resized()
                                 height * 0.2f,
                                 height * 0.1f);
     
-    globalDecayLabel.setBounds(x + width * 0.55f,
+    globalDecayLabel.setBounds(x + width * 0.65f,
                                y + height * 0.25f,
                                height * 0.2f,
                                height * 0.1f);
@@ -480,7 +481,7 @@ void MacroControlsInterface::resized()
                                  height * 0.2f,
                                  height * 0.1f);
     
-    globalReleaseLabel.setBounds(x + width * 0.55f,
+    globalReleaseLabel.setBounds(x + width * 0.65f,
                                  y + height * 0.45f,
                                  height * 0.2f,
                                  height * 0.1f);
