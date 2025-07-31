@@ -34,4 +34,11 @@ inline juce::Colour textColor = juce::Colour(130, 130, 130);
         juce::Colour(89, 247, 199),
         juce::Colour(251, 251, 251),
     };
+
+    namespace LevelMeter
+    {
+        inline juce::Colour background = juce::Colour(35, 37, 36);     // Dark background
+        inline juce::Colour levelOK = juce::Colour(69, 227, 179);     // Green for normal levels (using one of your main colors)
+        inline juce::Colour tooLoud = juce::Colour(255, 80, 80);      // Red for levels above 0dB
+    }
 };

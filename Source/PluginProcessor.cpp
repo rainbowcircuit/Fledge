@@ -166,6 +166,36 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     }
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    
+    const int numChannels = buffer.getNumChannels();
+    const int numSamples = buffer.getNumSamples();
+
+    if (numChannels >= 1) {
+        auto* leftData = buffer.getReadPointer(0);
+        float maxL = 0.0f;
+        for (int i = 0; i < numSamples; ++i) {
+            maxL = juce::jmax(maxL, std::abs(leftData[i]));
+        }
+        outputLevelL.updateIfGreater(maxL);
+    }
+
+    if (numChannels >= 2) {
+        auto* rightData = buffer.getReadPointer(1);
+        float maxR = 0.0f;
+        for (int i = 0; i < numSamples; ++i) {
+            maxR = juce::jmax(maxR, std::abs(rightData[i]));
+        }
+        outputLevelR.updateIfGreater(maxR);
+    } else if (numChannels >= 1) {
+        auto* leftData = buffer.getReadPointer(0);
+        float maxL = 0.0f;
+        for (int i = 0; i < numSamples; ++i) {
+            maxL = juce::jmax(maxL, std::abs(leftData[i]));
+        }
+        outputLevelR.updateIfGreater(maxL);
+    }
+    
+    
 }
 
 //==============================================================================

@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "VoiceProcessor.h"
+#include "Measurement.h"
 
 //==============================================================================
 /**
@@ -135,7 +136,8 @@ public:
     
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
 
-    
+    Measurement& getOutputLevelL() { return outputLevelL; }
+    Measurement& getOutputLevelR() { return outputLevelR; }
     
 private:
     float globalAttack, globalDecay, globalSustain, globalRelease, outputRouting;
@@ -146,6 +148,9 @@ private:
     float outputLevel;
     std::atomic<float> levelAtomic;
     
+    Measurement outputLevelL;
+    Measurement outputLevelR;
+
     juce::Synthesiser synth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessor)
