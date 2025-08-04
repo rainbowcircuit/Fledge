@@ -482,7 +482,7 @@ public:
         float widthIncrement = graphicWidth/domainResolution;
         float heightIncrement = graphicHeight/envelopeSegments;
 
-        for (int j = 0; j < envelopeSegments; j++){
+        for (int j = 0; j <= envelopeSegments; j++){
             int k = envelopeSegments - j;
             float amp3 = ampSmooth[3][k].getNextValue();
             float amp2 = ampSmooth[2][k].getNextValue();
@@ -505,7 +505,6 @@ public:
                                                  + (op3Phase * op[3].gain[3])) * 8.0f, twopi));
 
                 op3Phase = amp3 * op[3].amplitude * op3Sin;
-
                 float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio)
                                                  + (op[2].phase * twopi)
                                                  + ((op0Phase * op[2].gain[0])
@@ -635,7 +634,7 @@ public:
 private:
     int domainResolution = 128;
     int envelopeSegments = 72;
-    float op0Phase, op1Phase, op2Phase, op3Phase;
+    float op0Phase = 0.0f, op1Phase = 0.0f, op2Phase = 0.0f, op3Phase = 0.0f;
     std::vector<float> segmentAmplitude;
     std::array<std::array<juce::SmoothedValue<float>, 72>, 4> ampSmooth;
     juce::dsp::FastMathApproximations fastSin;

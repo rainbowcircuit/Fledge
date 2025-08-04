@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "PluginProcessor.h"
 #include "LookAndFeel.h"
 
 
@@ -34,7 +35,6 @@ public:
             cablePath.startNewSubPath(outputPoint);
             
             float cableWidth = isSelected || isHoveredOn ? 2.0f : 1.0f;
-
             if (isConnected)
             {
                 float dx = inputPoint.x - outputPoint.x;
@@ -153,7 +153,7 @@ public:
     
 private:
     juce::Path cableSelectPath;
-    int outputIndex, inputIndex;
+    int outputIndex = -1, inputIndex = -1;
     bool isConnected = false, isInUse = false, isSelected = false, isHoveredOn = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
 };
@@ -323,6 +323,12 @@ public:
     {
         blockCenterCoords.x = x;
         blockCenterCoords.y = y;
+        
+        // refresh source block
+        blockRectangle = { blockCenterCoords.x - blockSize/2,
+            blockCenterCoords.y - blockSize/2,
+            blockSize, blockSize };
+        
         repaint();
     }
     
@@ -399,6 +405,7 @@ public:
     {
         inputIndex[index] = value;
         DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
+        
     }
 
     int getOperatorIndex()
@@ -455,7 +462,7 @@ class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Lis
 {
 public:
     
-    AlgorithmGraphics()
+    AlgorithmGraphics(FledgeAudioProcessor& p) : audioProcessor(p)
     {
         addAndMakeVisible(op[4]);
         op[4].setOperatorIndex(4);
@@ -484,6 +491,7 @@ public:
             cable[k][j].setInterceptsMouseClicks(false, false);
         }
         
+        setGUIFromParameter();
         addAndMakeVisible(clearCablesButton);
         clearCablesButton.addListener(this);
         
@@ -604,6 +612,8 @@ public:
     {
         float widthScale = x + widthMargin;
         float heightScale = y + heightMargin + height;
+        
+        deleteAllCables();
         switch(selectionIndex)
         {
             case 0:
@@ -611,6 +621,10 @@ public:
                 moveBlock(2, { widthScale + width * 0.5f, heightScale * 0.35f });
                 moveBlock(1, { widthScale + width * 0.5f, heightScale * 0.575f });
                 moveBlock(0, { widthScale + width * 0.5f, heightScale * 0.8f });
+                setCable(3, 0, 2);
+                setCable(2, 0, 1);
+                setCable(1, 0, 0);
+                setCable(0, 0, 4);
                 break;
 
             case 1:
@@ -618,6 +632,10 @@ public:
                 moveBlock(2, {widthScale + width * 0.775f, heightScale * 0.475f });
                 moveBlock(1, {widthScale + width * 0.225f, heightScale * 0.475f });
                 moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.775f });
+                setCable(3, 0, 2);
+                setCable(2, 0, 0);
+                setCable(1, 0, 0);
+                setCable(0, 0, 4);
                 break;
 
             case 2:
@@ -625,6 +643,10 @@ public:
                 moveBlock(2, {widthScale + width * 0.5f, heightScale * 0.4f });
                 moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.4f });
                 moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.65f });
+                setCable(3, 0, 0);
+                setCable(2, 0, 0);
+                setCable(1, 0, 0);
+                setCable(0, 0, 4);
                 break;
 
             case 3:
@@ -632,6 +654,11 @@ public:
                 moveBlock(2, {widthScale + width * 0.225f, heightScale * 0.4f });
                 moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.4f });
                 moveBlock(0, {widthScale + width * 0.5f, heightScale * 0.65f });
+                setCable(3, 0, 2);
+                setCable(3, 1, 1);
+                setCable(2, 0, 0);
+                setCable(1, 0, 0);
+                setCable(0, 0, 4);
                 break;
                 
             case 4:
@@ -639,6 +666,10 @@ public:
                 moveBlock(2, {widthScale + width * 0.75f, heightScale * 0.65f });
                 moveBlock(1, {widthScale + width * 0.25f, heightScale * 0.3f });
                 moveBlock(0, {widthScale + width * 0.25f, heightScale * 0.65f });
+                setCable(3, 0, 2);
+                setCable(2, 0, 4);
+                setCable(1, 0, 0);
+                setCable(0, 0, 4);
                 break;
 
             case 5:
@@ -646,6 +677,11 @@ public:
                 moveBlock(2, {widthScale + width * 0.5f, heightScale * 0.4f });
                 moveBlock(1, {widthScale + width * 0.775f, heightScale * 0.65f });
                 moveBlock(0, {widthScale + width * 0.225f, heightScale * 0.65f });
+                setCable(3, 1, 2);
+                setCable(2, 0, 1);
+                setCable(1, 0, 4);
+                setCable(2, 1, 0);
+                setCable(0, 0, 4);
                 break;
 
             case 6:
@@ -653,12 +689,21 @@ public:
                 moveBlock(2, {widthScale + width * 0.775f, heightScale * 0.65f });
                 moveBlock(1, {widthScale + width * 0.5f, heightScale * 0.65f });
                 moveBlock(0, {widthScale + width * 0.225f, heightScale * 0.65f });
+                setCable(3, 1, 2);
+                setCable(2, 0, 4);
+                setCable(1, 0, 4);
+                setCable(0, 0, 4);
                 break;
             case 7:
                 moveBlock(3, {widthScale + width * 0.9f, heightScale * 0.6f });
                 moveBlock(2, {widthScale + width * 0.625f, heightScale * 0.6f });
                 moveBlock(1, {widthScale + width * 0.375f, heightScale * 0.6f });
                 moveBlock(0, {widthScale + width * 0.1f, heightScale * 0.6f });
+                setCable(3, 1, 4);
+                setCable(2, 0, 4);
+                setCable(1, 0, 4);
+                setCable(0, 0, 4);
+
                 break;
         };
         
@@ -677,47 +722,45 @@ public:
     void mouseDown(const juce::MouseEvent& m) override
     {
         grabKeyboardFocus();
-
+        
+        currentCableIndex.reset();
+        currentOutputBlockIndex.reset();
+        dragState.reset();
+        
         for (int i = 0; i < 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
-            
             selectCable(mouse); // organize this later
             
             for (int j = 0; j < 4; j++)
             {
                  cable[i][j].setIsCableSelected(cable[i][j].getIsMouseOver(mouse));
+                
+                if (op[i].isOverOutputPoint(mouse) && !cable[i][j].getIsInUse())
+                {
+                    currentOutputBlockIndex = i;
+                    currentCableIndex = j;
+
+                    startNewCableOnMouseDown(i, j, mouse);
+                    dragState = 2; // dragging cable
+                    return;
+                }
             }
             
-            if (op[i].isOverOutputPoint(mouse) && op[i].getNumCableAvailable() != 0)
-            {
-                //********** CREATE NEW CABLES **********//
-                int cableIndex = op[i].getNumCableAvailable();
-                auto outputPoint = op[i].getOutputPoint();
-                cable[i][cableIndex].setOutputPoint(outputPoint);
-                cable[i][cableIndex].setMousePoint(mouse);
-                cable[i][cableIndex].setIsInUse(true);
-                
-                currentOutputBlockIndex = i;
-                currentCableIndex = cableIndex;
-                dragState = 2; // dragging cable
-                
-            } else if (op[i].isOverBlock(mouse)) {
-                op[i].setBlockInFocus(true);
+            if (op[i].isOverBlock(mouse)) {
                 moveBlock(i, mouse);
                 followCable(i);
+
+                op[i].setBlockInFocus(true);
                 currentOutputBlockIndex = i;
                 dragState = 1; // dragging block
-                
+                return;
             }
-            /*
-            if (op[point].isOverPoint(mouse) && modifier){
-                
-                DBG("mousedown with modifier");
+            
+            if (op[i].isOverOutputPoint(mouse) || op[i].isOverInputPoint(mouse) || op[i].isOverBlock(mouse)){
+                dragState = 0; // not over anything
+                return;
             }
-             */
-            
-            
         }
     }
     
@@ -729,62 +772,17 @@ public:
         for (int i = 0; i <= 4; i++)
         {
             auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
-            auto globalMouse = op[i].getLocalPoint(this, m.getPosition());
             
-            op[i].setBlockInFocus(false);
-            op[i].setPointInFocus(false);
-
-            
-            
-            /*
-            // REFRESH CABLE POSITION WITH BLOCK
-            for (int j = 0; j < 4; j++)
-            {
-                // iterating all cables for every block.
-                bool inUseAndConnected = cable[i][j].getIsInUse() && cable[i][j].getIsConnected();
-                int outputIndex = cable[i][j].getCableOutputIndex(); // cable origin
-                int inputIndex = cable[i][j].getCableInputIndex(); // cable dest
-
-                if (outputIndex == blk && outputIndex != -1 && inUseAndConnected)
-                {
-                    DBG("outputs associated with block input: " << outputIndex);
-                    auto outputPoint = op[outputIndex].getOutputPoint();
-                    cable[i][j].setOutputPoint(outputPoint);
-                }
-                
-                if (inputIndex == i && inputIndex != -1 && inUseAndConnected)
-                {
-
-                    DBG("inputs associated with block output: " << inputIndex);
-
-                    auto inputPoint = op[inputIndex].getInputPoint();
-                    cable[i][j].setInputPoint(inputPoint);
-                }
-
-                if (op[i].isOverBlock(mouse) && *dragState == 1)
-                {
-                    DBG("current block being dragged: " << i);
-                    // DRAGGING BLOCK
-                    op[i].setBlockInFocus(true);
-                    op[i].setBlockCenter(globalMouse.x, globalMouse.y);
-
-                }
-            }
-            */
-            
-            
-            
-            if (*dragState == 1) // dragging block
+            if (currentOutputBlockIndex.has_value() && *dragState == 1) // dragging block
             {
                 mouse = limitBlockDrag(mouse);
                 moveBlock(blk, mouse);
                 followCable(blk);
-                
+                op[blk].setBlockInFocus(true);
                 averageVanishingPoint();
             }
-
             
-            if (currentCableIndex.has_value() && *dragState == 2)
+            if (currentCableIndex.has_value() && *dragState == 2) // dragging cable end
             {
                 auto outputPoint = op[blk].getOutputPoint();
                 cable[blk][cbl].setIsInUse(true);
@@ -792,20 +790,12 @@ public:
                 cable[blk][cbl].setMousePoint(mouse);
             }
             
-            if(cable[blk][cbl].getIsInUse() && cable[blk][cbl].getIsConnected() && *dragState == 2){
-                int outputIndex = cable[blk][cbl].getCableOutputIndex();
-                auto outputPoint = op[outputIndex].getOutputPoint();
-                auto inputPoint = op[i].getInputPoint();
-                
-                cable[blk][cbl].setOutputPoint(outputPoint);
-                cable[blk][cbl].setInputPoint(inputPoint);
-            }
-            
-            if (op[i].isOverOutputPoint(mouse))
+            if (op[i].isOverOutputPoint(mouse) && *dragState == 2)
             {
                 op[i].setPointInFocus(true);
             }
-            if (op[i].isOverInputPoint(mouse))
+            
+            if (op[i].isOverInputPoint(mouse) && *dragState == 2)
             {
                 op[i].setPointInFocus(true);
             }
@@ -830,9 +820,10 @@ public:
                 cable[blk][cbl].setIsConnected(true);
                 
                 int outputIndex = cable[blk][cbl].getCableOutputIndex();
-                op[outputIndex].setNumCableAvailable(-1);
+         //       op[outputIndex].setNumCableAvailable(-1);
 
                 op[i].setInput(blk, 1.0f);
+                setParameterFromGUI();
                 break;
             }
             
@@ -843,23 +834,22 @@ public:
             }
         }
 
-        currentCableIndex.reset();
-        currentOutputBlockIndex.reset();
-        dragState.reset();
         
         for (int i = 0; i <= 4; i++)
         {
             op[i].setBlockInFocus(false);
             op[i].setPointInFocus(false);
         }
+        
+        currentCableIndex.reset();
+        currentOutputBlockIndex.reset();
+        dragState.reset();
     }
 
     void moveBlock(int blockToMove, juce::Point<float> newPoint)
     {
         // drag block
         op[blockToMove].setBlockCenter(newPoint.x, newPoint.y);
-        op[blockToMove].setBlockInFocus(true);
-    
     }
     
     void followCable(int blockToMove)
@@ -869,6 +859,18 @@ public:
         
         auto inputPoint = op[blockToMove].getInputPoint();
         setCableInputCoords(blockToMove, inputPoint);
+    }
+    
+    void startNewCableOnMouseDown(int originBlock, int cableIndex, juce::Point<float> mouse)
+    {
+        if (op[originBlock].getNumCableAvailable() != 0)
+        {
+            auto outputPoint = op[originBlock].getOutputPoint();
+            cable[originBlock][cableIndex].setOutputPoint(outputPoint);
+            cable[originBlock][cableIndex].setMousePoint(mouse);
+            cable[originBlock][cableIndex].setIsInUse(true);
+            cable[originBlock][cableIndex].setIsConnected(false);
+        }
     }
     
     void setCable(int originBlock, int cableIndex, int destBlock)
@@ -881,6 +883,9 @@ public:
         
         cable[originBlock][cableIndex].setIsInUse(true);
         cable[originBlock][cableIndex].setIsConnected(true);
+        
+        cable[originBlock][cableIndex].setCableInputIndex(destBlock);
+        cable[originBlock][cableIndex].setCableOutputIndex(originBlock);
     }
     
     void setCableOutputCoords(int originBlock, juce::Point<float> newOutputPoint)
@@ -933,6 +938,36 @@ public:
     void disconnectCableFromBlock(int cableToDisconnect, int disconnectedBlock)
     {
         
+    }
+    
+    void setGUIFromParameter()
+    {
+        // do this later
+    //    auto op0Routing = audioProcessor.apvts.getRawParameterValue("operator0Routing")->load();
+        auto output = toBinary4(1);
+        for (int i = 0; i < 4; i++)
+        {
+            if (output[i] > 0){
+                setCable(0, i, 2);
+            }
+        }
+    }
+    
+    void setParameterFromGUI()
+    {
+        for (int i = 0; i <= 4; i++) {
+            auto input = op[i].getInputIndex();
+            int inputInt = fromBinary4(input);
+            
+            auto param = audioProcessor.apvts.getParameter("operator" + juce::String(i) + "Routing");
+            
+            if (i == 4) {
+                param = audioProcessor.apvts.getParameter("outputRouting");
+            }
+
+            float inputFloat = param->convertTo0to1(inputInt);
+            param->setValueNotifyingHost(inputFloat);
+        }
     }
     
     void selectCable(juce::Point<float> mouse)
@@ -1038,6 +1073,8 @@ private:
     std::array<std::array<PatchCable, 4>, 5> cable;
     std::optional<int> currentCableIndex, currentOutputBlockIndex;
     std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
+    
+    FledgeAudioProcessor& audioProcessor;
 };
 
 
@@ -1059,7 +1096,6 @@ public:
     
     void selectAlgorithm()
     {
-
         switch(graphicIndex){
             case 0:
                 block.blockToUse = { 1, 5, 9, 13 };

@@ -37,14 +37,17 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     addAndMakeVisible(waveformDisplay);
     waveformDisplay.setVisible(true);
 
-    addAndMakeVisible(algorithmGraphics);
-    algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, algorithmGraphics);
+    algorithmGraphics = std::make_unique<AlgorithmGraphics>(audioProcessor);
+    addAndMakeVisible(*algorithmGraphics);
+    
+    
+    algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, *algorithmGraphics);
     addAndMakeVisible(*algorithmSelector);
     
     macroInterface = std::make_unique<MacroControlsInterface>(audioProcessor);
     addAndMakeVisible(*macroInterface);
     
-    algorithmGraphics.setVisible(false);
+    algorithmGraphics->setVisible(false);
     algorithmSelector->setVisible(false);
     macroInterface->setVisible(false);
 
@@ -98,7 +101,7 @@ void FledgeAudioProcessorEditor::resized()
 
     presetInterface->setBounds(5, 5, 760, 50);
     waveformDisplay.setBounds(5, 60, 280, 490);
-    algorithmGraphics.setBounds(5, 60, 280, 350);
+    algorithmGraphics->setBounds(5, 60, 280, 350);
     algorithmSelector->setBounds(5, 400, 280, 150);
     macroInterface->setBounds(5, 60, 280, 490);
 

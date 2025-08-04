@@ -73,19 +73,19 @@ public:
         if (buttonClicked == &showWaveformButton)
         {
             waveformDisplay.setVisible(true);
-            algorithmGraphics.setVisible(false);
+            algorithmGraphics->setVisible(false);
             algorithmSelector->setVisible(false);
             macroInterface->setVisible(false);
 
         } else if (buttonClicked == &showAlgorithmButton) {
             waveformDisplay.setVisible(false);
-            algorithmGraphics.setVisible(true);
+            algorithmGraphics->setVisible(true);
             algorithmSelector->setVisible(true);
             macroInterface->setVisible(false);
 
         } else if (buttonClicked == &showMacrosButton) {
             waveformDisplay.setVisible(false);
-            algorithmGraphics.setVisible(false);
+            algorithmGraphics->setVisible(false);
             algorithmSelector->setVisible(false);
             macroInterface->setVisible(true);
         }
@@ -109,7 +109,7 @@ private:
     
     juce::TextButton showWaveformButton, showAlgorithmButton, showMacrosButton;
     WaveformDisplayGraphics waveformDisplay;
-    AlgorithmGraphics algorithmGraphics;
+    std::unique_ptr<AlgorithmGraphics> algorithmGraphics;
     std::unique_ptr<AlgorithmSelectInterface> algorithmSelector;
     
     std::unique_ptr<LevelMeter> outputLevelMeter;

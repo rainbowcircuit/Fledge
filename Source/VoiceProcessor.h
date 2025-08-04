@@ -53,6 +53,7 @@ public:
         {
             op[i].stopNote();
         }
+        clearCurrentNote();
     }
     
     void setEnvelope(int index, float attack, float decay, float sustain, float release, float globalAttack, float globalDecay, float globalSustain, float globalRelease)

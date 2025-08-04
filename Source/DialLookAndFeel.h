@@ -16,6 +16,12 @@
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+    DialLookAndFeel()
+    {
+        setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+        setColour(juce::Slider::textBoxTextColourId, juce::Colour(200, 200, 200));
+    }
+    
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider &slider) override
     {
         auto bounds = slider.getLocalBounds().toFloat();
@@ -72,6 +78,33 @@ public:
                                   1.5, 1.5, 0.0f, 0.0f, pi * 2, true);
         g.setColour(juce::Colour(200, 200, 200));
         g.fillPath(dialDotPath);
+    }
+    
+    void fillTextEditorBackground(juce::Graphics& g, int width, int height, juce::TextEditor& textEditor) override
+    {
+        g.setColour(juce::Colours::transparentBlack);
+        juce::Path bgPath;
+        bgPath.addRoundedRectangle(textEditor.getLocalBounds().reduced(4.0f, 0.0f), 3.0f);
+        g.fillPath(bgPath);
+    }
+
+
+    juce::Label* createSliderTextBox(juce::Slider& slider) override
+    {
+        auto label = LookAndFeel_V4::createSliderTextBox(slider);
+        
+        label->setFont(juce::FontOptions(12.0f, juce::Font::plain));
+        label->setJustificationType(juce::Justification::centred);
+        label->setColour(juce::Label::textColourId, juce::Colour(200, 200, 200));
+
+        label->onEditorShow = [label]()
+        {
+            if(auto* editor = label->getCurrentTextEditor())
+            {
+                editor->setJustification(juce::Justification::centred);
+            }
+        };
+        return label;
     }
 };
 
