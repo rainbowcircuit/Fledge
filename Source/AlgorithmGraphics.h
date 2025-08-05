@@ -14,6 +14,31 @@
 #include "LookAndFeel.h"
 
 
+class AlgorithmHelper
+{
+public:
+    std::array<float, 4> toBinary4(int input)
+   {
+       std::array<float, 4> bits;
+       for (int i = 0; i < 4; ++i)
+           bits[i] = (input >> i) & 1;
+       return bits;
+   }
+    
+    int fromBinary4(const std::array<float, 4>& bits)
+    {
+        int result = 0;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (bits[i] >= 0.5f)
+           //     result |= (1 << (3 - i));
+            result |= (1 << i);
+
+        }
+        return result;
+    }
+};
+
 class PatchCable : public juce::Component
 {
 public:
@@ -156,11 +181,12 @@ private:
     int outputIndex = -1, inputIndex = -1;
     bool isConnected = false, isInUse = false, isSelected = false, isHoveredOn = false;
     juce::Point<float> outputPoint, inputPoint, mousePoint;
+    
 };
 
 
 
-class OperatorBlock : public juce::Component
+class OperatorBlock : public juce::Component, AlgorithmHelper
 {
 
 public:
@@ -392,11 +418,7 @@ public:
     
     
     
-    
-    //
-    
-    
-    std::array<float, 4> getInputIndex()
+    std::array<float, 4>& getInputIndex()
     {
         return inputIndex;
     }
@@ -405,8 +427,21 @@ public:
     {
         inputIndex[index] = value;
         DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
-        
     }
+    
+    void setInput(std::array<float, 4> inputIndex)
+    {
+        this->inputIndex = inputIndex;
+     //   DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
+    }
+    
+    void setInput(int integerIndex)
+    {
+        inputIndex = toBinary4(integerIndex);
+        DBG("operator " << juce::String(operatorIndex) << ": " << inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
+    }
+
+
 
     int getOperatorIndex()
     {
@@ -456,9 +491,11 @@ private:
     perspectiveTopRight,
     perspectiveBotLeft,
     perspectiveBotRight;
+    
+
 };
 
-class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener
+class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener, AlgorithmHelper
 {
 public:
     
@@ -703,7 +740,6 @@ public:
                 setCable(2, 0, 4);
                 setCable(1, 0, 4);
                 setCable(0, 0, 4);
-
                 break;
         };
         
@@ -715,6 +751,7 @@ public:
         if (button == &clearCablesButton)
         {
             deleteAllCables();
+            clearAllInputs();
         }
     }
 
@@ -819,9 +856,7 @@ public:
                 cable[blk][cbl].setIsInUse(true);
                 cable[blk][cbl].setIsConnected(true);
                 
-                int outputIndex = cable[blk][cbl].getCableOutputIndex();
-         //       op[outputIndex].setNumCableAvailable(-1);
-
+                
                 op[i].setInput(blk, 1.0f);
                 setParameterFromGUI();
                 break;
@@ -942,6 +977,7 @@ public:
     
     void setGUIFromParameter()
     {
+        /*
         // do this later
     //    auto op0Routing = audioProcessor.apvts.getRawParameterValue("operator0Routing")->load();
         auto output = toBinary4(1);
@@ -951,22 +987,33 @@ public:
                 setCable(0, i, 2);
             }
         }
+         */
     }
     
     void setParameterFromGUI()
     {
-        for (int i = 0; i <= 4; i++) {
-            auto input = op[i].getInputIndex();
-            int inputInt = fromBinary4(input);
+        // set output
+        int outputGainInt = fromBinary4(op[4].getInputIndex());
+        auto outputParam = audioProcessor.apvts.getParameter("outputRouting");
+        
+        if (outputParam != nullptr){
+            float outputGainFloat = outputParam->convertTo0to1(outputGainInt);
+            outputParam->setValueNotifyingHost(outputGainFloat);
+        } else {
+            DBG("Parameter not found for output routing");
+        }
+        
+        // set operators
+        for (int i = 0; i < 4; i++) {
+            int operatorGainInt = fromBinary4(op[i].getInputIndex());
+            auto operatorParam = audioProcessor.apvts.getParameter("operator" + juce::String(i) + "Routing");
             
-            auto param = audioProcessor.apvts.getParameter("operator" + juce::String(i) + "Routing");
-            
-            if (i == 4) {
-                param = audioProcessor.apvts.getParameter("outputRouting");
+            if (operatorParam != nullptr){
+                float operatorGainFloat = operatorParam->convertTo0to1(operatorGainInt);
+                operatorParam->setValueNotifyingHost(operatorGainFloat);
+            } else {
+                DBG("Parameter not found for index: " << i);
             }
-
-            float inputFloat = param->convertTo0to1(inputInt);
-            param->setValueNotifyingHost(inputFloat);
         }
     }
     
@@ -983,14 +1030,19 @@ public:
     void deleteAllCables()
     {
         for (int i = 0; i < 4; i++) {
-
             for (int j = 0; j < 4; j++) {
                 cable[i][j].setIsInUse(false);
                 cable[i][j].setIsConnected(false);
                 cable[i][j].setCableInputIndex(-1);
                 cable[i][j].setCableOutputIndex(-1);
-                op[i].setInput(j, 0);
             }
+        }
+    }
+    
+    void clearAllInputs()
+    {
+        for (int i = 0; i <= 4; i++) {
+                op[i].setInput(0);
         }
     }
 
@@ -1002,8 +1054,24 @@ public:
                 {
                     cable[i][j].setIsInUse(false);
                     cable[i][j].setIsConnected(false);
-                    int outputIndex = cable[i][j].getCableOutputIndex();
-                    op[outputIndex].setNumCableAvailable(1);
+                    
+                    
+                    // when cable is detached, it modifies the destination
+                    int outputIndex = cable[i][j].getCableOutputIndex(); // cable origin
+                    int inputIndex = cable[i][j].getCableInputIndex(); // cable destination
+
+                    auto blockInputIndex = op[inputIndex].getInputIndex(); // array of
+                    DBG("recieved input block to modify: " << inputIndex);
+                    DBG("before: " << blockInputIndex[0] << blockInputIndex[1] << blockInputIndex[2] << blockInputIndex[3]);
+
+                    blockInputIndex[outputIndex] = 0.0f;
+                    DBG("modified output index: " << outputIndex);
+                    DBG("after: " << blockInputIndex[0] << blockInputIndex[1] << blockInputIndex[2] << blockInputIndex[3]);
+
+                    int modifiedInputIndex = fromBinary4(blockInputIndex);
+                    op[inputIndex].setInput(modifiedInputIndex);
+                    cable[i][j].setCableOutputIndex(-1);
+
                 }
             }
         }
@@ -1038,43 +1106,28 @@ public:
         if (key.getKeyCode() == juce::KeyPress::backspaceKey)
         {
             deleteSelectedCable();
+        //    clearAllInputs();
+            setParameterFromGUI();
         }
         return true;
     }
 
     
+    std::array<OperatorBlock, 5> op;
 private:
-    std::array<float, 4> toBinary4(int input)
-   {
-       std::array<float, 4> bits;
-       for (int i = 0; i < 4; ++i)
-           bits[i] = (input >> i) & 1;
-       return bits;
-   }
-    
-    int fromBinary4(const std::array<float, 4>& bits)
-    {
-        int result = 0;
-        for (int i = 0; i < 4; ++i)
-        {
-            if (bits[i] >= 0.5f)
-                result |= (1 << (3 - i));
-        }
-        return result;
-    }
-    
     juce::Rectangle<float> bounds;
     juce::Point<float> vp;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
     juce::TextButton clearCablesButton;
 
     
-    std::array<OperatorBlock, 5> op;
     std::array<std::array<PatchCable, 4>, 5> cable;
     std::optional<int> currentCableIndex, currentOutputBlockIndex;
     std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
     
     FledgeAudioProcessor& audioProcessor;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AlgorithmGraphics)
 };
 
 

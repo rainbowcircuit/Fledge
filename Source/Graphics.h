@@ -12,7 +12,6 @@ public:
     OperatorDisplayGraphics(FledgeAudioProcessor& p) : audioProcessor(p)
     {
         startTimerHz(30);
-        
         const auto params = audioProcessor.getParameters();
         for (auto param : params){
             param->addListener(this);
@@ -52,7 +51,7 @@ public:
         float sliderWidth = width * 0.1f;
         float sliderHeight = height * 0.05f;
 
-        float macroYPosition = juce::jlimit(y, y + height - sliderWidth - sliderHeight, macroPosition.y);
+        float macroYPosition = juce::jlimit(y, y + height - sliderWidth - (sliderHeight * 2.0f), macroPosition.y);
         macroY.addRoundedRectangle(x, macroYPosition, sliderHeight, sliderWidth, 2);
         g.fillPath(macroY);
 
@@ -60,25 +59,43 @@ public:
         macroX.addRoundedRectangle(macroXPosition, height * 0.95f, sliderWidth, sliderHeight, 2);
         g.fillPath(macroX);
         
-        juce::Path waveform = waveformPath(g, x + width * 0.1f,
+        juce::Path bgWaveform = waveformPath(g, x + width * 0.1f,
                                            y,
                                            width * 0.9f,
-                                           height * 0.9f,
-                                           ratio, amplitude);
+                                           height * 0.8f,
+                                           1.0f, 1.0f, 0.0f);
+        g.setColour(Colors::greyColor);
+        g.strokePath(bgWaveform, strokeType);
+
         
-        g.strokePath(waveform, strokeType);
+        juce::Path fgWaveform = waveformPath(g, x + width * 0.1f,
+                                           y,
+                                           width * 0.9f,
+                                           height * 0.8f,
+                                           ratio, amplitude, phase);
+        g.setColour(Colors::mainColors[index]);
+        g.strokePath(fgWaveform, strokeType);
         
     }
     
-    juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp)
+    juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp, float phase)
     {
         juce::Path graphicPath;
         graphicPath.startNewSubPath(x, y + height/2);
+        
+        float twopi = juce::MathConstants<float>::twoPi;
         int domainResolution = 128;
         float widthIncrement = width/domainResolution;
-        for (int i = 0; i < domainResolution; i++)
+        float phaseScale = domainResolution/twopi;
+        phase = (phase/100.0f) * twopi;
+        
+        float sinStart = std::sin((0/phaseScale) * freq + phase);
+        graphicPath.startNewSubPath(x + widthIncrement * 0, (y + height/2) + (height * sinStart/2) * amp);
+
+        for (int i = 1; i < domainResolution; i++)
         {
-            float sin = 1.0f * std::sin((i/40.7f) * freq * 2.0f);
+            
+            float sin = std::sin((i/phaseScale) * freq + phase);
             graphicPath.lineTo(x + widthIncrement * i, (y + height/2) + (height * sin/2) * amp);
         }
     
@@ -89,11 +106,12 @@ public:
     void resized() override {}
     
     
-    void setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio)
+    void setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio, float phase)
     {
         this->ratio = ratio;
         this->fixed = fixed;
         this->amplitude = amplitude/100.0f;
+        this->phase = phase;
         repaint();
     }
     
@@ -166,7 +184,7 @@ private:
     std::atomic<int> parameterIndexAtomic;
     
     int index;
-    float ratio, fixed, amplitude;
+    float ratio, fixed, amplitude, phase;
     
     FledgeAudioProcessor& audioProcessor;
 };
@@ -482,7 +500,7 @@ public:
         float widthIncrement = graphicWidth/domainResolution;
         float heightIncrement = graphicHeight/envelopeSegments;
 
-        for (int j = 0; j <= envelopeSegments; j++){
+        for (int j = 0; j < envelopeSegments; j++){
             int k = envelopeSegments - j;
             float amp3 = ampSmooth[3][k].getNextValue();
             float amp2 = ampSmooth[2][k].getNextValue();
@@ -491,7 +509,7 @@ public:
             
             float heightScaled = y + heightMargin + heightIncrement * j;
             
-            float sin0Phase = fmodf(((0/phaseScale) * op[0].ratio * 2.0f), twopi);
+            float sin0Phase = fmodf(((0/phaseScale) * op[0].ratio * 2.0f) + op[0].phase * twopi, twopi);
             float sin = amp0 * fastSin.sin(sin0Phase);
 
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
@@ -543,7 +561,7 @@ public:
             }
         }
         
-        graphicLines = graphicLines.createPathWithRoundedCorners(20.0f);
+        graphicLines = graphicLines.createPathWithRoundedCorners(40.0f);
         g.setColour(Colors::mainColors[0]);
         juce::PathStrokeType strokeType(1.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
         g.strokePath(graphicLines, strokeType);
@@ -552,7 +570,6 @@ public:
     void setGainCoefficients(int index, int gainIndex, int outputGainIndex)
     {
         outputGain = toBinary4(outputGainIndex);
-
         switch(index){
             case 0:
                 op[0].gain = toBinary4(gainIndex);

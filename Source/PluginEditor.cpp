@@ -33,13 +33,11 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     showMacrosButton.addListener(this);
     showMacrosButton.setLookAndFeel(&showMacroLAF);
 
-    
     addAndMakeVisible(waveformDisplay);
     waveformDisplay.setVisible(true);
 
     algorithmGraphics = std::make_unique<AlgorithmGraphics>(audioProcessor);
     addAndMakeVisible(*algorithmGraphics);
-    
     
     algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, *algorithmGraphics);
     addAndMakeVisible(*algorithmSelector);
@@ -58,12 +56,13 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     );
     addAndMakeVisible(*outputLevelMeter);
 
-
+    initializeParameter();
     
     const auto params = audioProcessor.getParameters();
     for (auto param : params){
         param->addListener(this);
     }
+    
     setSize (765, 600);
 }
 

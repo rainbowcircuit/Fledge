@@ -99,7 +99,6 @@ public:
     
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
-        
         juce::String newParameterID;
         float scaledValue = 0.0f;
 
@@ -116,6 +115,7 @@ public:
         globalSustain = juce::String("globalSustain") == newParameterID ? scaledValue : globalSustain;
         globalRelease = juce::String("globalRelease") == newParameterID ? scaledValue : globalRelease;
         
+
         for (int oper = 0; oper < 4; oper++)
         {
             juce::String incr = juce::String(oper);
@@ -129,9 +129,12 @@ public:
             fixed[oper] = juce::String("fixed") + incr == newParameterID ? scaledValue : fixed[oper];
             amplitude[oper] = juce::String("amplitude") + incr == newParameterID ? scaledValue : amplitude[oper];
             phase[oper] = juce::String("phase") + incr == newParameterID ? scaledValue : phase[oper];
+            
             juce::String routingID = juce::String("operator") + incr + juce::String("Routing");
             routing[oper] = routingID == newParameterID ? scaledValue : routing[oper];
         }
+        
+        outputRouting = juce::String("outputRouting") == newParameterID ? scaledValue : outputRouting;
     }
     
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}

@@ -16,6 +16,7 @@
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+    
     DialLookAndFeel()
     {
         setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
@@ -120,6 +121,7 @@ public:
         addAndMakeVisible(textBox);
         textBox.setEditable(false, false, false);
         textBox.setInterceptsMouseClicks(false, false);
+        textBox.setColour(juce::Label::outlineWhenEditingColourId, juce::Colours::transparentBlack);
         
         // initialize displayed value
         auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
@@ -202,7 +204,12 @@ public:
         textValueToParamValue(normalized);
         repaint();
     }
-
+    
+    void editorHidden(juce::Label *, juce::TextEditor &) override
+    {
+        textBox.setInterceptsMouseClicks(false, false);
+    }
+    
     void textValueToParamValue(float value)
     {
         value = juce::jlimit(0.0f, 1.0f, value);

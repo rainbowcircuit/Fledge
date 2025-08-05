@@ -250,8 +250,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
     
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
 
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "algorithmPreset", 1 }, "Algorithm Preset", 0, 7, 1));
+    std::array<float, 4> defaultAmplitude = { 100.0f, 0.0f, 0.0f, 0.0f };
+    std::array<int, 4> defaultRouting = { 2, 4, 8, 0 };
 
+    
     for (int oper = 0; oper < 4; oper++)
     {
         //******** Envelope Controls ********//
@@ -296,7 +298,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         juce::String amplitudeID = "amplitude" + juce::String(oper);
         juce::String amplitudeName = "Amplitude " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), 0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), defaultAmplitude[oper]));
         
         juce::String phaseID = "phase" + juce::String(oper);
         juce::String phaseName = "Phase " + juce::String(oper);
@@ -305,9 +307,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::create
         
         //******** Operator Input ********//
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
-        juce::String operatorRoutingName = "Operator " + juce::String(oper) + " Routing";
+        juce::String operatorRoutingName = "Op " + juce::String(oper) + " Routing";
         
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, oper + 1 ));
+        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, defaultRouting[oper] ));
         
     }
     
