@@ -27,8 +27,8 @@ public:
             juce::Colour(255, 255, 255).withAlpha((float)0.025f),
             bounds.getX() + bounds.getWidth(),
             bounds.getCentreY(), false};
-        g.setGradientFill(highlight);
-        g.strokePath(boundsPath, juce::PathStrokeType(1.25f));
+     //   g.setGradientFill(highlight);
+     //   g.strokePath(boundsPath, juce::PathStrokeType(1.25f));
     }
     
     void fillControlPanel(juce::Graphics &g, juce::Rectangle<float> bounds)

@@ -232,6 +232,16 @@ void FledgeAudioProcessor::setStateInformation (const void* data, int sizeInByte
     params->apvts.replaceState(newTree);
 }
 
+void FledgeAudioProcessor::saveEditorState(int width, int height, int index, juce::Point<float> operatorPosition)
+{
+    params->apvts.state.setProperty("editorWidth", width, nullptr);
+    params->apvts.state.setProperty("editorHeight", height, nullptr);
+    
+    juce::String indexStr = juce::String(index);
+    params->apvts.state.setProperty("oper" + indexStr + "XPos", operatorPosition.x, nullptr);
+    params->apvts.state.setProperty("oper" + indexStr + "YPos", operatorPosition.y, nullptr);
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

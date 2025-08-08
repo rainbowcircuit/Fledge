@@ -56,6 +56,9 @@ public:
     void paint(juce::Graphics &g) override;
     void resized() override;
     
+    std::unique_ptr<OperatorDisplayGraphics> opGraphics;
+    std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
+
 private:
     void setLabel(juce::Label &l, juce::String labelText, float size);
     void timerCallback() override;
@@ -80,8 +83,6 @@ private:
     sustainSlider,
     releaseSlider;
 
-    std::unique_ptr<OperatorDisplayGraphics> opGraphics;
-    std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
     FledgeAudioProcessor& audioProcessor;
 };
 

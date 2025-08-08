@@ -39,6 +39,15 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     algorithmGraphics = std::make_unique<AlgorithmGraphics>(audioProcessor);
     addAndMakeVisible(*algorithmGraphics);
     
+    for (int oper = 0; oper < 4; oper++){
+        juce::String indexStr = juce::String(oper);
+
+        float x = audioProcessor.params->apvts.state.getProperty("oper" + indexStr + "XPos", 100);
+        float y = audioProcessor.params->apvts.state.getProperty("oper" + indexStr + "XPos", 50);
+        
+        algorithmGraphics->moveBlock(oper, { x, y });
+    }
+    
     algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, *algorithmGraphics);
     addAndMakeVisible(*algorithmSelector);
     
@@ -56,26 +65,15 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     );
     addAndMakeVisible(*outputLevelMeter);
 
-    initializeParameter();
-    
-    const auto params = audioProcessor.getParameters();
-    for (auto param : params){
-        param->addListener(this);
-    }
-    
     setSize (770, 605);
+    startTimerHz(30);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
 {
-    const auto& params = audioProcessor.getParameters();
-    for (auto param : params){
-        param->removeListener(this);
-    }
     showWaveformButton.removeListener(this);
     showAlgorithmButton.removeListener(this);
     showMacrosButton.removeListener(this);
-
 }
 
 //==============================================================================
@@ -92,8 +90,17 @@ void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
 
 void FledgeAudioProcessorEditor::resized()
 {
+    const int width = getWidth();
+    const int height = getHeight();
+    const float margin = width * 0.00641f;
+
+    
     for (int oper = 0; oper < 4; oper++)
     {
+        if (auto* processor = dynamic_cast<FledgeAudioProcessor*>(&audioProcessor))
+        {
+            processor->saveEditorState(getWidth(), getHeight(), oper, algorithmGraphics->op[oper].getBlockCenter());
+        }
         opInterface[oper]->setBounds(285, oper * 125 + 100, 480, 125);
     }
 
@@ -108,4 +115,33 @@ void FledgeAudioProcessorEditor::resized()
     showWaveformButton.setBounds(5, 555, 94, 40);
     showAlgorithmButton.setBounds(100, 555, 94, 40);
     showMacrosButton.setBounds(195, 555, 94, 40);
+}
+
+
+
+void FledgeAudioProcessorEditor::timerCallback()
+{
+    for (int oper = 0; oper < 4; oper++)
+    {
+        waveformDisplay.setEnvelope(oper,
+                                    audioProcessor.params->attack[oper]->getSafe(),
+                                    audioProcessor.params->decay[oper]->getSafe(),
+                                    audioProcessor.params->sustain[oper]->getSafe(),
+                                    audioProcessor.params->release[oper]->getSafe());
+        
+        waveformDisplay.setFMParameter(oper,
+                                       audioProcessor.params->ratio[oper]->getSafe(),
+                                       0.0f,
+                                       true,
+                                       audioProcessor.params->amplitude[oper]->getSafe(),
+                                       audioProcessor.params->phase[oper]->getSafe());
+                
+        waveformDisplay.setGainCoefficients(oper,
+                                            audioProcessor.params->routing[oper]->getSafe(),
+                                            audioProcessor.params->outputRouting->getSafe());
+
+        algorithmGraphics->op[oper].setInput(audioProcessor.params->routing[oper]->getSafe());
+    }
+    algorithmGraphics->op[4].setInput(audioProcessor.params->outputRouting->getSafe());
+    waveformDisplay.repaint(); // paint for internal slew limiting
 }

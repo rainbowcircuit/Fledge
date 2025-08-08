@@ -20,7 +20,7 @@
 //==============================================================================
 /**
 */
-class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener, juce::Button::Listener, GraphicsHelper
+class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer, juce::Button::Listener, GraphicsHelper
 {
 public:
     FledgeAudioProcessorEditor (FledgeAudioProcessor&);
@@ -29,80 +29,8 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-    
-    void initializeParameter()
-    {
-        for (int oper = 0; oper < 4; oper++)
-        {
-            juce::String attackID = "attack" + juce::String(oper);
-            juce::String decayID = "decay" + juce::String(oper);
-            juce::String sustainID = "sustain" + juce::String(oper);
-            juce::String releaseID = "release" + juce::String(oper);
+    void timerCallback() override;
 
-            float attack = audioProcessor.params->apvts.getRawParameterValue(attackID)->load();
-            float decay = audioProcessor.params->apvts.getRawParameterValue(decayID)->load();
-            float sustain = audioProcessor.params->apvts.getRawParameterValue(sustainID)->load();
-            float release = audioProcessor.params->apvts.getRawParameterValue(releaseID)->load();
-            
-            waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
-
-            juce::String ratioID = "ratio" + juce::String(oper);
-            juce::String amplitudeID = "amplitude" + juce::String(oper);
-            juce::String phaseID = "phase" + juce::String(oper);
-
-            float ratio = audioProcessor.params->apvts.getRawParameterValue(ratioID)->load();
-            float amplitude = audioProcessor.params->apvts.getRawParameterValue(amplitudeID)->load();
-            float phase = audioProcessor.params->apvts.getRawParameterValue(phaseID)->load();
-
-            juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
-            float gainIndex = audioProcessor.params->apvts.getRawParameterValue(gainIndexID)->load();
-            float outputGainIndex = audioProcessor.params->apvts.getRawParameterValue("outputRouting")->load();
-
-            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude, phase);
-            waveformDisplay.setGainCoefficients(oper, gainIndex, outputGainIndex);
-        }
-    }
-    
-    void parameterValueChanged (int parameterIndex, float newValue) override
-    {
-        
-        float outputGainIndex = audioProcessor.params->apvts.getRawParameterValue("outputRouting")->load();
-        algorithmGraphics->op[4].setInput(outputGainIndex);
-
-        for (int oper = 0; oper < 4; oper++)
-        {
-            juce::String attackID = "attack" + juce::String(oper);
-            juce::String decayID = "decay" + juce::String(oper);
-            juce::String sustainID = "sustain" + juce::String(oper);
-            juce::String releaseID = "release" + juce::String(oper);
-
-            float attack = audioProcessor.params->apvts.getRawParameterValue(attackID)->load();
-            float decay = audioProcessor.params->apvts.getRawParameterValue(decayID)->load();
-            float sustain = audioProcessor.params->apvts.getRawParameterValue(sustainID)->load();
-            float release = audioProcessor.params->apvts.getRawParameterValue(releaseID)->load();
-            
-            waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
-
-            juce::String ratioID = "ratio" + juce::String(oper);
-            juce::String amplitudeID = "amplitude" + juce::String(oper);
-            juce::String phaseID = "phase" + juce::String(oper);
-
-            float ratio = audioProcessor.params->apvts.getRawParameterValue(ratioID)->load();
-            float amplitude = audioProcessor.params->apvts.getRawParameterValue(amplitudeID)->load();
-            float phase = audioProcessor.params->apvts.getRawParameterValue(phaseID)->load();
-
-            juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
-            float gainIndex = audioProcessor.params->apvts.getRawParameterValue(gainIndexID)->load();
-            
-            algorithmGraphics->op[oper].setInput(gainIndex);
-
-            waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude, phase);
-            waveformDisplay.setGainCoefficients(oper, gainIndex, outputGainIndex);
-
-        }
-    }
-    
-    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
     void buttonClicked(juce::Button* buttonClicked) override
     {
         if (buttonClicked == &showWaveformButton)
@@ -130,8 +58,8 @@ public:
     
     void initializeEditorState()
     {
-        editorState.setProperty("width", 0.5f, nullptr);
-        editorState.setProperty("height", 0.5f, nullptr);
+   //     editorState.setProperty("width", 0.5f, nullptr);
+    //    editorState.setProperty("height", 0.5f, nullptr);
     }
 
 
@@ -149,8 +77,6 @@ private:
     
     std::unique_ptr<LevelMeter> outputLevelMeter;
 
-    
     FledgeAudioProcessor& audioProcessor;
-    juce::ValueTree editorState;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessorEditor)
 };

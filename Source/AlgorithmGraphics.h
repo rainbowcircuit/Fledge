@@ -566,10 +566,10 @@ public:
                                     localBounds.getWidth() * 0.15f,
                                     localBounds.getHeight() * 0.05f);
         
-        op[0].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
-        op[1].setBlockCenter(x + blockIncr * 2, y);
-        op[2].setBlockCenter(x + blockIncr, y + blockIncr);
-        op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
+     //   op[0].setBlockCenter(x + blockIncr * 3, y + blockIncr * 3);
+     //   op[1].setBlockCenter(x + blockIncr * 2, y);
+     //   op[2].setBlockCenter(x + blockIncr, y + blockIncr);
+      //  op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
         op[4].setBlockCenter(x + widthMargin + width/2, y + height * 1.075f); // output
         averageVanishingPoint();

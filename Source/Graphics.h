@@ -12,7 +12,6 @@ class OperatorDisplayGraphics : public juce::Component, juce::AudioProcessorPara
 public:
     OperatorDisplayGraphics(FledgeAudioProcessor& p) : audioProcessor(p)
     {
-        startTimerHz(30);
         const auto params = audioProcessor.getParameters();
         for (auto param : params){
             param->addListener(this);
@@ -469,7 +468,7 @@ private:
 };
 
 
-class WaveformDisplayGraphics : public juce::Component, juce::Timer
+class WaveformDisplayGraphics : public juce::Component
 {
 public:
     WaveformDisplayGraphics()
@@ -481,8 +480,6 @@ public:
                 ampSmooth[i][k].reset(5);
             }
         }
-        
-        startTimerHz(60);
     }
     
     void paint(juce::Graphics &g) override
@@ -587,6 +584,7 @@ public:
                 op[3].gain = toBinary4(gainIndex);
                 break;
         }
+        
         repaint();
     }
     
@@ -629,7 +627,6 @@ public:
             float attackDecayTime = (op[index].attack + op[index].decay);
             op[index].attackSegment = (op[index].attack/attackDecayTime) * 36;
             op[index].decaySegment = (op[index].decay/attackDecayTime) * 36;
-            
             float releaseClamped = juce::jlimit(0.0f, 20.0f, op[index].release);
             op[index].releaseSegment = std::pow(releaseClamped/20.0f, 0.5f) * 24;
         }
@@ -646,10 +643,6 @@ public:
         }
     }
     
-    void timerCallback() override
-    {
-        repaint();
-    }
 
 private:
     int domainResolution = 128;

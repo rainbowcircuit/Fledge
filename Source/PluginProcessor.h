@@ -57,7 +57,9 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-
+    void saveEditorState(int width, int height, int index, juce::Point<float> operatorPosition);
+    
+    
     Measurement& getOutputLevelL() { return outputLevelL; }
     Measurement& getOutputLevelR() { return outputLevelR; }
     
