@@ -12,7 +12,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
-
+#include "GraphicsUtility.h"
 
 class AlgorithmHelper
 {
@@ -200,7 +200,7 @@ public:
         auto bounds = getLocalBounds().toFloat();
         bounds.reduce(5, 5);
         
-        blockSize = bounds.getWidth() * 0.165f;
+        blockSize = bounds.getWidth() * 0.15f;
         blockRectangle = { blockCenterCoords.x - blockSize/2,
             blockCenterCoords.y - blockSize/2,
             blockSize, blockSize };
@@ -219,9 +219,9 @@ public:
         } else {
             drawBlockPoint(g, blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
             g.setColour(juce::Colour(120, 120, 120));
+            g.setFont(juce::FontOptions(12.0f));
             g.drawText("Output", blockRectangle.getX(), blockRectangle.getY() - 16.0f, blockRectangle.getWidth(), blockRectangle.getHeight(), juce::Justification::centred);
         }
-        
     }
     
     juce::Point<float> interpolateToVanishing(juce::Point<float> origin)
@@ -495,7 +495,7 @@ private:
 
 };
 
-class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener, AlgorithmHelper
+class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener, AlgorithmHelper, GraphicsHelper
 {
 public:
     
@@ -544,6 +544,7 @@ public:
     void paint(juce::Graphics& g) override
     {
         auto bounds = getLocalBounds().toFloat();
+        fillControlPanel(g, bounds);
         calculateCoordinates(bounds);
         
         op[0].setVanishingPoint(vp, 0.1f);
@@ -551,7 +552,7 @@ public:
         op[2].setVanishingPoint(vp, 0.1f);
         op[3].setVanishingPoint(vp, 0.1f);
         
-        drawGridBox(g);
+        drawGridBox(g, bounds);
     }
     
     void resized() override
@@ -571,7 +572,7 @@ public:
      //   op[2].setBlockCenter(x + blockIncr, y + blockIncr);
       //  op[3].setBlockCenter(x + blockIncr * 2, y + blockIncr * 2);
 
-        op[4].setBlockCenter(x + widthMargin + width/2, y + height * 1.075f); // output
+        op[4].setBlockCenter(x + widthMargin + width/2, y + height * 1.05f); // output
         averageVanishingPoint();
         
         for (int i = 0; i <= 4; i++){
@@ -585,15 +586,16 @@ public:
         }
     }
     
-    void drawGridBox(juce::Graphics& g)
+    void drawGridBox(juce::Graphics& g, juce::Rectangle<float> bounds)
     {
-        juce::Rectangle<float> frontRectangle = getLocalBounds().toFloat();
-        frontRectangle.reduce(5.0f, 5.0f);
+        juce::Rectangle<float> frontRectangle = bounds;
+        float reduceAmount = bounds.getWidth() * 0.0525f;
+        frontRectangle.reduce(reduceAmount, reduceAmount);
         
         juce::Path backPath, frontPath, sidePath;
-        float backBoxWidth = width * 0.85f;
-        float backBoxHeight = height * 0.85f;
-        g.setColour(juce::Colour(80, 80, 80));
+        float backBoxWidth = frontRectangle.getWidth() * 0.85f;
+        float backBoxHeight = frontRectangle.getHeight() * 0.85f;
+        g.setColour(juce::Colour(45, 47, 46));
 
         float maxY = frontRectangle.getBottom() - backBoxHeight;
         float constrainedY = juce::jlimit(frontRectangle.getY(), maxY, vp.y - backBoxHeight / 2);
@@ -604,25 +606,41 @@ public:
         juce::Rectangle<float> backRectangle = { constrainedX, constrainedY, backBoxWidth, backBoxHeight };
 
         backPath.addRoundedRectangle(backRectangle, 1.0f);
-        g.strokePath(backPath, juce::PathStrokeType(1.0f));
+        g.strokePath(backPath, juce::PathStrokeType(0.75f));
         
         frontPath.addRoundedRectangle(frontRectangle, 1.0f);
-        g.strokePath(frontPath, juce::PathStrokeType(1.0f));
+        g.strokePath(frontPath, juce::PathStrokeType(0.75f));
         
-        // sides 
-        sidePath.startNewSubPath(backRectangle.getTopLeft());
-        sidePath.lineTo(frontRectangle.getTopLeft());
-        
-        sidePath.startNewSubPath(backRectangle.getTopRight());
-        sidePath.lineTo(frontRectangle.getTopRight());
+        juce::Path gridWidthPath, gridHeightPath;
+        for (int i = 0; i <= 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                float frontHeightIncr = (frontRectangle.getHeight()/10) * i;
+                float backHeightIncr = (backRectangle.getHeight()/10) * i;
+                float frontWidthIncr = (frontRectangle.getWidth()/10) * j;
+                float backWidthIncr = (backRectangle.getWidth()/10) * j;
 
-        sidePath.startNewSubPath(backRectangle.getBottomLeft());
-        sidePath.lineTo(frontRectangle.getBottomLeft());
+                gridHeightPath.startNewSubPath(frontRectangle.getTopLeft().x,
+                                         frontRectangle.getTopLeft().y + frontHeightIncr);
+                gridHeightPath.lineTo(backRectangle.getTopLeft().x,
+                                backRectangle.getTopLeft().y + backHeightIncr);
+                gridHeightPath.lineTo(backRectangle.getTopRight().x,
+                                backRectangle.getTopRight().y + backHeightIncr);
+                gridHeightPath.lineTo(frontRectangle.getTopRight().x,
+                                frontRectangle.getTopRight().y + frontHeightIncr);
 
-        sidePath.startNewSubPath(backRectangle.getBottomRight());
-        sidePath.lineTo(frontRectangle.getBottomRight());
+                gridWidthPath.startNewSubPath(frontRectangle.getTopLeft().x + frontWidthIncr,
+                                         frontRectangle.getTopLeft().y);
+                gridWidthPath.lineTo(backRectangle.getTopLeft().x + backWidthIncr,
+                                backRectangle.getTopLeft().y);
+                gridWidthPath.lineTo(backRectangle.getBottomLeft().x + backWidthIncr,
+                                backRectangle.getBottomLeft().y);
+                gridWidthPath.lineTo(frontRectangle.getBottomLeft().x + frontWidthIncr,
+                                frontRectangle.getBottomLeft().y);
 
-        g.strokePath(sidePath, juce::PathStrokeType(1.0f));
+                g.strokePath(gridHeightPath, juce::PathStrokeType(0.75f));
+                g.strokePath(gridWidthPath, juce::PathStrokeType(0.75f));
+            }
+        }
     }
     
 
