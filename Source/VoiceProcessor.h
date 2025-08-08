@@ -70,9 +70,9 @@ public:
                               releaseScaled, false);
     }
     
-    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase)
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex)
     {
-        op[index].setOperator(ratio, fixed, isFixed, amplitude, phase);
+        op[index].setOperator(ratio, fixed, isFixed, amplitude, phase, globalModIndex);
     }
     
     void pitchWheelMoved(int newPitchWheelValue) override {}
@@ -82,8 +82,6 @@ public:
     {
         if (op[0].ampEnvelope.isActive())
         {
-//            for (int sample = start; sample < outputBuffer.getNumSamples(); ++sample) {
-
             for (int sample = startSample; sample < startSample + numSamples; ++sample) {
                 op3 = op[3].processOperator(op0 * op3Gain[0],
                                             op1 * op3Gain[1],
@@ -104,9 +102,7 @@ public:
                                             op1 * op0Gain[1],
                                             op2 * op0Gain[2],
                                             op3 * op0Gain[3]);
-                
-          //      DBG(op0Gain[0] << op0Gain[1] << op0Gain[2] << op0Gain[3]);
-                                
+
                 float output = op0 * outputGain[0] +
                 op1 * outputGain[1] +
                 op2 * outputGain[2] +

@@ -114,13 +114,14 @@ public:
     void setSliderAndLabel(juce::Slider &s, juce::Label &l, DialLookAndFeel &lookAndFeel, juce::String labelText, juce::String suffix)
     {
         addAndMakeVisible(l);
+        l.setFont(juce::FontOptions(12.0f));
         l.setText(labelText, juce::dontSendNotification);
         l.setJustificationType(juce::Justification::centred);
         l.setColour(juce::Label::textColourId, Colors::textColor);
         
         addAndMakeVisible(s);
         s.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 20);
+        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 15);
         s.setLookAndFeel(&lookAndFeel);
         s.setTextValueSuffix(suffix);
     }

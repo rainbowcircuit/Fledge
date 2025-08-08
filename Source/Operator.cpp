@@ -21,6 +21,7 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
     amplitudeSmoothed.reset(sampleRate, 0.001);
     phaseSmoothed.reset(sampleRate, 0.001);
     sustainSmoothed.reset(sampleRate, 0.001);
+    globalModIndexSmoothed.reset(sampleRate, 0.001);
 }
 
 void FMOperator::startNote()
@@ -50,12 +51,13 @@ void FMOperator::setNoteNumber(float noteNumber)
     noteFrequency = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
 }
 
-void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase)
+void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex)
 {
     ratioSmoothed.setTargetValue(ratio);
     fixedSmoothed.setTargetValue(fixed);
     amplitudeSmoothed.setTargetValue(amplitude/100.0f);
     phaseSmoothed.setTargetValue(phase/100.0f);
+    globalModIndexSmoothed.setTargetValue(globalModIndex);
     this->isFixed = isFixed;
 }
 
@@ -72,7 +74,8 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     float twopi = juce::MathConstants<float>::twoPi;
     float envelope = ampEnvelope.getNextSample();
     float phaseOffset = phaseSmoothed.getNextValue();
-    float waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * 8.0f)) * envelope; // 8 is the mod index
+    float modIndex = std::pow(2.0f, globalModIndexSmoothed.getNextValue() / 100.0f) * 8.0f;
+    float waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * modIndex)) * envelope; // 8 is the mod index
 
     // accumulate and wrap
     operatorPhase += operatorAngle;

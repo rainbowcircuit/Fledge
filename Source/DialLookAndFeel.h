@@ -124,13 +124,13 @@ public:
         textBox.setColour(juce::Label::outlineWhenEditingColourId, juce::Colours::transparentBlack);
         
         // initialize displayed value
-        auto value = audioProcessor.apvts.getRawParameterValue(parameterID)->load();
+        auto value = audioProcessor.params->apvts.getRawParameterValue(parameterID)->load();
         juce::String formattedValue = juce::String(value, numDecimals) + parameterSuffix;
         textBox.setText(formattedValue, juce::dontSendNotification);
         textBox.addListener(this);
         
         // initialize parameter ranges
-        juce::NormalisableRange range = audioProcessor.apvts.getParameterRange(parameterID);
+        juce::NormalisableRange range = audioProcessor.params->apvts.getParameterRange(parameterID);
         rangeStart = range.start;
         rangeEnd = range.end;
         
@@ -165,7 +165,7 @@ public:
         auto mousePoint = m.getPosition().toFloat();
         dragStartPoint.y = mousePoint.y;
         
-        initialParamValue = audioProcessor.apvts.getParameter(parameterID)->getValue();
+        initialParamValue = audioProcessor.params->apvts.getParameter(parameterID)->getValue();
     }
 
     void mouseDrag(const juce::MouseEvent& m) override
@@ -213,7 +213,7 @@ public:
     void textValueToParamValue(float value)
     {
         value = juce::jlimit(0.0f, 1.0f, value);
-        audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(value);
+        audioProcessor.params->apvts.getParameter(parameterID)->setValueNotifyingHost(value);
     }
         
     void parameterValueChanged (int parameterIndex, float newValue) override

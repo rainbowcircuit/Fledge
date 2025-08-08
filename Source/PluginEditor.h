@@ -39,10 +39,10 @@ public:
             juce::String sustainID = "sustain" + juce::String(oper);
             juce::String releaseID = "release" + juce::String(oper);
 
-            float attack = audioProcessor.apvts.getRawParameterValue(attackID)->load();
-            float decay = audioProcessor.apvts.getRawParameterValue(decayID)->load();
-            float sustain = audioProcessor.apvts.getRawParameterValue(sustainID)->load();
-            float release = audioProcessor.apvts.getRawParameterValue(releaseID)->load();
+            float attack = audioProcessor.params->apvts.getRawParameterValue(attackID)->load();
+            float decay = audioProcessor.params->apvts.getRawParameterValue(decayID)->load();
+            float sustain = audioProcessor.params->apvts.getRawParameterValue(sustainID)->load();
+            float release = audioProcessor.params->apvts.getRawParameterValue(releaseID)->load();
             
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
 
@@ -50,13 +50,13 @@ public:
             juce::String amplitudeID = "amplitude" + juce::String(oper);
             juce::String phaseID = "phase" + juce::String(oper);
 
-            float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
-            float amplitude = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
-            float phase = audioProcessor.apvts.getRawParameterValue(phaseID)->load();
+            float ratio = audioProcessor.params->apvts.getRawParameterValue(ratioID)->load();
+            float amplitude = audioProcessor.params->apvts.getRawParameterValue(amplitudeID)->load();
+            float phase = audioProcessor.params->apvts.getRawParameterValue(phaseID)->load();
 
             juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
-            float gainIndex = audioProcessor.apvts.getRawParameterValue(gainIndexID)->load();
-            float outputGainIndex = audioProcessor.apvts.getRawParameterValue("outputRouting")->load();
+            float gainIndex = audioProcessor.params->apvts.getRawParameterValue(gainIndexID)->load();
+            float outputGainIndex = audioProcessor.params->apvts.getRawParameterValue("outputRouting")->load();
 
             waveformDisplay.setFMParameter(oper, ratio, 0.0f, true, amplitude, phase);
             waveformDisplay.setGainCoefficients(oper, gainIndex, outputGainIndex);
@@ -66,7 +66,7 @@ public:
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
         
-        float outputGainIndex = audioProcessor.apvts.getRawParameterValue("outputRouting")->load();
+        float outputGainIndex = audioProcessor.params->apvts.getRawParameterValue("outputRouting")->load();
         algorithmGraphics->op[4].setInput(outputGainIndex);
 
         for (int oper = 0; oper < 4; oper++)
@@ -76,10 +76,10 @@ public:
             juce::String sustainID = "sustain" + juce::String(oper);
             juce::String releaseID = "release" + juce::String(oper);
 
-            float attack = audioProcessor.apvts.getRawParameterValue(attackID)->load();
-            float decay = audioProcessor.apvts.getRawParameterValue(decayID)->load();
-            float sustain = audioProcessor.apvts.getRawParameterValue(sustainID)->load();
-            float release = audioProcessor.apvts.getRawParameterValue(releaseID)->load();
+            float attack = audioProcessor.params->apvts.getRawParameterValue(attackID)->load();
+            float decay = audioProcessor.params->apvts.getRawParameterValue(decayID)->load();
+            float sustain = audioProcessor.params->apvts.getRawParameterValue(sustainID)->load();
+            float release = audioProcessor.params->apvts.getRawParameterValue(releaseID)->load();
             
             waveformDisplay.setEnvelope(oper, attack, decay, sustain, release);
 
@@ -87,12 +87,12 @@ public:
             juce::String amplitudeID = "amplitude" + juce::String(oper);
             juce::String phaseID = "phase" + juce::String(oper);
 
-            float ratio = audioProcessor.apvts.getRawParameterValue(ratioID)->load();
-            float amplitude = audioProcessor.apvts.getRawParameterValue(amplitudeID)->load();
-            float phase = audioProcessor.apvts.getRawParameterValue(phaseID)->load();
+            float ratio = audioProcessor.params->apvts.getRawParameterValue(ratioID)->load();
+            float amplitude = audioProcessor.params->apvts.getRawParameterValue(amplitudeID)->load();
+            float phase = audioProcessor.params->apvts.getRawParameterValue(phaseID)->load();
 
             juce::String gainIndexID = "operator" + juce::String(oper) + "Routing";
-            float gainIndex = audioProcessor.apvts.getRawParameterValue(gainIndexID)->load();
+            float gainIndex = audioProcessor.params->apvts.getRawParameterValue(gainIndexID)->load();
             
             algorithmGraphics->op[oper].setInput(gainIndex);
 

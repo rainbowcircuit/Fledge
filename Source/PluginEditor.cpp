@@ -18,7 +18,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
         opInterface[oper] = std::make_unique<OperatorInterface>(audioProcessor, oper);
         addAndMakeVisible(*opInterface[oper]);
     }
-    presetInterface = std::make_unique<PresetInterface>(audioProcessor, audioProcessor.apvts);
+    presetInterface = std::make_unique<PresetInterface>(audioProcessor, audioProcessor.params->apvts);
     addAndMakeVisible(*presetInterface);
 
     addAndMakeVisible(showWaveformButton);

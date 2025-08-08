@@ -126,10 +126,10 @@ public:
     void setParameter(float x, float y)
     {
         float ratio = juce::jlimit(0.0f, 1.0f, x/100.0f);
-        audioProcessor.apvts.getParameter("ratio" + juce::String(index))->setValueNotifyingHost(ratio);
+        audioProcessor.params->apvts.getParameter("ratio" + juce::String(index))->setValueNotifyingHost(ratio);
         
         float amplitude = juce::jlimit(0.0f, 1.0f, 1.0f - (y/100.0f));
-        audioProcessor.apvts.getParameter("amplitude" + juce::String(index))->setValueNotifyingHost(amplitude);
+        audioProcessor.params->apvts.getParameter("amplitude" + juce::String(index))->setValueNotifyingHost(amplitude);
     }
     
     void timerCallback() override
@@ -355,7 +355,7 @@ public:
                 dragStartPoint = mouse;
                 
                 auto segmentParameterID = (getSegmentParamID(*dragIndex));
-                initialParamValue = audioProcessor.apvts.getParameter(segmentParameterID)->getValue();
+                initialParamValue = audioProcessor.params->apvts.getParameter(segmentParameterID)->getValue();
             }
         }
     }
@@ -417,9 +417,9 @@ public:
     void setEnvelopeParam(int segmentDragged, float adjustAmount)
     {
         auto segmentParameterID = getSegmentParamID(segmentDragged);
-        auto paramRange = audioProcessor.apvts.getParameterRange(segmentParameterID);
+        auto paramRange = audioProcessor.params->apvts.getParameterRange(segmentParameterID);
         
-        audioProcessor.apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
+        audioProcessor.params->apvts.getParameter(segmentParameterID)->setValueNotifyingHost(adjustAmount);
         
     }
 

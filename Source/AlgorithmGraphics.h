@@ -426,7 +426,7 @@ public:
     void setInput(int index, float value) // potentially with bool
     {
         inputIndex[index] = value;
-        DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
+    //    DBG(inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
     }
     
     void setInput(std::array<float, 4> inputIndex)
@@ -438,7 +438,7 @@ public:
     void setInput(int integerIndex)
     {
         inputIndex = toBinary4(integerIndex);
-        DBG("operator " << juce::String(operatorIndex) << ": " << inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
+    //    DBG("operator " << juce::String(operatorIndex) << ": " << inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3]);
     }
 
 
@@ -994,7 +994,7 @@ public:
     {
         // set output
         int outputGainInt = fromBinary4(op[4].getInputIndex());
-        auto outputParam = audioProcessor.apvts.getParameter("outputRouting");
+        auto outputParam = audioProcessor.params->apvts.getParameter("outputRouting");
         
         if (outputParam != nullptr){
             float outputGainFloat = outputParam->convertTo0to1(outputGainInt);
@@ -1006,7 +1006,7 @@ public:
         // set operators
         for (int i = 0; i < 4; i++) {
             int operatorGainInt = fromBinary4(op[i].getInputIndex());
-            auto operatorParam = audioProcessor.apvts.getParameter("operator" + juce::String(i) + "Routing");
+            auto operatorParam = audioProcessor.params->apvts.getParameter("operator" + juce::String(i) + "Routing");
             
             if (operatorParam != nullptr){
                 float operatorGainFloat = operatorParam->convertTo0to1(operatorGainInt);

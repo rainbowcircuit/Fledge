@@ -242,23 +242,23 @@ void OperatorInterface::setIndex(int index)
 
 void OperatorInterface::timerCallback()
 {
-    float ratio = audioProcessor.apvts.getRawParameterValue("ratio" + juce::String(index))->load();
-    float fixed = audioProcessor.apvts.getRawParameterValue("fixed" + juce::String(index))->load();
-    float modIndex = audioProcessor.apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
-    bool opMode = audioProcessor.apvts.getRawParameterValue("opMode" + juce::String(index))->load();
-    float phase = audioProcessor.apvts.getRawParameterValue("phase" + juce::String(index))->load();
+    float ratio = audioProcessor.params->apvts.getRawParameterValue("ratio" + juce::String(index))->load();
+    float fixed = audioProcessor.params->apvts.getRawParameterValue("fixed" + juce::String(index))->load();
+    float modIndex = audioProcessor.params->apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
+    bool opMode = audioProcessor.params->apvts.getRawParameterValue("opMode" + juce::String(index))->load();
+    float phase = audioProcessor.params->apvts.getRawParameterValue("phase" + juce::String(index))->load();
 
     opGraphics->setRatioAndAmplitude(ratio, fixed, modIndex, opMode, phase);
     
-    float attack = audioProcessor.apvts.getRawParameterValue("attack" + juce::String(index))->load();
-    float decay = audioProcessor.apvts.getRawParameterValue("decay" + juce::String(index))->load();
-    float sustain = audioProcessor.apvts.getRawParameterValue("sustain" + juce::String(index))->load();
-    float release = audioProcessor.apvts.getRawParameterValue("release" + juce::String(index))->load();
+    float attack = audioProcessor.params->apvts.getRawParameterValue("attack" + juce::String(index))->load();
+    float decay = audioProcessor.params->apvts.getRawParameterValue("decay" + juce::String(index))->load();
+    float sustain = audioProcessor.params->apvts.getRawParameterValue("sustain" + juce::String(index))->load();
+    float release = audioProcessor.params->apvts.getRawParameterValue("release" + juce::String(index))->load();
     
-    float globalAttack = audioProcessor.apvts.getRawParameterValue("globalAttack")->load();
-    float globalDecay = audioProcessor.apvts.getRawParameterValue("globalDecay")->load();
-    float globalSustain = audioProcessor.apvts.getRawParameterValue("globalSustain")->load();
-    float globalRelease = audioProcessor.apvts.getRawParameterValue("globalRelease")->load();
+    float globalAttack = audioProcessor.params->apvts.getRawParameterValue("globalAttack")->load();
+    float globalDecay = audioProcessor.params->apvts.getRawParameterValue("globalDecay")->load();
+    float globalSustain = audioProcessor.params->apvts.getRawParameterValue("globalSustain")->load();
+    float globalRelease = audioProcessor.params->apvts.getRawParameterValue("globalRelease")->load();
 
     envGraphics->setEnvelope(attack, decay, sustain, release, globalAttack, globalDecay, globalSustain, globalRelease);
 
@@ -382,47 +382,47 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
 
 void AlgorithmSelectInterface::setOperatorParam(int index, int gainIndex)
 {
-    auto paramRange = audioProcessor.apvts.getParameterRange("operator0Routing");
+    auto paramRange = audioProcessor.params->apvts.getParameterRange("operator0Routing");
     float valueScaled = paramRange.convertTo0to1(gainIndex);
     
     juce::String parameterID = "operator" + juce::String(index) + "Routing";
-    audioProcessor.apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
+    audioProcessor.params->apvts.getParameter(parameterID)->setValueNotifyingHost(valueScaled);
         
 }
 
 void AlgorithmSelectInterface::setOutputParam(int gainIndex)
 {
-    auto paramRange = audioProcessor.apvts.getParameterRange("outputRouting");
+    auto paramRange = audioProcessor.params->apvts.getParameterRange("outputRouting");
     float valueScaled = paramRange.convertTo0to1(gainIndex);
     
-    audioProcessor.apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
+    audioProcessor.params->apvts.getParameter("outputRouting")->setValueNotifyingHost(valueScaled);
 
 }
 
 void AlgorithmSelectInterface::setPresetParam(int index)
 {
-    auto paramRange = audioProcessor.apvts.getParameterRange("algorithmPreset");
+    auto paramRange = audioProcessor.params->apvts.getParameterRange("algorithmPreset");
     float valueScaled = paramRange.convertTo0to1(index);
     
-    audioProcessor.apvts.getParameter("algorithmPreset")->setValueNotifyingHost(valueScaled);
+    audioProcessor.params->apvts.getParameter("algorithmPreset")->setValueNotifyingHost(valueScaled);
 }
 
 MacroControlsInterface::MacroControlsInterface(FledgeAudioProcessor& p) : audioProcessor(p)
 {
-    setSliderAndLabel(globalFreqSlider, globalFreqLabel, dialLAF, "Global Freq", "");
-    setSliderAndLabel(globalModIndexSlider, globalModIndexLabel, dialLAF, "Global Freq", "");
-    
-    setSliderAndLabel(globalAttackSlider, globalAttackLabel, dialLAF, "Global Attack", "%");
-    globalAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalAttack", globalAttackSlider);
-    
-    setSliderAndLabel(globalDecaySlider, globalDecayLabel, dialLAF, "Global Decay", "%");
-    globalDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalDecay", globalDecaySlider);
-    
-    setSliderAndLabel(globalSustainSlider, globalSustainLabel, dialLAF, "Global Sustain", "%");
-    globalSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalSustain", globalSustainSlider);
+    setSliderAndLabel(globalModIndexSlider, globalModIndexLabel, dialLAF, "Mod Scale", "%");
+    globalModIndexAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "globalModIndex", globalModIndexSlider);
 
-    setSliderAndLabel(globalReleaseSlider, globalReleaseLabel, dialLAF, "Global Release", "%");
-    globalReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "globalRelease", globalReleaseSlider);
+    setSliderAndLabel(globalAttackSlider, globalAttackLabel, dialLAF, "Attack Scale", "%");
+    globalAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "globalAttack", globalAttackSlider);
+    
+    setSliderAndLabel(globalDecaySlider, globalDecayLabel, dialLAF, "Decay Scale", "%");
+    globalDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "globalDecay", globalDecaySlider);
+    
+    setSliderAndLabel(globalSustainSlider, globalSustainLabel, dialLAF, "Sustain Scale", "%");
+    globalSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "globalSustain", globalSustainSlider);
+
+    setSliderAndLabel(globalReleaseSlider, globalReleaseLabel, dialLAF, "Release Scale", "%");
+    globalReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "globalRelease", globalReleaseSlider);
 
 }
 
@@ -434,54 +434,61 @@ void MacroControlsInterface::resized()
     float width = bounds.getWidth();
     float height = bounds.getHeight();
 
-    globalFreqSlider.setBounds(x + width * 0.15f,
-                               y + height * 0.05f,
-                               height * 0.15f,
-                               height * 0.2f);
+    float sliderSize = width * 0.25f;
     
-    globalModIndexSlider.setBounds(x + width * 0.65f,
+    globalModIndexLabel.setBounds(x + (width/2) - (sliderSize/2),
                                    y + height * 0.05f,
-                                   height * 0.15f,
-                                   height * 0.2f);
-    
-    globalAttackSlider.setBounds(x + width * 0.15f,
-                                 y + height * 0.375f,
-                                 height * 0.15f,
-                                 height * 0.2f);
-    
-    globalDecaySlider.setBounds(x + width * 0.65f,
-                                y + height * 0.375f,
-                                height * 0.15f,
-                                height * 0.2f);
-    
-    globalSustainSlider.setBounds(x + width * 0.15f,
-                                  y + height * 0.6f,
-                                  height * 0.15f,
-                                  height * 0.2f);
-    
-    globalReleaseSlider.setBounds(x + width * 0.65f,
-                                  y + height * 0.6f,
-                                  height * 0.15f,
-                                  height * 0.2f);
+                                  sliderSize,
+                                  sliderSize/4);
 
-    globalAttackLabel.setBounds(x + width * 0.15f,
-                                y + height * 0.25f,
-                                height * 0.2f,
-                                height * 0.1f);
+    globalModIndexSlider.setBounds(x + (width/2) - (sliderSize/2),
+                                   y + height * 0.1f,
+                                   sliderSize,
+                                   sliderSize * 1.15f);
     
-    globalDecayLabel.setBounds(x + width * 0.65f,
-                               y + height * 0.25f,
-                               height * 0.2f,
-                               height * 0.1f);
+    // attack
+    globalAttackLabel.setBounds(x + width * 0.125f,
+                                y + height * 0.325f,
+                                sliderSize,
+                                sliderSize/4);
+
+    globalAttackSlider.setBounds(x + width * 0.125f,
+                                 y + height * 0.375f,
+                                 sliderSize,
+                                 sliderSize * 1.15f);
+        
+    // decay
+    globalDecayLabel.setBounds(x + width * 0.625f,
+                               y + height * 0.325f,
+                               sliderSize,
+                               sliderSize/4);
     
-    globalSustainLabel.setBounds(x + width * 0.15f,
-                                 y + height * 0.45f,
-                                 height * 0.2f,
-                                 height * 0.1f);
+    globalDecaySlider.setBounds(x + width * 0.625f,
+                                y + height * 0.375f,
+                                sliderSize,
+                                sliderSize * 1.15f);
+
+    // sustain
+    globalSustainLabel.setBounds(x + width * 0.125f,
+                                 y + height * 0.6f,
+                                 sliderSize,
+                                 sliderSize/4);
     
-    globalReleaseLabel.setBounds(x + width * 0.65f,
-                                 y + height * 0.45f,
-                                 height * 0.2f,
-                                 height * 0.1f);
+    globalSustainSlider.setBounds(x + width * 0.125f,
+                                  y + height * 0.65f,
+                                  sliderSize,
+                                  sliderSize * 1.15f);
+
+    // release
+    globalReleaseLabel.setBounds(x + width * 0.625f,
+                                 y + height * 0.6f,
+                                 sliderSize,
+                                 sliderSize/4);
+    
+    globalReleaseSlider.setBounds(x + width * 0.625f,
+                                  y + height * 0.65f,
+                                  sliderSize,
+                                  sliderSize * 1.15f);
+
 
 }

@@ -23,19 +23,11 @@ FledgeAudioProcessor::FledgeAudioProcessor()
                        )
 #endif
 {
-    initializeParameters();
-    const auto params = this->getParameters();
-    for (auto param : params){
-        param->addListener(this);
-    }
+    params = std::make_unique<Parameters>(*this);
 }
 
 FledgeAudioProcessor::~FledgeAudioProcessor()
 {
-    const auto params = this->getParameters();
-    for (auto param : params){
-        param->removeListener(this);
-    }
 }
 
 //==============================================================================
@@ -157,10 +149,25 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         {
             if(auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(v)))
             {
-                voice->setEnvelope(oper, attack[oper], decay[oper], sustain[oper], release[oper],
-                                   globalAttack, globalDecay, globalSustain, globalRelease);
-                voice->setFMParameters(oper, ratio[oper], fixed[oper], false, amplitude[oper], phase[oper]);
-                voice->setOperatorGain(oper, routing[oper], outputRouting);
+                voice->setEnvelope(oper,
+                                   params->attack[oper]->get(),
+                                   params->decay[oper]->get(),
+                                   params->sustain[oper]->get(),
+                                   params->release[oper]->get(),
+                                   params->globalAttack->get(),
+                                   params->globalDecay->get(),
+                                   params->globalSustain->get(),
+                                   params->globalRelease->get());
+                
+                voice->setFMParameters(oper,
+                                       params->ratio[oper]->get(),
+                                       fixed[oper],
+                                       false,
+                                       params->amplitude[oper]->get(),
+                                       params->phase[oper]->get(),
+                                       params->globalModIndex->get());
+                
+                voice->setOperatorGain(oper, params->routing[oper]->get(), params->outputRouting->get());
             }
         }
     }
@@ -194,8 +201,6 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         }
         outputLevelR.updateIfGreater(maxL);
     }
-    
-    
 }
 
 //==============================================================================
@@ -213,9 +218,9 @@ juce::AudioProcessorEditor* FledgeAudioProcessor::createEditor()
 void FledgeAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     float myvalue = 200.0f;
-    apvts.state.setProperty("testValue", myvalue, nullptr);
+    params->apvts.state.setProperty("testValue", myvalue, nullptr);
     
-    copyXmlToBinary(*apvts.copyState().createXml(), destData);
+    copyXmlToBinary(*params->apvts.copyState().createXml(), destData);
 }
 
 void FledgeAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -224,7 +229,7 @@ void FledgeAudioProcessor::setStateInformation (const void* data, int sizeInByte
        if (xmlState == nullptr)
            return;
        const auto newTree = juce::ValueTree::fromXml(*xmlState);
-       apvts.replaceState(newTree);
+    params->apvts.replaceState(newTree);
 }
 
 //==============================================================================
@@ -234,85 +239,3 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new FledgeAudioProcessor();
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout FledgeAudioProcessor::createParameterLayout()
-{
-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
-    
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalAttack", 1 }, "Global Attack", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
-
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalDecay", 1 }, "Global Decay", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
-
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(50.0f, 200.0f, 0.01f), 100.0f));
-
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(50.0f, 200.0f, 0.1f), 100.0f));
-    
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
-
-    std::array<float, 4> defaultAmplitude = { 100.0f, 0.0f, 0.0f, 0.0f };
-    std::array<int, 4> defaultRouting = { 2, 4, 8, 0 };
-
-    
-    for (int oper = 0; oper < 4; oper++)
-    {
-        //******** Envelope Controls ********//
-        juce::String attackID = "attack" + juce::String(oper);
-        juce::String attackName = "Attack " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { attackID, 1 }, attackName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), .01f));
-        
-        juce::String decayID = "decay" + juce::String(oper);
-        juce::String decayName = "Decay " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { decayID, 1 }, decayName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), .2f));
-
-        juce::String sustainID = "sustain" + juce::String(oper);
-        juce::String sustainName = "Sustain " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { sustainID, 1 }, sustainName, juce::NormalisableRange<float>(0.0f, 100.0f), 80.0f));
-
-        juce::String releaseID = "release" + juce::String(oper);
-        juce::String releaseName = "Release " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { releaseID, 1 }, releaseName, juce::NormalisableRange<float>(0.0f, 20.0f, 0.01f, 0.5f), 1.0f));
-        
-        //******** Ratio and FM Amount ********//
-        juce::String ratioID = "ratio" + juce::String(oper);
-        juce::String ratioName = "Ratio " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { ratioID, 1 }, ratioName, juce::NormalisableRange<float>(0.25f, 20.0f, 0.25f), 1.0f));
-
-        juce::String fixedID = "fixed" + juce::String(oper);
-        juce::String fixedName = "Fixed " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { fixedID, 1 }, fixedName, juce::NormalisableRange<float>(20.0f, 20000.0f), 20.0f));
-        
-        juce::String opModeID = "opMode" + juce::String(oper);
-        juce::String opModeName = "Mode " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterBool>(juce::ParameterID { opModeID, 1},
-                                                              opModeName,
-                                                               false));
-
-        juce::String amplitudeID = "amplitude" + juce::String(oper);
-        juce::String amplitudeName = "Amplitude " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), defaultAmplitude[oper]));
-        
-        juce::String phaseID = "phase" + juce::String(oper);
-        juce::String phaseName = "Phase " + juce::String(oper);
-        
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { phaseID, 1 }, phaseName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f, 0.5f), 0.0f));
-        
-        //******** Operator Input ********//
-        juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
-        juce::String operatorRoutingName = "Op " + juce::String(oper) + " Routing";
-        
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, defaultRouting[oper] ));
-        
-    }
-    
-
-    return layout;
-}
