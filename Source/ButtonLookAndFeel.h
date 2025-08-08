@@ -11,8 +11,9 @@
 #pragma once
 #include <JuceHeader.h>
 #include "LookAndFeel.h"
+#include "GraphicsUtility.h"
 
-class ButtonLookAndFeel : public juce::LookAndFeel_V4
+class ButtonLookAndFeel : public juce::LookAndFeel_V4, GraphicsHelper
 {
 public:
     ButtonLookAndFeel(int graphicIndex)
@@ -23,6 +24,8 @@ public:
     void drawButtonBackground (juce::Graphics &g, juce::Button &button, const juce::Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         auto bounds = button.getLocalBounds().toFloat();
+        fillBackgroundPanel(g, bounds);
+        
         bounds.reduce(5, 5);
         float xPos = bounds.getX();
         float yPos = bounds.getY();
@@ -30,10 +33,7 @@ public:
         float graphicWidth = bounds.getWidth();
 
         // fill background
-        juce::Path bgPath;
-        bgPath.addRoundedRectangle(bounds, 5.0f, 5.0f);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(bgPath);
+    
         
         if (graphicIndex == 0)
         {

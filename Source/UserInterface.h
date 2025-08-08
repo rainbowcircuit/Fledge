@@ -18,6 +18,7 @@
 #include "ButtonLookAndFeel.h"
 #include "ComboBoxLookAndFeel.h"
 #include "LookAndFeel.h"
+#include "GraphicsUtility.h"
 
 class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
 {
@@ -46,7 +47,7 @@ private:
     FledgeAudioProcessor& audioProcessor;
 };
 
-class OperatorInterface : public juce::Component, juce::Timer
+class OperatorInterface : public juce::Component, juce::Timer, GraphicsHelper
 {
 public:
     OperatorInterface(FledgeAudioProcessor& p, int index);

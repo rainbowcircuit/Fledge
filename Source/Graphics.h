@@ -3,10 +3,11 @@
 #include <cmath>
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
+#include "GraphicsUtility.h"
 
 //Takuma your waveforms look like a butt
 
-class OperatorDisplayGraphics : public juce::Component, juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Timer
+class OperatorDisplayGraphics : public juce::Component, juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Timer, GraphicsHelper
 {
 public:
     OperatorDisplayGraphics(FledgeAudioProcessor& p) : audioProcessor(p)
@@ -34,11 +35,9 @@ public:
     void paint(juce::Graphics &g) override
     {
         bounds = getLocalBounds().toFloat();
-        bounds.reduce(5, 5);
-        juce::Path bgFill;
-        bgFill.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(12, 10, 11));
+        fillControlPanel(g, bounds);
 
+        bounds.reduce(5, 5);
         float x = bounds.getX();
         float y = bounds.getY();
         float width = bounds.getWidth();
@@ -51,16 +50,16 @@ public:
         float sliderWidth = width * 0.1f;
         float sliderHeight = height * 0.05f;
 
-        float macroYPosition = juce::jlimit(y, y + height - sliderWidth - (sliderHeight * 2.0f), macroPosition.y);
+        float macroYPosition = juce::jlimit(y, y + height - sliderHeight - sliderWidth, macroPosition.y);
         macroY.addRoundedRectangle(x, macroYPosition, sliderHeight, sliderWidth, 2);
         g.fillPath(macroY);
 
         float macroXPosition = juce::jlimit(x + sliderHeight, x + width - sliderWidth, macroPosition.x);
-        macroX.addRoundedRectangle(macroXPosition, height * 0.95f, sliderWidth, sliderHeight, 2);
+        macroX.addRoundedRectangle(macroXPosition, height, sliderWidth, sliderHeight, 2);
         g.fillPath(macroX);
         
-        juce::Path bgWaveform = waveformPath(g, x + width * 0.1f,
-                                           y,
+        juce::Path bgWaveform = waveformPath(g, x + width * 0.05f,
+                                           y + height * 0.1f,
                                            width * 0.9f,
                                            height * 0.8f,
                                            1.0f, 1.0f, 0.0f);
@@ -68,8 +67,8 @@ public:
         g.strokePath(bgWaveform, strokeType);
 
         
-        juce::Path fgWaveform = waveformPath(g, x + width * 0.1f,
-                                           y,
+        juce::Path fgWaveform = waveformPath(g, x + width * 0.05f,
+                                           y + height * 0.1f,
                                            width * 0.9f,
                                            height * 0.8f,
                                            ratio, amplitude, phase);
@@ -191,7 +190,7 @@ private:
 
 
 
-class EnvelopeDisplayGraphics : public juce::Component, juce::Timer
+class EnvelopeDisplayGraphics : public juce::Component, juce::Timer, GraphicsHelper
 {
 public:
     EnvelopeDisplayGraphics(FledgeAudioProcessor &p, int index) : audioProcessor(p)
@@ -203,13 +202,17 @@ public:
     void paint(juce::Graphics &g) override
     {
         auto bounds = getLocalBounds().toFloat();
+        fillControlPanel(g, bounds);
         
         float x = bounds.getX();
         float y = bounds.getY();
-        float width = bounds.getWidth() * 0.9f;
-        float height = bounds.getHeight() * 0.9f;
-        float widthMargin = bounds.getWidth() * 0.05f;
-        float heightMargin = bounds.getHeight() * 0.05f;
+        auto envelopeBounds = bounds;
+        envelopeBounds.reduce(5, 5);
+
+        float width = envelopeBounds.getWidth() * 0.8f;
+        float height = envelopeBounds.getHeight() * 0.8f;
+        float widthMargin = envelopeBounds.getWidth() * 0.1f;
+        float heightMargin = envelopeBounds.getHeight() * 0.1f;
         
         calculateSegment();
 
@@ -243,10 +246,10 @@ public:
         auto bounds = getLocalBounds().toFloat();
         float x = bounds.getX();
         float y = bounds.getY();
-        float width = bounds.getWidth() * 0.9f;
-        float height = bounds.getHeight() * 0.9f;
-        float widthMargin = bounds.getWidth() * 0.05f;
-        float heightMargin = bounds.getHeight() * 0.05f;
+        float width = bounds.getWidth() * 0.8f;
+        float height = bounds.getHeight() * 0.8f;
+        float widthMargin = bounds.getWidth() * 0.1f;
+        float heightMargin = bounds.getHeight() * 0.1f;
 
         pointsGlobalAdjusted[0].coords = { x + widthMargin,
             y + height + heightMargin }; // Bottom (0)

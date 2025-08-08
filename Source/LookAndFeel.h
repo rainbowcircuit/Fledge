@@ -14,6 +14,8 @@ namespace Colors
 {
 inline juce::Colour textColor = juce::Colour(130, 130, 130);
 inline juce::Colour greyColor = juce::Colour(80, 80, 80);
+inline juce::Colour controlPanelColor = juce::Colour(35, 37, 36);
+inline juce::Colour controlPanelShadowColor = juce::Colour(33, 35, 34);
 
     inline juce::Colour cableColor = juce::Colour(221, 221, 221);
     inline juce::Colour cableSelectColor = juce::Colour(251, 251, 251);

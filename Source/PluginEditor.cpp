@@ -63,7 +63,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
         param->addListener(this);
     }
     
-    setSize (765, 600);
+    setSize (770, 605);
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
@@ -86,25 +86,24 @@ void FledgeAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll();
     
     juce::Path leftBounds;
-    leftBounds.addRoundedRectangle(5, 60, 280, 490, 5.0f);
-    g.setColour(juce::Colour(40, 42, 41));
-    g.fillPath(leftBounds);
+    juce::Rectangle<float> mainPanelBounds = { 5, 60, 280, 490 };
+    fillBackgroundPanel(g, mainPanelBounds);
 }
 
 void FledgeAudioProcessorEditor::resized()
 {
     for (int oper = 0; oper < 4; oper++)
     {
-        opInterface[oper]->setBounds(285, oper * 125 + 55, 480, 125);
+        opInterface[oper]->setBounds(285, oper * 125 + 100, 480, 125);
     }
 
     presetInterface->setBounds(5, 5, 760, 50);
     waveformDisplay.setBounds(5, 60, 280, 490);
-    algorithmGraphics->setBounds(5, 60, 280, 350);
+    algorithmGraphics->setBounds(10, 65, 270, 335);
     algorithmSelector->setBounds(5, 400, 280, 150);
     macroInterface->setBounds(5, 60, 280, 490);
 
-    outputLevelMeter->setBounds(555, 20, 200, 25);
+    outputLevelMeter->setBounds(285, 72, 300, 25);
 
     showWaveformButton.setBounds(5, 555, 94, 40);
     showAlgorithmButton.setBounds(100, 555, 94, 40);

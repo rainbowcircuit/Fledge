@@ -11,8 +11,9 @@
 #pragma once
 #include <JuceHeader.h>
 #include "LookAndFeel.h"
+#include "GraphicsUtility.h"
 
-class ComboBoxGraphics : public juce::LookAndFeel_V4
+class ComboBoxGraphics : public juce::LookAndFeel_V4, GraphicsHelper
 {
 public:
     ComboBoxGraphics()
@@ -24,13 +25,11 @@ public:
     void drawComboBox(juce::Graphics& g, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, juce::ComboBox& comboBox) override
     {
         auto bounds = juce::Rectangle<int>(width, height).toFloat();
+        fillBackgroundPanel(g, bounds);
+
         bounds.reduce(5, 5);
-        juce::Path comboBoxPath, trianglePath, buttonPath;
-        
-        comboBoxPath.addRoundedRectangle(bounds, 5.0f);
-        g.setColour(juce::Colour(40, 42, 41));
-        g.fillPath(comboBoxPath);
-        
+        juce::Path trianglePath, buttonPath;
+                
         auto buttonBounds = juce::Rectangle<int>(buttonX, buttonY, buttonW, buttonH);
         buttonPath.addRoundedRectangle(buttonBounds, 3.0f);
         

@@ -5,6 +5,8 @@
               version="1.0.0" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="HjcJ18" name="Fledge">
     <GROUP id="{E95012C8-BA53-E04B-38D3-3734F17061CD}" name="Utility">
+      <FILE id="pAkmnd" name="GraphicsUtility.h" compile="0" resource="0"
+            file="Source/GraphicsUtility.h"/>
       <FILE id="bDmtdW" name="Measurement.h" compile="0" resource="0" file="Source/Measurement.h"/>
       <FILE id="JDx1A9" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters.cpp"/>
       <FILE id="V11gMI" name="Parameters.h" compile="0" resource="0" file="Source/Parameters.h"/>

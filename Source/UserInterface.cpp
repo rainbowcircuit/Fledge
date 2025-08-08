@@ -106,7 +106,7 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     setLabel(ratioLabel, "Ratio", 12.0f);
     ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index), ":1");
     addAndMakeVisible(*ratioSlider);
-    ratioSlider->setFontSize(22.0f);
+    ratioSlider->setFontSize(12.0f);
     ratioSlider->setNumDecimals(2);
     
     setLabel(fixedLabel, "Fixed", 12.0f);
@@ -114,12 +114,12 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     addAndMakeVisible(*fixedSlider);
     fixedSlider->setFontSize(24.0f);
 
-    setLabel(amplitudeLabel, "Amplitude", 12.0f);
+    setLabel(amplitudeLabel, "Amp", 12.0f);
     amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index), "%");
     addAndMakeVisible(*amplitudeSlider);
-    amplitudeSlider->setFontSize(36.0f);
+    amplitudeSlider->setFontSize(12.0f);
 
-    setLabel(phaseLabel, "Phase", 12.0f);
+    setLabel(phaseLabel, "P", 12.0f);
     phaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "phase" + juce::String(index), "%");
     addAndMakeVisible(*phaseSlider);
     phaseSlider->setFontSize(12.0f);
@@ -157,13 +157,10 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
 void OperatorInterface::paint(juce::Graphics &g)
 {
     auto bounds = getLocalBounds().toFloat();
+    fillBackgroundPanel(g, bounds);
     bounds.reduce(5, 5);
     
-    juce::Path boundsPath;
-    boundsPath.addRoundedRectangle(bounds, 5, 5);
-    g.setColour(juce::Colour(40, 42, 41));
-    g.fillPath(boundsPath);
-    
+
 }
 
 void OperatorInterface::resized()
@@ -174,43 +171,38 @@ void OperatorInterface::resized()
     float width = bounds.getWidth();
     float height = bounds.getHeight();
 
-    float sliderSize = width * 0.15f;
-    float heightMargin = height * 0.1f;
-    float labelHeight = height * 0.1f;
-    float textSliderHeight = height * 0.25f;
+    amplitudeLabel.setBounds(x + width * 0.0125f, height * 0.025f, width * 0.15f, height * 0.2f);
+    amplitudeSlider->setBounds(x + width * 0.075, height * 0.025f, width * 0.15f, height * 0.2f);
 
-    amplitudeLabel.setBounds(x + width * 0.025f,  height * 0.1f, width * 0.15f, height * 0.1f);
-    amplitudeSlider->setBounds(x + width * 0.025f, height * 0.175f, width * 0.225f, height * 0.375f);
+    ratioLabel.setBounds(x + width * 0.175f, height * 0.025f, width * 0.15f, height * 0.2f);
+    ratioSlider->setBounds(x + width * 0.245f, height * 0.025f, width * 0.175f, height * 0.2f);
 
-    ratioLabel.setBounds(x + width * 0.025f, y + height * 0.6f, width * 0.15f, height * 0.1f);
-    ratioSlider->setBounds(x + width * 0.025f, y + height * 0.6f + labelHeight, width * 0.175f, height * 0.25f);
+    opGraphics->setBounds(x + width * 0.0125f,
+                          y + height * 0.2f,
+                          width * 0.45f,
+                          height * 0.7625f);
 
-    opGraphics->setBounds(x + width * 0.25f,
-                          y + height * 0.25f,
-                          width * 0.275f,
-                          height * 0.725f);
-
-    phaseLabel.setBounds(x + width * 0.365f,  height * 0.025f, width * 0.15f, height * 0.2f);
-    phaseSlider->setBounds(x + width * 0.435f, height * 0.025f, width * 0.15f, height * 0.2f);
+    phaseLabel.setBounds(x + width * 0.325f,  height * 0.025f, width * 0.15f, height * 0.2f);
+    phaseSlider->setBounds(x + width * 0.35f, height * 0.025f, width * 0.15f, height * 0.2f);
     
     attackLabel.setBounds(x + width * 0.825f,
                           y + height * 0.1f,
-                          width * 0.035f,
+                          width * 0.05f,
                           height * 0.2f);
     
     decayLabel.setBounds(x + width * 0.825f,
                          y + height * 0.3f,
-                         width * 0.035f,
+                         width * 0.05f,
                          height * 0.2f);
     
     sustainLabel.setBounds(x + width * 0.825f,
                            y + height * 0.5f,
-                           width * 0.035f,
+                           width * 0.05f,
                            height * 0.2f);
     
     releaseLabel.setBounds(x + width * 0.825f,
                            y + height * 0.7f,
-                           width * 0.035f,
+                           width * 0.05f,
                            height * 0.2f);
     
     attackSlider->setBounds(x + width * 0.865f,
@@ -224,7 +216,7 @@ void OperatorInterface::resized()
     sustainSlider->setBounds(x + width * 0.865f, y + height * 0.5f, width * 0.165f, height * 0.2f);
     releaseSlider->setBounds(x + width * 0.865f, y + height * 0.7f, width * 0.165f, height * 0.2f);
 
-    envGraphics->setBounds(x + width * 0.55f, y + height * 0.125f, width * 0.275f, height * 0.75f);
+    envGraphics->setBounds(x + width * 0.4525f, y + height * 0.05f, width * 0.375f, height * 0.9125f);
 }
 
 void OperatorInterface::setLabel(juce::Label &l, juce::String labelText, float size)

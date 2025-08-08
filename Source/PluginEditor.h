@@ -15,12 +15,12 @@
 #include "ButtonLookAndFeel.h"
 #include "LookAndFeel.h"
 #include "LevelMeter.h"
-
+#include "GraphicsUtility.h"
 
 //==============================================================================
 /**
 */
-class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener, juce::Button::Listener
+class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::AudioProcessorParameter::Listener, juce::Button::Listener, GraphicsHelper
 {
 public:
     FledgeAudioProcessorEditor (FledgeAudioProcessor&);

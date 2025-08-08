@@ -609,6 +609,7 @@ public:
         frontPath.addRoundedRectangle(frontRectangle, 1.0f);
         g.strokePath(frontPath, juce::PathStrokeType(1.0f));
         
+        // sides 
         sidePath.startNewSubPath(backRectangle.getTopLeft());
         sidePath.lineTo(frontRectangle.getTopLeft());
         
