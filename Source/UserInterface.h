@@ -11,100 +11,13 @@
 #pragma once
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "Presets.h"
+#include "PresetManager.h"
 #include "Graphics.h"
 #include "AlgorithmGraphics.h"
 #include "DialLookAndFeel.h"
 #include "ButtonLookAndFeel.h"
-#include "ComboBoxLookAndFeel.h"
 #include "LookAndFeel.h"
 #include "GraphicsUtility.h"
-
-class PresetInterface : public juce::Component, juce::ComboBox::Listener, juce::Button::Listener
-{
-public:
-    PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorValueTreeState& apvts);
-    ~PresetInterface();
-    
-    void paint(juce::Graphics& g) override {}
-    
-    void resized() override;
-    void comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged) override;
-    void buttonClicked(juce::Button* buttonClicked) override;
-    void loadPresetList();
-    
-private:
-    
-    ButtonLookAndFeel saveLAF { 0 }, prevLAF{ 1 }, nextLAF { 2 };
-    ComboBoxGraphics presetComboBoxLAF;
-    juce::TextButton saveButton, nextButton, prevButton;
-    juce::ComboBox presetComboBox;
-    juce::Label rateLabel, rateValueLabel;
-    
-    std::unique_ptr<juce::FileChooser> fileChooser;
-
-    PresetManager presetManager;
-    FledgeAudioProcessor& audioProcessor;
-};
-
-class OperatorInterface : public juce::Component, juce::Timer, GraphicsHelper
-{
-public:
-    OperatorInterface(FledgeAudioProcessor& p, int index);
-    void setIndex(int index);
-
-    void paint(juce::Graphics &g) override;
-    void resized() override;
-    
-    std::unique_ptr<OperatorDisplayGraphics> opGraphics;
-    std::unique_ptr<EnvelopeDisplayGraphics> envGraphics;
-
-private:
-    void setLabel(juce::Label &l, juce::String labelText, float size);
-    void timerCallback() override;
-
-    int index;
-    
-    juce::Label ratioLabel,
-    fixedLabel,
-    amplitudeLabel,
-    phaseLabel,
-    attackLabel,
-    decayLabel,
-    sustainLabel,
-    releaseLabel;
-    
-    std::unique_ptr<EditableTextBoxSlider> ratioSlider,
-    fixedSlider,
-    amplitudeSlider,
-    phaseSlider,
-    attackSlider,
-    decaySlider,
-    sustainSlider,
-    releaseSlider;
-
-    FledgeAudioProcessor& audioProcessor;
-};
-
-class AlgorithmSelectInterface : public juce::Component, public juce::Button::Listener
-{
-public:
-    AlgorithmSelectInterface(FledgeAudioProcessor& p, AlgorithmGraphics& a);
-    ~AlgorithmSelectInterface();
-    void paint(juce::Graphics& g) override {}
-    void resized() override;
-    void buttonClicked(juce::Button* button) override;
-    void setOperatorParam(int index, int gainIndex);
-    void setOutputParam(int gainIndex);
-    void setPresetParam(int index);
-    
-private:
-    std::array<BlockDiagrams, 8> algorithmGraphics;
-    std::array<juce::ToggleButton, 8> algorithm;
-    
-    AlgorithmGraphics& algoGraphics;
-    FledgeAudioProcessor& audioProcessor;
-};
 
 class MacroControlsInterface : public juce::Component
 {

@@ -31,23 +31,9 @@ public:
         float yPos = bounds.getY();
         float size = bounds.getHeight();
         float graphicWidth = bounds.getWidth();
-
-        // fill background
-    
         
-        if (graphicIndex == 0)
-        {
-            drawSaveButton(g, xPos, yPos, size, size);
             
-        } else if (graphicIndex == 1)
-        {
-            drawArrowButton(g, xPos, yPos, size, size, false);
-            
-        } else if (graphicIndex == 2)
-        {
-            drawArrowButton(g, xPos, yPos, size, size, true);
-            
-        } else if (graphicIndex == 3)
+        if (graphicIndex == 3)
         {
             drawWaveIcon(g, xPos + (graphicWidth/2) - (size/2), yPos, size, shouldDrawButtonAsDown);
 
@@ -61,66 +47,6 @@ public:
         }
     }
     
-    void drawSaveButton(juce::Graphics& g, float x, float y, float width, float height)
-    {
-        float graphicMargin = width * 0.3f;
-        float graphicSize = width * 0.4f;
-        x = x + graphicMargin;
-        y = y + graphicMargin;
-
-        juce::Point<float> topLeft { x, y };
-        juce::Point<float> slopeStart { x + graphicSize * 0.75f, y };
-        juce::Point<float> slopeEnd { x + graphicSize, y + graphicSize * 0.25f};
-        juce::Point<float> botRight { x + graphicSize, y + graphicSize };
-        juce::Point<float> botLeft { x, y + graphicSize };
-
-        juce::Path bodyPath;
-        bodyPath.startNewSubPath(topLeft);
-        bodyPath.lineTo(slopeStart);
-        bodyPath.lineTo(slopeEnd);
-        bodyPath.lineTo(botRight);
-        bodyPath.lineTo(botLeft);
-        bodyPath.closeSubPath();
-        bodyPath = bodyPath.createPathWithRoundedCorners(1.0f);
-        g.setColour(Colors::mainColors[0]);
-        g.fillPath(bodyPath);
-    }
-
-    
-    void drawArrowButton(juce::Graphics& g, float x, float y, float width, float height, bool isLeftArrow)
-    {
-        float graphicMargin = width * 0.4f;
-        float graphicSize = width * 0.2f;
-        x = x + graphicMargin;
-        y = y + graphicMargin;
-
-        // coordinates
-        juce::Point<float> topLeft { x, y };
-        juce::Point<float> botLeft { x, y + graphicSize };
-        juce::Point<float> middleRight { x + graphicSize, y + graphicSize/2 };
-        juce::Point<float> topRight { x + graphicSize, y };
-        juce::Point<float> middleLeft { x, y + graphicSize/2 };
-        juce::Point<float> botRight { x + graphicSize, y + graphicSize };
-
-        // drawing
-        juce::Path arrowPath;
-        if (isLeftArrow){
-            arrowPath.startNewSubPath(topLeft);
-            arrowPath.lineTo(botLeft);
-            arrowPath.lineTo(middleRight);
-            arrowPath.closeSubPath();
-        } else {
-            arrowPath.startNewSubPath(topRight);
-            arrowPath.lineTo(botRight);
-            arrowPath.lineTo(middleLeft);
-            arrowPath.closeSubPath();
-        }
-
-        arrowPath = arrowPath.createPathWithRoundedCorners(1.0f);
-        g.setColour(Colors::mainColors[0]);
-        g.fillPath(arrowPath);
-    }
-
     
     void drawBlockIcon(juce::Graphics &g, float x, float y, float size, bool buttonDown)
     {

@@ -10,8 +10,6 @@
       <FILE id="bDmtdW" name="Measurement.h" compile="0" resource="0" file="Source/Measurement.h"/>
       <FILE id="JDx1A9" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters.cpp"/>
       <FILE id="V11gMI" name="Parameters.h" compile="0" resource="0" file="Source/Parameters.h"/>
-      <FILE id="UZk6lh" name="Presets.cpp" compile="1" resource="0" file="Source/Presets.cpp"/>
-      <FILE id="DEaSpT" name="Presets.h" compile="0" resource="0" file="Source/Presets.h"/>
     </GROUP>
     <GROUP id="{5D77C634-74F4-E6F7-5EEB-0A252B295FE3}" name="Source">
       <FILE id="R5Cc33" name="PluginProcessor.cpp" compile="1" resource="0"
@@ -23,6 +21,9 @@
       <FILE id="ulrSI4" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
     <GROUP id="{A05BF710-3583-6F29-F5BF-FA1E55BAD1A2}" name="DSP">
+      <FILE id="Ht7g7x" name="ADSREnvelope.cpp" compile="1" resource="0"
+            file="Source/ADSREnvelope.cpp"/>
+      <FILE id="DPhmtN" name="ADSREnvelope.h" compile="0" resource="0" file="Source/ADSREnvelope.h"/>
       <FILE id="ZfUABZ" name="Operator.cpp" compile="1" resource="0" file="Source/Operator.cpp"/>
       <FILE id="oZXitA" name="Operator.h" compile="0" resource="0" file="Source/Operator.h"/>
       <FILE id="Nh7pGO" name="VoiceProcessor.cpp" compile="1" resource="0"
@@ -30,21 +31,59 @@
       <FILE id="cqmG04" name="VoiceProcessor.h" compile="0" resource="0"
             file="Source/VoiceProcessor.h"/>
     </GROUP>
+    <GROUP id="{9FE53B35-E7B3-13B7-1707-857C294EE09A}" name="Operator">
+      <FILE id="PRaS1b" name="EnvelopeGraphics.cpp" compile="1" resource="0"
+            file="Source/EnvelopeGraphics.cpp"/>
+      <FILE id="qS19qr" name="EnvelopeGraphics.h" compile="0" resource="0"
+            file="Source/EnvelopeGraphics.h"/>
+      <FILE id="Uyy8v8" name="WaveformDisplayGraphics.cpp" compile="1" resource="0"
+            file="Source/WaveformDisplayGraphics.cpp"/>
+      <FILE id="rcs7pa" name="WaveformDisplayGraphics.h" compile="0" resource="0"
+            file="Source/WaveformDisplayGraphics.h"/>
+      <FILE id="qukj24" name="OperatorLayout.cpp" compile="1" resource="0"
+            file="Source/OperatorLayout.cpp"/>
+      <FILE id="mLIEka" name="OperatorLayout.h" compile="0" resource="0"
+            file="Source/OperatorLayout.h"/>
+    </GROUP>
+    <GROUP id="{1FF4E30C-E3AF-F208-5367-CF6E458077B9}" name="PresetManager">
+      <FILE id="X7T8sI" name="PresetLayout.cpp" compile="1" resource="0"
+            file="Source/PresetLayout.cpp"/>
+      <FILE id="IQLgIO" name="PresetLayout.h" compile="0" resource="0" file="Source/PresetLayout.h"/>
+      <FILE id="UZk6lh" name="PresetManager.cpp" compile="1" resource="0"
+            file="Source/PresetManager.cpp"/>
+      <FILE id="DEaSpT" name="PresetManager.h" compile="0" resource="0" file="Source/PresetManager.h"/>
+    </GROUP>
+    <GROUP id="{32091848-41C4-AE88-1814-3A29D7D3697A}" name="MainControls">
+      <GROUP id="{A16C69FB-1878-85B7-8ACD-C5052C448EDE}" name="Algorithms">
+        <FILE id="fQlZcJ" name="AlgorithmGraphics.cpp" compile="1" resource="0"
+              file="Source/AlgorithmGraphics.cpp"/>
+        <FILE id="DyMJCt" name="AlgorithmGraphics.h" compile="0" resource="0"
+              file="Source/AlgorithmGraphics.h"/>
+        <FILE id="DVEnT9" name="AlgorithmHelper.h" compile="0" resource="0"
+              file="Source/AlgorithmHelper.h"/>
+        <FILE id="yxxQJj" name="AlgorithmSelector.cpp" compile="1" resource="0"
+              file="Source/AlgorithmSelector.cpp"/>
+        <FILE id="lT49q0" name="AlgorithmSelector.h" compile="0" resource="0"
+              file="Source/AlgorithmSelector.h"/>
+      </GROUP>
+      <GROUP id="{DE5B3162-2338-BED6-395E-253D141F4E95}" name="Macros">
+        <FILE id="thBkjp" name="MacroLayout.cpp" compile="1" resource="0" file="Source/MacroLayout.cpp"/>
+        <FILE id="yiCVRj" name="MacroLayout.h" compile="0" resource="0" file="Source/MacroLayout.h"/>
+      </GROUP>
+      <GROUP id="{2E8528BD-02E4-80F7-A786-E7813F05D8F6}" name="WaveformDisplay">
+        <FILE id="UvymgJ" name="WaveformGraphics.cpp" compile="1" resource="0"
+              file="Source/WaveformGraphics.cpp"/>
+        <FILE id="QzzJcU" name="WaveformGraphics.h" compile="0" resource="0"
+              file="Source/WaveformGraphics.h"/>
+      </GROUP>
+    </GROUP>
     <GROUP id="{A8AAE2D7-7ED2-C48F-2D8C-D6192CEC0292}" name="Graphics">
       <FILE id="rgeWvj" name="LevelMeter.cpp" compile="1" resource="0" file="Source/LevelMeter.cpp"/>
       <FILE id="otgaXz" name="LevelMeter.h" compile="0" resource="0" file="Source/LevelMeter.h"/>
-      <FILE id="uPT0cd" name="ComboBoxLookAndFeel.cpp" compile="1" resource="0"
-            file="Source/ComboBoxLookAndFeel.cpp"/>
-      <FILE id="toom2y" name="ComboBoxLookAndFeel.h" compile="0" resource="0"
-            file="Source/ComboBoxLookAndFeel.h"/>
       <FILE id="vuCbu5" name="ButtonLookAndFeel.cpp" compile="1" resource="0"
             file="Source/ButtonLookAndFeel.cpp"/>
       <FILE id="X9j7F5" name="ButtonLookAndFeel.h" compile="0" resource="0"
             file="Source/ButtonLookAndFeel.h"/>
-      <FILE id="fQlZcJ" name="AlgorithmGraphics.cpp" compile="1" resource="0"
-            file="Source/AlgorithmGraphics.cpp"/>
-      <FILE id="DyMJCt" name="AlgorithmGraphics.h" compile="0" resource="0"
-            file="Source/AlgorithmGraphics.h"/>
       <FILE id="A1BgkZ" name="DialLookAndFeel.cpp" compile="1" resource="0"
             file="Source/DialLookAndFeel.cpp"/>
       <FILE id="cjB0Nl" name="DialLookAndFeel.h" compile="0" resource="0"

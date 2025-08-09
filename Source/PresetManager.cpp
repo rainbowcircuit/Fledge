@@ -8,7 +8,7 @@
   ==============================================================================
 */
 
-#include "Presets.h"
+#include "PresetManager.h"
 
 const juce::File PresetManager::defaultDirectory { juce::File::getSpecialLocation(
     juce::File::SpecialLocationType::commonDocumentsDirectory)

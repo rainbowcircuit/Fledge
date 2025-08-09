@@ -10,6 +10,8 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "LookAndFeel.h"
+
 class GraphicsHelper
 {
 public:

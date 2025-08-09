@@ -5,9 +5,9 @@
 
   ==============================================================================
 */
-
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "AlgorithmSelector.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
 FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
@@ -144,4 +144,27 @@ void FledgeAudioProcessorEditor::timerCallback()
     }
     algorithmGraphics->op[4].setInput(audioProcessor.params->outputRouting->getSafe());
     waveformDisplay.repaint(); // paint for internal slew limiting
+}
+
+void FledgeAudioProcessorEditor::buttonClicked(juce::Button* buttonClicked)
+{
+    if (buttonClicked == &showWaveformButton)
+    {
+        waveformDisplay.setVisible(true);
+        algorithmGraphics->setVisible(false);
+        algorithmSelector->setVisible(false);
+        macroInterface->setVisible(false);
+
+    } else if (buttonClicked == &showAlgorithmButton) {
+        waveformDisplay.setVisible(false);
+        algorithmGraphics->setVisible(true);
+        algorithmSelector->setVisible(true);
+        macroInterface->setVisible(false);
+
+    } else if (buttonClicked == &showMacrosButton) {
+        waveformDisplay.setVisible(false);
+        algorithmGraphics->setVisible(false);
+        algorithmSelector->setVisible(false);
+        macroInterface->setVisible(true);
+    }
 }

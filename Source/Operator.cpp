@@ -5,16 +5,7 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
 {
     this->sampleRate = sampleRate;
     
-    // envelope
     ampEnvelope.setSampleRate(sampleRate);
-    ampEnvelope.reset();
-
-    envParameters.attack = 1000.0f;
-    envParameters.decay = 250.0f;
-    envParameters.sustain = 0.8f;
-    envParameters.release = 1000.0f;
-    
-    ampEnvelope.setParameters(envParameters);
     
     ratioSmoothed.reset(sampleRate, 0.001);
     fixedSmoothed.reset(sampleRate, 0.001);
@@ -39,11 +30,11 @@ void FMOperator::stopNote()
 
 void FMOperator::setEnvelope(float attackInMs, float decayInMs, float sustainInFloat, float releaseInMs, bool isLooping)
 {
-    envParameters.attack = attackInMs;
-    envParameters.decay = decayInMs;
-    sustainSmoothed.setTargetValue(sustainInFloat);
-    envParameters.release = releaseInMs;
-    
+ //   envParameters.attack = attackInMs;
+ //   envParameters.decay = decayInMs;
+ //   sustainSmoothed.setTargetValue(sustainInFloat);
+  //  envParameters.release = releaseInMs;
+    ampEnvelope.setEnvelopeParameters(attackInMs, decayInMs, sustainSmoothed.getNextValue(), releaseInMs);
 }
 
 void FMOperator::setNoteNumber(float noteNumber)
@@ -64,7 +55,7 @@ void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float ampli
 float FMOperator::processOperator(float phase1, float phase2, float phase3, float phase4)
 {
     envParameters.sustain = sustainSmoothed.getNextValue();
-    ampEnvelope.setParameters(envParameters);
+   // ampEnvelope.setParameters(envParameters);
     
     frequency = noteFrequency * ratioSmoothed.getNextValue();
     if (isFixed) frequency = fixedSmoothed.getNextValue();

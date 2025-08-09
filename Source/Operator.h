@@ -2,6 +2,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "ADSREnvelope.h"
 
 class FMOperator
 {
@@ -15,7 +16,7 @@ public:
     void setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex);
     float processOperator(float phase1, float phase2, float phase3, float phase4);
     
-    juce::ADSR ampEnvelope;
+    ADSREnvelope ampEnvelope;
     juce::ADSR::Parameters envParameters;
 private:
     double sampleRate;

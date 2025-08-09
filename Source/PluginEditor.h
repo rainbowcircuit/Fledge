@@ -11,16 +11,17 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "UserInterface.h"
-#include "AlgorithmGraphics.h"
 #include "ButtonLookAndFeel.h"
 #include "LookAndFeel.h"
 #include "LevelMeter.h"
 #include "GraphicsUtility.h"
+#include "OperatorLayout.h"
+#include "AlgorithmGraphics.h"
+#include "AlgorithmSelector.h"
+#include "PresetLayout.h"
+#include "WaveformGraphics.h"
 
-//==============================================================================
-/**
-*/
-class FledgeAudioProcessorEditor  : public juce::AudioProcessorEditor, juce::Timer, juce::Button::Listener, GraphicsHelper
+class FledgeAudioProcessorEditor : public juce::AudioProcessorEditor, juce::Timer, juce::Button::Listener, GraphicsHelper
 {
 public:
     FledgeAudioProcessorEditor (FledgeAudioProcessor&);
@@ -31,37 +32,7 @@ public:
     void resized() override;
     void timerCallback() override;
 
-    void buttonClicked(juce::Button* buttonClicked) override
-    {
-        if (buttonClicked == &showWaveformButton)
-        {
-            waveformDisplay.setVisible(true);
-            algorithmGraphics->setVisible(false);
-            algorithmSelector->setVisible(false);
-            macroInterface->setVisible(false);
-
-        } else if (buttonClicked == &showAlgorithmButton) {
-            waveformDisplay.setVisible(false);
-            algorithmGraphics->setVisible(true);
-            algorithmSelector->setVisible(true);
-            macroInterface->setVisible(false);
-
-        } else if (buttonClicked == &showMacrosButton) {
-            waveformDisplay.setVisible(false);
-            algorithmGraphics->setVisible(false);
-            algorithmSelector->setVisible(false);
-            macroInterface->setVisible(true);
-        }
-    }
-
-    
-    
-    void initializeEditorState()
-    {
-   //     editorState.setProperty("width", 0.5f, nullptr);
-    //    editorState.setProperty("height", 0.5f, nullptr);
-    }
-
+    void buttonClicked(juce::Button* buttonClicked) override;
 
 private:
     ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
