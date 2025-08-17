@@ -57,6 +57,18 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
     algorithmGraphics->setVisible(false);
     algorithmSelector->setVisible(false);
     macroInterface->setVisible(false);
+    
+    volumeSlider.setSliderStyle(juce::Slider::LinearHorizontal);
+    volumeSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 80, 20);
+    volumeSlider.setTextValueSuffix(" dB");
+    addAndMakeVisible(volumeSlider);
+    
+    
+
+    volumeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+    audioProcessor.params->apvts, "volume", volumeSlider);
+
+    
 
     outputLevelMeter = std::make_unique<LevelMeter>
     (
@@ -111,10 +123,15 @@ void FledgeAudioProcessorEditor::resized()
     macroInterface->setBounds(5, 60, 280, 490);
 
     outputLevelMeter->setBounds(285, 72, 300, 25);
+    
+        volumeSlider.setBounds(285, 52, 300, 25);
+
 
     showWaveformButton.setBounds(5, 555, 94, 40);
     showAlgorithmButton.setBounds(100, 555, 94, 40);
     showMacrosButton.setBounds(195, 555, 94, 40);
+    
+
 }
 
 

@@ -34,6 +34,8 @@ apvts(audioProcessor, nullptr, "Parameters", createParameterLayout())
     globalRelease = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalRelease");
     globalModIndex = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalModIndex");
     outputRouting = std::make_unique<ParameterInstance>(audioProcessor, *this, "outputRouting");
+    
+ 
 
 }
 
@@ -54,6 +56,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(25.0f, 400.0f, 0.1f), 100.0f));
     
     layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
+    
+       layout.add(std::make_unique<juce::AudioParameterFloat>(
+    juce::ParameterID { "volume", 1 }, "Master Volume",
+    juce::NormalisableRange<float>(-60.0f, 6.0f, 0.1f), 
+    0.0f 
+    ));
+
 
     std::array<float, 4> defaultAmplitude = { 100.0f, 0.0f, 0.0f, 0.0f };
     std::array<int, 4> defaultRouting = { 2, 4, 8, 0 };

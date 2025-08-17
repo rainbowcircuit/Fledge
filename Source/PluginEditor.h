@@ -41,6 +41,10 @@ private:
     std::unique_ptr<PresetInterface>  presetInterface;
     std::unique_ptr<MacroControlsInterface> macroInterface;
     
+    juce::Slider volumeSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> volumeAttachment;
+
+    
     juce::TextButton showWaveformButton, showAlgorithmButton, showMacrosButton;
     WaveformDisplayGraphics waveformDisplay;
     std::unique_ptr<AlgorithmGraphics> algorithmGraphics;

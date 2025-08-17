@@ -174,6 +174,10 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
+    float volumeDb = params->apvts.getRawParameterValue("volume")->load();
+    float gain     = juce::Decibels::decibelsToGain(volumeDb);
+    buffer.applyGain(gain);
+    
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
