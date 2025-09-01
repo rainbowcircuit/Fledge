@@ -16,6 +16,11 @@ LevelMeter::LevelMeter(Measurement& measurementL_, Measurement& measurementR_)
     : measurementL(measurementL_), measurementR(measurementR_),
       dbLevelL(clampdB), dbLevelR(clampdB)
 {
+    addAndMakeVisible(gainSlider);
+    gainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    gainSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    gainSlider.setLookAndFeel(&gainLAF);
+    
     setOpaque(true);
     startTimerHz(refreshRate);
     decay = 1.0f - std::exp(-1.0f / (float(refreshRate) * 0.2f));
@@ -23,6 +28,7 @@ LevelMeter::LevelMeter(Measurement& measurementL_, Measurement& measurementR_)
 
 LevelMeter::~LevelMeter()
 {
+    gainSlider.setLookAndFeel(nullptr);
 }
 
 void LevelMeter::paint (juce::Graphics& g)
@@ -41,6 +47,10 @@ void LevelMeter::resized()
 {
     maxPos = 4.0f;  // Left margin (start position)
     minPos = float(getWidth()) - 4.0f;  // Right margin (end position)
+    
+    auto bounds = getLocalBounds();
+    gainSlider.setBounds(bounds);
+    
 }
 
 void LevelMeter::timerCallback()

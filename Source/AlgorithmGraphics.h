@@ -105,9 +105,15 @@ public:
     void setNumCableAvailable(int amount);
     int getNumCableAvailable();
     
+    void setOpacity(float opacity)
+    {
+        this->opacity = opacity/1000.0f;
+    }
+    
 private:
     float width, x, y;
     
+    float opacity = 0.0f;
     int numCableAvailable = 4;
     int operatorIndex;
     std::array<float, 4> inputIndex;
@@ -129,7 +135,7 @@ private:
     perspectiveBotRight;
 };
 
-class AlgorithmGraphics : public juce::Component, juce::Timer, juce::Button::Listener, AlgorithmHelper, GraphicsHelper
+class AlgorithmGraphics : public juce::Component, juce::AsyncUpdater, juce::Timer, juce::Button::Listener, AlgorithmHelper, GraphicsHelper
 {
 public:
     
@@ -138,21 +144,22 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
     
+    //==============================================================================
     void calculateCoordinates(juce::Rectangle<float> bounds);
     void averageVanishingPoint();
     
+    //==============================================================================
     void setFromAlgorithmSelection(int selectionIndex);
     void buttonClicked(juce::Button* button) override;
-
-    void drawGridBox(juce::Graphics& g, juce::Rectangle<float> bounds);
     
-
+    //==============================================================================
+    void drawGridBox(juce::Graphics& g, juce::Rectangle<float> bounds);
 
     void mouseDown(const juce::MouseEvent& m) override;
     void mouseDrag(const juce::MouseEvent& m) override;
     void mouseUp(const juce::MouseEvent& m) override;
     
-    
+    //==============================================================================
     void startNewCableOnMouseDown(int originBlock, int cableIndex, juce::Point<float> mouse);
     void setCable(int originBlock, int cableIndex, int destBlock);
     void setCableOutputCoords(int originBlock, juce::Point<float> newOutputPoint);
@@ -160,18 +167,24 @@ public:
     void connectCableToBlock(int originBlock, int cableToConnect, int destinationBlock);
     void disconnectCableFromBlock(int cableToDisconnect, int disconnectedBlock);
 
+    //==============================================================================
     void moveBlock(int blockToMove, juce::Point<float> newPoint);
+    void saveBlockPosition();
     void followCable(int blockToMove);
     juce::Point<float> limitBlockDrag(juce::Point<float> mousePoint);
     
+    //==============================================================================
     void setGUIFromParameter();
     void setParameterFromGUI();
-    
+    void handleAsyncUpdate() override;
+
+    //==============================================================================
     void selectCable(juce::Point<float> mouse);
     void deleteAllCables();
     void clearAllInputs();
     void deleteSelectedCable();
     
+    //==============================================================================
     void timerCallback() override;
     bool keyPressed(const juce::KeyPress& key) override;
     
@@ -181,11 +194,12 @@ private:
     juce::Point<float> vp;
     float x, y, width, widthMargin, height, heightMargin, blockIncr;
     juce::TextButton clearCablesButton;
-
     
     std::array<std::array<PatchCable, 4>, 5> cable;
     std::optional<int> currentCableIndex, currentOutputBlockIndex;
     std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
+    
+    std::array<std::atomic<int>, 5> routingAtomic;
     
     FledgeAudioProcessor& audioProcessor;
     

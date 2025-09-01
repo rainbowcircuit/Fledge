@@ -58,6 +58,9 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     void saveEditorState(int width, int height, int index, juce::Point<float> operatorPosition);
+    void saveBlockPosition(juce::Point<float> op0Coords, juce::Point<float> op1Coords, juce::Point<float> op2Coords, juce::Point<float> op3Coords);
+
+    
     
     
     Measurement& getOutputLevelL() { return outputLevelL; }
@@ -78,7 +81,7 @@ private:
     Measurement outputLevelL;
     Measurement outputLevelR;
 
-    juce::Synthesiser synth;
+    Synthesizer synth;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FledgeAudioProcessor)
 };

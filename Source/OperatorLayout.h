@@ -33,7 +33,20 @@ private:
 
     int index;
     
-    juce::Label ratioLabel,
+    DialLookAndFeel ratioSliderLAF
+    { DialLAF::HorizontalSlider },
+    amplitudeSliderLAF { DialLAF::VerticalSlider };
+
+    juce::Slider
+    ratioGraphicSlider,
+    amplitudeGraphicSlider;
+    
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>
+    ratioGraphicAttachment,
+    amplitudeGraphicAttachment;
+
+    juce::Label
+    ratioLabel,
     fixedLabel,
     amplitudeLabel,
     phaseLabel,
@@ -42,7 +55,8 @@ private:
     sustainLabel,
     releaseLabel;
     
-    std::unique_ptr<EditableTextBoxSlider> ratioSlider,
+    std::unique_ptr<EditableTextBoxSlider>
+    ratioSlider,
     fixedSlider,
     amplitudeSlider,
     phaseSlider,

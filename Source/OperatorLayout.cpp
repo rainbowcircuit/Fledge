@@ -60,6 +60,20 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     opGraphics = std::make_unique<OperatorDisplayGraphics>(audioProcessor);
     addAndMakeVisible(*opGraphics);
     opGraphics->setIndex(index);
+    
+    addAndMakeVisible(amplitudeGraphicSlider);
+    amplitudeSliderLAF.setIndex(index);
+    amplitudeGraphicSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    amplitudeGraphicSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    amplitudeGraphicSlider.setLookAndFeel(&amplitudeSliderLAF);
+    amplitudeGraphicAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "amplitude" + juce::String(index), amplitudeGraphicSlider);
+
+    addAndMakeVisible(ratioGraphicSlider);
+    ratioSliderLAF.setIndex(index);
+    ratioGraphicSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    ratioGraphicSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    ratioGraphicSlider.setLookAndFeel(&ratioSliderLAF);
+    ratioGraphicAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "ratio" + juce::String(index), ratioGraphicSlider);
 
     startTimerHz(30);
 }
@@ -69,8 +83,6 @@ void OperatorInterface::paint(juce::Graphics &g)
     auto bounds = getLocalBounds().toFloat();
     fillBackgroundPanel(g, bounds);
     bounds.reduce(5, 5);
-    
-
 }
 
 void OperatorInterface::resized()
@@ -87,14 +99,30 @@ void OperatorInterface::resized()
     ratioLabel.setBounds(x + width * 0.175f, height * 0.025f, width * 0.15f, height * 0.2f);
     ratioSlider->setBounds(x + width * 0.245f, height * 0.025f, width * 0.175f, height * 0.2f);
 
+    phaseLabel.setBounds(x + width * 0.325f,  height * 0.025f, width * 0.15f, height * 0.2f);
+    phaseSlider->setBounds(x + width * 0.35f, height * 0.025f, width * 0.15f, height * 0.2f);
+    
     opGraphics->setBounds(x + width * 0.0125f,
                           y + height * 0.2f,
                           width * 0.45f,
                           height * 0.7625f);
-
-    phaseLabel.setBounds(x + width * 0.325f,  height * 0.025f, width * 0.15f, height * 0.2f);
-    phaseSlider->setBounds(x + width * 0.35f, height * 0.025f, width * 0.15f, height * 0.2f);
     
+    float sliderWidth = x + width * 0.04f;
+    float sliderHeight = x + width * 0.02f;
+
+    amplitudeSliderLAF.setSliderSize(sliderWidth);
+    amplitudeGraphicSlider.setBounds(x + width * 0.02f,
+                                     y + height * 0.2f,
+                                     sliderHeight,
+                                     height * 0.7625f);
+    
+    ratioSliderLAF.setSliderSize(sliderWidth);
+    ratioGraphicSlider.setBounds(x + width * 0.0125f,
+                                 y + height * 0.85f,
+                                 width * 0.45f,
+                                 sliderHeight);
+    
+
     attackLabel.setBounds(x + width * 0.825f,
                           y + height * 0.1f,
                           width * 0.05f,
@@ -123,6 +151,7 @@ void OperatorInterface::resized()
                            y + height * 0.3f,
                            width * 0.165f,
                            height * 0.2f);
+    
     sustainSlider->setBounds(x + width * 0.865f, y + height * 0.5f, width * 0.165f, height * 0.2f);
     releaseSlider->setBounds(x + width * 0.865f, y + height * 0.7f, width * 0.165f, height * 0.2f);
 

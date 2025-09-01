@@ -23,7 +23,7 @@ public:
     //==============================================================================
     void setIndex(int index);
     void paint(juce::Graphics &g) override;
-    void resized() override {}
+    void resized() override;
     juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp, float phase);
 
     //==============================================================================
@@ -36,7 +36,6 @@ public:
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override {}
         void handleAsyncUpdate() override;
 
-
 private:
     
     void timerCallback() override;
@@ -46,6 +45,8 @@ private:
     
     std::atomic<float> newValueAtomic;
     std::atomic<int> parameterIndexAtomic;
+
+
     
     int index;
     float ratio, fixed, amplitude, phase;

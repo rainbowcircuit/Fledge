@@ -13,11 +13,13 @@
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
 
+enum class DialLAF { RoundDial, GainSlider, HorizontalSlider, VerticalSlider};
+
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
     
-    DialLookAndFeel()
+    DialLookAndFeel(DialLAF l) : lookAndFeel(l)
     {
         setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
         setColour(juce::Slider::textBoxTextColourId, juce::Colour(200, 200, 200));
@@ -25,12 +27,35 @@ public:
     
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider &slider) override
     {
-        auto bounds = slider.getLocalBounds().toFloat();
-        float xPos = bounds.getX();
-        float yPos = bounds.getY();
-        float size = bounds.getWidth();
+        bool hover = slider.isMouseOver();
         
-        drawRoundDial(g, xPos, yPos, size, sliderPosProportional);
+        switch(lookAndFeel){
+            case DialLAF::RoundDial:
+            {
+                drawRoundDial(g, x, y, width, sliderPosProportional);
+                break;
+            }
+            case DialLAF::GainSlider:
+            {
+                break;
+            }
+            case DialLAF::HorizontalSlider:
+            {
+                drawHorizontalSlider(g, x, y, width, height, sliderPosProportional, hover);
+                break;
+            }
+            case DialLAF::VerticalSlider:
+            {
+                drawVerticalSlider(g, x, y, width, height, sliderPosProportional, hover);
+                break;
+            }
+
+        }
+    }
+    
+    void setIndex(int index)
+    {
+        this->index = index;
     }
     
     void drawRoundDial(juce::Graphics &g, float x, float y, float size, float position)
@@ -81,6 +106,41 @@ public:
         g.fillPath(dialDotPath);
     }
     
+    void drawHorizontalSlider(juce::Graphics& g, float x, float y, float width, float height, float pos, bool isHovered)
+    {
+        juce::Rectangle<float> slider = { (x + width - sliderSize) * pos,
+            y,
+            sliderSize,
+            height };
+
+        juce::Path sliderPath;
+        sliderPath.addRoundedRectangle(slider, sliderSize * 0.15f);
+        
+        auto fillColor = isHovered ? Colors::mainHoverColors[index] : Colors::mainColors[index];
+        g.setColour(fillColor);
+        g.fillPath(sliderPath);
+    }
+    
+    void drawVerticalSlider(juce::Graphics& g, float x, float y, float width, float height, float pos, bool isHovered)
+    {
+        juce::Rectangle<float> slider = { x,
+            (y + height - sliderSize) * (1.0f - pos),
+            width,
+            sliderSize };
+                
+        juce::Path sliderPath;
+        sliderPath.addRoundedRectangle(slider, sliderSize * 0.15f);
+        
+        auto fillColor = isHovered ? Colors::mainHoverColors[index] : Colors::mainColors[index];
+        g.setColour(fillColor);
+        g.fillPath(sliderPath);
+    }
+        
+    void setSliderSize(float sliderSize)
+    {
+        this->sliderSize = sliderSize;
+    }
+
     void fillTextEditorBackground(juce::Graphics& g, int width, int height, juce::TextEditor& textEditor) override
     {
         g.setColour(juce::Colours::transparentBlack);
@@ -88,7 +148,6 @@ public:
         bgPath.addRoundedRectangle(textEditor.getLocalBounds().reduced(4.0f, 0.0f), 3.0f);
         g.fillPath(bgPath);
     }
-
 
     juce::Label* createSliderTextBox(juce::Slider& slider) override
     {
@@ -107,6 +166,11 @@ public:
         };
         return label;
     }
+    
+private:
+    DialLAF lookAndFeel;
+    int index;
+    float sliderSize;
 };
 
 
@@ -218,8 +282,8 @@ public:
         
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
-        newValueAtomic.store(newValue);
-        parameterIndexAtomic.store(parameterIndex);
+        const juce::SpinLock::ScopedLockType lock(pendingLock);
+        pendingChanges.emplace_back(parameterIndex, newValue);
         triggerAsyncUpdate();
     }
     
@@ -227,24 +291,32 @@ public:
     
     void handleAsyncUpdate() override
     {
-        float newValue = newValueAtomic.load();
-        int parameterIndex = parameterIndexAtomic.load();
-        juce::String newParameterID;
-        float scaledValue;
-        
-        if (auto* param = dynamic_cast<juce::AudioProcessorParameterWithID*>(audioProcessor.getParameters()[parameterIndex]))
+        std::vector<std::pair<int, float>> updatesCopy;
+
         {
-            if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(param))
-            {
-                scaledValue = rangedParam->convertFrom0to1(newValue);
-                newParameterID = param->paramID;
-            }
+            const juce::SpinLock::ScopedLockType lock(pendingLock);
+            updatesCopy.swap(pendingChanges); // safely move all pending updates
         }
-        
-        if (newParameterID == parameterID)
+
+        for (const auto& [parameterIndex, newValue] : updatesCopy)
         {
-            juce::String formattedValue = juce::String(scaledValue, numDecimals) + parameterSuffix;
-            textBox.setText(formattedValue, juce::dontSendNotification);
+            juce::String newParameterID;
+            float scaledValue;
+            
+            if (auto* param = dynamic_cast<juce::AudioProcessorParameterWithID*>(audioProcessor.getParameters()[parameterIndex]))
+            {
+                if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*>(param))
+                {
+                    scaledValue = rangedParam->convertFrom0to1(newValue);
+                    newParameterID = param->paramID;
+                }
+            }
+            
+            if (newParameterID == parameterID)
+            {
+                juce::String formattedValue = juce::String(scaledValue, numDecimals) + parameterSuffix;
+                textBox.setText(formattedValue, juce::dontSendNotification);
+            }
         }
     }
 
@@ -271,9 +343,10 @@ public:
 private:
     float initialParamValue;
     float rangeStart, rangeEnd;
-    std::atomic<float> newValueAtomic;
-    std::atomic<int> parameterIndexAtomic;
     
+    std::vector<std::pair<int, float>> pendingChanges;
+    juce::SpinLock pendingLock;
+
     juce::Point<float> dragStartPoint;
     juce::Label textBox;
     int numDecimals = 1;

@@ -37,6 +37,14 @@ public:
     routing;
     
     std::unique_ptr<ParameterInstance>
+    pitchModInit,
+    pitchModAttack,
+    pitchModPeaking,
+    pitchModDecay,
+    pitchModSustain,
+    pitchModRelease,
+    voiceCount,
+    voiceSlew,
     globalAttack,
     globalDecay,
     globalSustain,

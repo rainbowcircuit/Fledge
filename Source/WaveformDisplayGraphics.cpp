@@ -49,13 +49,6 @@ void OperatorDisplayGraphics::paint(juce::Graphics &g)
     float sliderWidth = width * 0.1f;
     float sliderHeight = height * 0.05f;
 
-    float macroYPosition = juce::jlimit(y, y + height - sliderHeight - sliderWidth, macroPosition.y);
-    macroY.addRoundedRectangle(x, macroYPosition, sliderHeight, sliderWidth, 2);
-    g.fillPath(macroY);
-
-    float macroXPosition = juce::jlimit(x + sliderHeight, x + width - sliderWidth, macroPosition.x);
-    macroX.addRoundedRectangle(macroXPosition, height, sliderWidth, sliderHeight, 2);
-    g.fillPath(macroX);
     
     juce::Path bgWaveform = waveformPath(g, x + width * 0.05f,
                                        y + height * 0.1f,
@@ -74,6 +67,13 @@ void OperatorDisplayGraphics::paint(juce::Graphics &g)
     g.setColour(Colors::mainColors[index]);
     g.strokePath(fgWaveform, strokeType);
 }
+
+void OperatorDisplayGraphics::resized()
+{
+    macroPosition.x = (audioProcessor.params->ratio[index]->getSafe()/20.0f) * bounds.getWidth();
+    macroPosition.y = (1.0f - audioProcessor.params->amplitude[index]->getSafe()/100.0f) * bounds.getHeight();
+}
+
 
 juce::Path OperatorDisplayGraphics::waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp, float phase)
 {
@@ -111,11 +111,11 @@ void OperatorDisplayGraphics::setRatioAndAmplitude(float ratio, float fixed, flo
 
 void OperatorDisplayGraphics::setParameter(float x, float y)
 {
-    float ratio = juce::jlimit(0.0f, 1.0f, x/100.0f);
-    audioProcessor.params->apvts.getParameter("ratio" + juce::String(index))->setValueNotifyingHost(ratio);
-    
     float amplitude = juce::jlimit(0.0f, 1.0f, 1.0f - (y/100.0f));
     audioProcessor.params->apvts.getParameter("amplitude" + juce::String(index))->setValueNotifyingHost(amplitude);
+    
+    float ratio = juce::jlimit(0.0f, 1.0f, x/500.0f);
+    audioProcessor.params->apvts.getParameter("ratio" + juce::String(index))->setValueNotifyingHost(ratio);
 }
 
 void OperatorDisplayGraphics::mouseDrag(const juce::MouseEvent& m)

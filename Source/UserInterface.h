@@ -43,7 +43,7 @@ public:
     
 private:
     // look and feel
-    DialLookAndFeel dialLAF;
+    DialLookAndFeel dialLAF { DialLAF::RoundDial };
     
     juce::Slider globalFreqSlider,
     globalModIndexSlider,

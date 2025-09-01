@@ -47,14 +47,11 @@ void SynthVoice::setEnvelope(int index, float attack, float decay, float sustain
 {
     float attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
     float decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
-    float sustainScaled = std::pow(2.0f, globalSustain / 100.0f) * (sustain/100.0f);
-    sustainScaled = juce::jlimit(0.0f, 1.0f, sustainScaled);
+    
+    float sustainScaled = juce::jlimit(0.0f, 1.0f, (globalSustain / 100.0f) * (sustain/100.0f));
     float releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
 
-    op[index].setEnvelope(attackScaled,
-                          decayScaled,
-                          sustainScaled,
-                          releaseScaled, false);
+    op[index].ampEnvelope.setEnvelopeParameters(attackScaled, decayScaled, sustainScaled, releaseScaled);
 }
 
 void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex)

@@ -49,7 +49,7 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
 {
     algoGraphics.clearAllInputs();
     if (button == &algorithm[0]){
-        setOperatorParam(3, 1);
+        setOperatorParam(3, 0);
         setOperatorParam(2, 8);
         setOperatorParam(1, 4);
         setOperatorParam(0, 2);
@@ -111,7 +111,12 @@ void AlgorithmSelectInterface::buttonClicked(juce::Button* button)
         setOperatorParam(0, 0);
         setOutputParam(15);
         algoGraphics.setFromAlgorithmSelection(7);
-
+    }
+    
+    for(int i = 0; i < 4; i++)
+    {
+        algoGraphics.op[i].setAlwaysOnTop(true);
+        algoGraphics.op[i].setBlockInFocus(false);
     }
 }
 

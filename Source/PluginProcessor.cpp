@@ -142,9 +142,8 @@ bool FledgeAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-        
+    synth.setVoiceCount(params->voiceCount->get());
     for (int oper = 0; oper < 4; oper++){
-
         for (int v = 0; v < synth.getNumVoices(); v++)
         {
             if(auto voice = dynamic_cast<SynthVoice*>(synth.getVoice(v)))
@@ -171,7 +170,6 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             }
         }
     }
-    
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
     const int numChannels = buffer.getNumChannels();
@@ -217,9 +215,6 @@ juce::AudioProcessorEditor* FledgeAudioProcessor::createEditor()
 //==============================================================================
 void FledgeAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    float myvalue = 200.0f;
-    params->apvts.state.setProperty("testValue", myvalue, nullptr);
-    
     copyXmlToBinary(*params->apvts.copyState().createXml(), destData);
 }
 
@@ -240,6 +235,22 @@ void FledgeAudioProcessor::saveEditorState(int width, int height, int index, juc
     juce::String indexStr = juce::String(index);
     params->apvts.state.setProperty("oper" + indexStr + "XPos", operatorPosition.x, nullptr);
     params->apvts.state.setProperty("oper" + indexStr + "YPos", operatorPosition.y, nullptr);
+}
+
+void FledgeAudioProcessor::saveBlockPosition(juce::Point<float> op0Coords, juce::Point<float> op1Coords, juce::Point<float> op2Coords, juce::Point<float> op3Coords)
+{
+    params->apvts.state.setProperty("op0XPos", op0Coords.x, nullptr);
+    params->apvts.state.setProperty("op0YPos", op0Coords.y, nullptr);
+
+    params->apvts.state.setProperty("op1XPos", op1Coords.x, nullptr);
+    params->apvts.state.setProperty("op1YPos", op1Coords.y, nullptr);
+
+    params->apvts.state.setProperty("op2XPos", op2Coords.x, nullptr);
+    params->apvts.state.setProperty("op2YPos", op2Coords.y, nullptr);
+
+    params->apvts.state.setProperty("op3XPos", op3Coords.x, nullptr);
+    params->apvts.state.setProperty("op3YPos", op3Coords.y, nullptr);
+
 }
 
 //==============================================================================

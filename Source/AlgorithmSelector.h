@@ -40,9 +40,9 @@ public:
     void setOutputParam(int gainIndex);
     void setPresetParam(int index);
     
+    std::array<juce::ToggleButton, 8> algorithm;
 private:
     std::array<BlockDiagrams, 8> algorithmGraphics;
-    std::array<juce::ToggleButton, 8> algorithm;
     
     AlgorithmGraphics& algoGraphics;
     FledgeAudioProcessor& audioProcessor;

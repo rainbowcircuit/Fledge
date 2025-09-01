@@ -13,6 +13,55 @@
 #include "Operator.h"
 #include "AlgorithmHelper.h"
 
+class Synthesizer : public juce::Synthesiser
+{
+public:
+    void noteOn(int midiChannel, int midiNoteNumber, float velocity) override
+    {
+        const juce::ScopedLock sl(lock);
+        
+        for (auto* sound : sounds)
+        {
+            if (sound->appliesToNote(midiNoteNumber) && sound->appliesToChannel(midiChannel))
+            {
+                // Round robin voice allocation
+                auto* voice = findVoiceRoundRobin(sound);
+                if (voice != nullptr)
+                {
+                    startVoice(voice, sound, midiChannel, midiNoteNumber, velocity);
+                }
+                break;
+            }
+        }
+    }
+    
+    void setVoiceCount(int voiceCount)
+    {
+        this->voiceCount = voiceCount;
+    }
+    
+private:
+    
+    juce::SynthesiserVoice* findVoiceRoundRobin(juce::SynthesiserSound* soundToPlay)
+    {
+        for (int attempts = 0; attempts < voiceCount; attempts++)
+        {
+            auto* voice = voices[nextVoiceIndex];
+            nextVoiceIndex = (nextVoiceIndex + 1) % voiceCount;
+            
+            if (voice->canPlaySound(soundToPlay))
+            {
+                if(voice->isVoiceActive()) voice->stopNote(1.0f, true);
+                return voice;
+            }
+        }
+        return nullptr;
+    }
+
+    int nextVoiceIndex = 0;
+    int voiceCount = 8;
+};
+
 class SynthSound : public juce::SynthesiserSound
 {
 public:

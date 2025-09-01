@@ -12,6 +12,8 @@
 
 #include <JuceHeader.h>
 #include "Measurement.h"
+#include "DialLookAndFeel.h"
+
 
 class LevelMeter  : public juce::Component, private juce::Timer
 {
@@ -31,6 +33,11 @@ private:
         return int(std::round(juce::jmap(dbLevel, mindB, maxdB, maxPos, minPos)));
     }
 
+    
+    DialLookAndFeel gainLAF { DialLAF::GainSlider };
+    juce::Slider gainSlider;
+    std::unique_ptr<juce::SliderParameterAttachment> gainAttachment;
+    
     void drawLevel(juce::Graphics& g, float level, int y, int height);
     void updateLevel(float newLevel, float& smoothedLevel, float& leveldB) const;
 

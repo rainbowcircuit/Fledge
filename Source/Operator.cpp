@@ -18,8 +18,6 @@ void FMOperator::prepareToPlay(double sampleRate, float samplesPerBlock, int num
 void FMOperator::startNote()
 {
     ampEnvelope.noteOn();
-    operatorAngle = 0.0;
-    operatorPhase = 0.0;
 }
 
 void FMOperator::stopNote()
@@ -30,11 +28,7 @@ void FMOperator::stopNote()
 
 void FMOperator::setEnvelope(float attackInMs, float decayInMs, float sustainInFloat, float releaseInMs, bool isLooping)
 {
- //   envParameters.attack = attackInMs;
- //   envParameters.decay = decayInMs;
- //   sustainSmoothed.setTargetValue(sustainInFloat);
-  //  envParameters.release = releaseInMs;
-    ampEnvelope.setEnvelopeParameters(attackInMs, decayInMs, sustainSmoothed.getNextValue(), releaseInMs);
+    ampEnvelope.setEnvelopeParameters(attackInMs, decayInMs, sustainInFloat, releaseInMs);
 }
 
 void FMOperator::setNoteNumber(float noteNumber)

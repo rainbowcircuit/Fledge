@@ -38,16 +38,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 
     algorithmGraphics = std::make_unique<AlgorithmGraphics>(audioProcessor);
     addAndMakeVisible(*algorithmGraphics);
-    
-    for (int oper = 0; oper < 4; oper++){
-        juce::String indexStr = juce::String(oper);
-
-        float x = audioProcessor.params->apvts.state.getProperty("oper" + indexStr + "XPos", 100);
-        float y = audioProcessor.params->apvts.state.getProperty("oper" + indexStr + "XPos", 50);
         
-        algorithmGraphics->moveBlock(oper, { x, y });
-    }
-    
     algorithmSelector = std::make_unique<AlgorithmSelectInterface>(audioProcessor, *algorithmGraphics);
     addAndMakeVisible(*algorithmSelector);
     
@@ -67,6 +58,7 @@ FledgeAudioProcessorEditor::FledgeAudioProcessorEditor (FledgeAudioProcessor& p)
 
     setSize (770, 605);
     startTimerHz(30);
+
 }
 
 FledgeAudioProcessorEditor::~FledgeAudioProcessorEditor()
@@ -94,20 +86,38 @@ void FledgeAudioProcessorEditor::resized()
     const int height = getHeight();
     const float margin = width * 0.00641f;
 
-    
     for (int oper = 0; oper < 4; oper++)
     {
-        if (auto* processor = dynamic_cast<FledgeAudioProcessor*>(&audioProcessor))
-        {
-            processor->saveEditorState(getWidth(), getHeight(), oper, algorithmGraphics->op[oper].getBlockCenter());
-        }
         opInterface[oper]->setBounds(285, oper * 125 + 100, 480, 125);
     }
 
-    presetInterface->setBounds(5, 5, 760, 50);
+
+    presetInterface->setBounds(5, 5, 760, 40);
     waveformDisplay.setBounds(5, 60, 280, 490);
     algorithmGraphics->setBounds(10, 65, 270, 335);
     algorithmSelector->setBounds(5, 400, 280, 150);
+    
+   // juce::String index = juce::String(oper);
+    float op0XPos = audioProcessor.params->apvts.state.getProperty("op0XPos");
+    float op0YPos = audioProcessor.params->apvts.state.getProperty("op0YPos");
+    
+    float op1XPos = audioProcessor.params->apvts.state.getProperty("op1XPos");
+    float op1YPos = audioProcessor.params->apvts.state.getProperty("op1YPos");
+
+    float op2XPos = audioProcessor.params->apvts.state.getProperty("op2XPos");
+    float op2YPos = audioProcessor.params->apvts.state.getProperty("op2YPos");
+
+    float op3XPos = audioProcessor.params->apvts.state.getProperty("op3XPos");
+    float op3YPos = audioProcessor.params->apvts.state.getProperty("op3YPos");
+
+    algorithmGraphics->moveBlock(0, { op0XPos, op0YPos });
+    algorithmGraphics->moveBlock(1, { op1XPos, op1YPos });
+    algorithmGraphics->moveBlock(2, { op2XPos, op2YPos });
+    algorithmGraphics->moveBlock(3, { op3XPos, op3YPos });
+
+    
+    
+    
     macroInterface->setBounds(5, 60, 280, 490);
 
     outputLevelMeter->setBounds(285, 72, 300, 25);
@@ -141,6 +151,7 @@ void FledgeAudioProcessorEditor::timerCallback()
                                             audioProcessor.params->outputRouting->getSafe());
 
         algorithmGraphics->op[oper].setInput(audioProcessor.params->routing[oper]->getSafe());
+        algorithmGraphics->op[oper].setOpacity(audioProcessor.params->amplitude[oper]->getSafe());
     }
     algorithmGraphics->op[4].setInput(audioProcessor.params->outputRouting->getSafe());
     waveformDisplay.repaint(); // paint for internal slew limiting

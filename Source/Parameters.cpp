@@ -28,6 +28,9 @@ apvts(audioProcessor, nullptr, "Parameters", createParameterLayout())
         routing[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, operatorRoutingID);
         
     }
+    voiceCount = std::make_unique<ParameterInstance>(audioProcessor, *this, "voiceCount");
+    voiceSlew = std::make_unique<ParameterInstance>(audioProcessor, *this, "voiceSlew");
+
     globalAttack = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalAttack");
     globalDecay = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalDecay");
     globalSustain = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalSustain");
@@ -41,7 +44,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "port", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "voiceCount", 1 }, "Voice Count", 1, 8, 0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "voiceSlew", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalModIndex", 1 }, "Global Mod Index", juce::NormalisableRange<float>(25.0f, 400.0f, 0.01f), 100.0f));
     

@@ -25,7 +25,7 @@ public:
     {
         attackInc  = 1.0f / (attack * 0.001f * sampleRate);
         decayInc  = 1.0f / (decay * 0.001f * sampleRate);
-        sustain  = sustain/100.0f;
+        this->sustain = sustain;
         releaseInc  = 1.0f / (release * 0.001f * sampleRate);
     }
     
@@ -66,6 +66,7 @@ public:
                 {
                     envelopeValue = sustain;
                     state = EnvState::Sustain;
+                    
                 }
                 break;
 
