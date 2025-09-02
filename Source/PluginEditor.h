@@ -34,7 +34,13 @@ public:
 
     void buttonClicked(juce::Button* buttonClicked) override;
 
+    void retrieveAlgorithmGraphics();
+
+    
 private:
+    int tabSelection = 0;
+    juce::Rectangle<float> mainPanelBounds;
+    
     ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
     
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;

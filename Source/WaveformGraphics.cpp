@@ -28,9 +28,9 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
     float y = bounds.getY();
     float height = bounds.getHeight();
     float graphicWidth = bounds.getWidth() * 0.9f;
-    float graphicHeight = bounds.getHeight() * 0.75f;
+    float graphicHeight = bounds.getHeight() * 0.85f;
     float widthMargin = bounds.getWidth() * 0.05f;
-    float heightMargin = bounds.getHeight() * 0.125f;
+    float heightMargin = bounds.getHeight() * 0.075f;
 
     float phaseScale = domainResolution/twopi;
 
@@ -91,6 +91,8 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
                                      + (op1Phase * outputGain[1])
                                      + (op2Phase * outputGain[2])
                                      + (op3Phase * outputGain[3]));
+                
+                outputPhase = std::tanh(outputPhase);
                 
                 graphicLines.lineTo(x + widthMargin + widthIncrement * i,
                                     (heightScaled + height/envelopeSegments) + outputPhase * height * 0.05f);

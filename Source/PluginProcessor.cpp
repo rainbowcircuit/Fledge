@@ -164,7 +164,8 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                                        false,
                                        params->amplitude[oper]->get(),
                                        params->phase[oper]->get(),
-                                       params->globalModIndex->get());
+                                       params->globalModIndex->get(),
+                                       params->gain->get());
                 
                 voice->setOperatorGain(oper, params->routing[oper]->get(), params->outputRouting->get());
             }

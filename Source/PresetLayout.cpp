@@ -157,6 +157,13 @@ PresetInterface::PresetInterface(FledgeAudioProcessor& p, juce::AudioProcessorVa
     presetComboBox.addListener(this);
     presetComboBox.setLookAndFeel(&comboBoxLAF);
     
+    addAndMakeVisible(editorSizeComboBox);
+    editorSizeComboBox.addListener(this);
+    editorSizeComboBox.setLookAndFeel(&comboBoxLAF);
+    editorSizeComboBox.addItem("Small", 1);
+    editorSizeComboBox.addItem("Medium", 2);
+    editorSizeComboBox.addItem("Large", 3);
+
     // refresh presets
     loadPresetList();
 }
@@ -167,6 +174,8 @@ PresetInterface::~PresetInterface()
     nextButton.removeListener(this);
     prevButton.removeListener(this);
     presetComboBox.removeListener(this);
+    editorSizeComboBox.removeListener(this);
+
 }
 
 void PresetInterface::resized()
@@ -174,7 +183,9 @@ void PresetInterface::resized()
     auto bounds = getLocalBounds().toFloat();
     float x = bounds.getX();
     float y = bounds.getY();
+    float width = bounds.getWidth();
     float height = bounds.getHeight();
+
 
     rateLabel.setBounds(600, y + height * 0.25f, 164, height * 0.35f);
     rateValueLabel.setBounds(605, y + height * 0.25f, 164, height * 0.35f);
@@ -183,6 +194,7 @@ void PresetInterface::resized()
     prevButton.setBounds(x + height, y, height, height);
     nextButton.setBounds(x + height * 9.0f, y, height, height);
     presetComboBox.setBounds(x + height * 2.0f, bounds.getY(), height * 7.0f, height);
+ //   editorSizeComboBox.setBounds(x + width - (height * 2.0f), y , height * 2.0f, height);
 }
 
 void PresetInterface::comboBoxChanged(juce::ComboBox *comboBoxThatHasChanged)

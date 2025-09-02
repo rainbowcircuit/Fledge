@@ -14,44 +14,53 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     this->index = index;
     
     setLabel(ratioLabel, "Ratio", 12.0f);
-    ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index), ":1");
+    ratioSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "ratio" + juce::String(index));
     addAndMakeVisible(*ratioSlider);
     ratioSlider->setFontSize(12.0f);
+    ratioSlider->setUnitStyle(UnitStyle::Custom);
+    ratioSlider->setSuffix(":1");
     ratioSlider->setNumDecimals(2);
     
+    
     setLabel(fixedLabel, "Fixed", 12.0f);
-    fixedSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "fixed" + juce::String(index), "");
+    fixedSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "fixed" + juce::String(index));
     addAndMakeVisible(*fixedSlider);
     fixedSlider->setFontSize(24.0f);
 
     setLabel(amplitudeLabel, "Amp", 12.0f);
-    amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index), "%");
+    amplitudeSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "amplitude" + juce::String(index));
     addAndMakeVisible(*amplitudeSlider);
+    amplitudeSlider->setUnitStyle(UnitStyle::Percent);
     amplitudeSlider->setFontSize(12.0f);
 
     setLabel(phaseLabel, "P", 12.0f);
-    phaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "phase" + juce::String(index), "%");
+    phaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "phase" + juce::String(index));
     addAndMakeVisible(*phaseSlider);
+    phaseSlider->setUnitStyle(UnitStyle::Percent);
     phaseSlider->setFontSize(12.0f);
 
     setLabel(attackLabel, "A", 12.0f);
-    attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index), " ms");
+    attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index));
     addAndMakeVisible(*attackSlider);
+    attackSlider->setUnitStyle(UnitStyle::Time);
     attackSlider->setFontSize(12.0f);
     
     setLabel(decayLabel, "D", 12.0f);
-    decaySlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "decay" + juce::String(index), " ms");
+    decaySlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "decay" + juce::String(index));
     addAndMakeVisible(*decaySlider);
+    decaySlider->setUnitStyle(UnitStyle::Time);
     decaySlider->setFontSize(12.0f);
 
     setLabel(sustainLabel, "S", 12.0f);
-    sustainSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "sustain" + juce::String(index), " %");
+    sustainSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "sustain" + juce::String(index));
     addAndMakeVisible(*sustainSlider);
+    sustainSlider->setUnitStyle(UnitStyle::Percent);
     sustainSlider->setFontSize(12.0f);
 
     setLabel(releaseLabel, "R", 12.0f);
-    releaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "release" + juce::String(index), " ms");
+    releaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "release" + juce::String(index));
     addAndMakeVisible(*releaseSlider);
+    releaseSlider->setUnitStyle(UnitStyle::Time);
     releaseSlider->setFontSize(12.0f);
 
     envGraphics = std::make_unique<EnvelopeDisplayGraphics>(audioProcessor, index);
@@ -107,19 +116,22 @@ void OperatorInterface::resized()
                           width * 0.45f,
                           height * 0.7625f);
     
-    float sliderWidth = x + width * 0.04f;
-    float sliderHeight = x + width * 0.02f;
+    float graphicsWidth = width * 0.45f;
+    float graphicsHeight = height * 0.7625f;
+
+    float sliderWidth = x + width * 0.03f;
+    float sliderHeight = x + width * 0.015f;
 
     amplitudeSliderLAF.setSliderSize(sliderWidth);
     amplitudeGraphicSlider.setBounds(x + width * 0.02f,
-                                     y + height * 0.2f,
+                                     y + height * 0.2f + (graphicsHeight * 0.05f),
                                      sliderHeight,
-                                     height * 0.7625f);
+                                     height * 0.7625f - sliderHeight * 2);
     
     ratioSliderLAF.setSliderSize(sliderWidth);
-    ratioGraphicSlider.setBounds(x + width * 0.0125f,
-                                 y + height * 0.85f,
-                                 width * 0.45f,
+    ratioGraphicSlider.setBounds(x + width * 0.02f + sliderHeight,
+                                 y + height * 0.9f - (graphicsHeight * 0.05f),
+                                 width * 0.45f - sliderHeight * 2,
                                  sliderHeight);
     
 

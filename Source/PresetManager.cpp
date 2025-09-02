@@ -22,13 +22,13 @@ PresetManager::PresetManager(juce::AudioProcessorValueTreeState& apvts) : apvts(
 {
     if(!defaultDirectory.exists())
     {
-        /*
+        
         const auto result = defaultDirectory.createDirectory();
         if (result.failed())
         {
-            jassertfalse;
+          //  jassertfalse;
         }
-        */
+         
     }
     
     apvts.state.addListener(this);

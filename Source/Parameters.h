@@ -22,7 +22,7 @@ public:
     
 private:
     FledgeAudioProcessor& audioProcessor;
-    
+        
 public:
     juce::AudioProcessorValueTreeState apvts;
     
@@ -50,7 +50,8 @@ public:
     globalSustain,
     globalRelease,
     globalModIndex,
-    outputRouting;
+    outputRouting,
+    gain;
     
 };
 

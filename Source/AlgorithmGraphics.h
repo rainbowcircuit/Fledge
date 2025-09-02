@@ -62,7 +62,7 @@ class OperatorBlock : public juce::Component, AlgorithmHelper
 public:
     void setIsOutput(bool isOutput);
     void paint(juce::Graphics& g) override;
-    void resized() override {}
+    void resized() override;
     //==============================================================================
 
     juce::Point<float> interpolateToVanishing(juce::Point<float> origin);
@@ -169,6 +169,7 @@ public:
 
     //==============================================================================
     void moveBlock(int blockToMove, juce::Point<float> newPoint);
+    void unfocusAllBlocks();
     void saveBlockPosition();
     void followCable(int blockToMove);
     juce::Point<float> limitBlockDrag(juce::Point<float> mousePoint);

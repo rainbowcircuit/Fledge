@@ -13,7 +13,7 @@
 #include "PluginProcessor.h"
 #include "LookAndFeel.h"
 
-enum class DialLAF { RoundDial, GainSlider, HorizontalSlider, VerticalSlider};
+enum class DialLAF { RoundDial, GainSlider, HorizontalSlider, VerticalSlider };
 
 class DialLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -37,6 +37,7 @@ public:
             }
             case DialLAF::GainSlider:
             {
+                drawGainSlider(g, x, y, width, height, sliderPosProportional, hover);
                 break;
             }
             case DialLAF::HorizontalSlider:
@@ -106,6 +107,19 @@ public:
         g.fillPath(dialDotPath);
     }
     
+    void drawGainSlider(juce::Graphics& g, float x, float y, float width, float height, float pos, bool isHovered)
+    {
+        juce::Path graphicPath;
+        juce::Point<float> topCoords = { x + width * pos, y };
+        juce::Point<float> botCoords = { x + width * pos, y + height };
+
+        graphicPath.startNewSubPath(topCoords);
+        graphicPath.lineTo(botCoords);
+        g.setColour(Colors::mainColors[4]);
+        g.strokePath(graphicPath, juce::PathStrokeType(1.5f));
+    }
+
+    
     void drawHorizontalSlider(juce::Graphics& g, float x, float y, float width, float height, float pos, bool isHovered)
     {
         juce::Rectangle<float> slider = { (x + width - sliderSize) * pos,
@@ -174,13 +188,14 @@ private:
 };
 
 
+enum class UnitStyle { Int, Float, Time, Frequency, Decibel, Percent, Semitone, Custom };
+
 class EditableTextBoxSlider : public juce::Component, juce::Timer, juce::AudioProcessorParameter::Listener, juce::AsyncUpdater, juce::Label::Listener
 {
 public:
-    EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID, juce::String parameterSuffix) : audioProcessor(p)
+    EditableTextBoxSlider(FledgeAudioProcessor& p, juce::String parameterID) : audioProcessor(p)
     {
         this->parameterID = parameterID;
-        this->parameterSuffix = parameterSuffix;
         
         addAndMakeVisible(textBox);
         textBox.setEditable(false, false, false);
@@ -188,9 +203,6 @@ public:
         textBox.setColour(juce::Label::outlineWhenEditingColourId, juce::Colours::transparentBlack);
         
         // initialize displayed value
-        auto value = audioProcessor.params->apvts.getRawParameterValue(parameterID)->load();
-        juce::String formattedValue = juce::String(value, numDecimals) + parameterSuffix;
-        textBox.setText(formattedValue, juce::dontSendNotification);
         textBox.addListener(this);
         
         // initialize parameter ranges
@@ -222,6 +234,9 @@ public:
         auto bounds = getLocalBounds();
         textBox.setBounds(bounds);
         
+        auto value = audioProcessor.params->apvts.getRawParameterValue(parameterID)->load();
+        juce::String formattedValue = formatValueWithUnit(value);
+        textBox.setText(formattedValue, juce::dontSendNotification);
     }
         
     void mouseDown(const juce::MouseEvent& m) override
@@ -261,7 +276,7 @@ public:
         auto value = l->getText().getFloatValue();
         float valueLimited = juce::jlimit(rangeStart, rangeEnd, value);
         
-        l->setText(juce::String(valueLimited, numDecimals), juce::dontSendNotification);
+        l->setText(formatValueWithUnit(valueLimited), juce::dontSendNotification);
         textBox.setInterceptsMouseClicks(false, false);
         
         float normalized = (valueLimited - rangeStart) / (rangeEnd - rangeStart);
@@ -314,7 +329,7 @@ public:
             
             if (newParameterID == parameterID)
             {
-                juce::String formattedValue = juce::String(scaledValue, numDecimals) + parameterSuffix;
+                juce::String formattedValue = formatValueWithUnit(scaledValue);
                 textBox.setText(formattedValue, juce::dontSendNotification);
             }
         }
@@ -330,6 +345,12 @@ public:
         this->numDecimals = numDecimals;
     }
     
+    void setSuffix(juce::String parameterSuffix)
+    {
+        this->parameterSuffix = parameterSuffix;
+    }
+
+    
     void timerCallback() override
     {
         auto bounds = getLocalBounds().toFloat();
@@ -340,7 +361,65 @@ public:
         }
     }
     
+    void setUnitStyle(UnitStyle style)
+    {
+        unitStyle = style; // Store the style for use in formatting
+    }
+    
+    juce::String formatValueWithUnit(float value)
+    {
+        switch(unitStyle)
+        {
+            case UnitStyle::Int:
+                return juce::String((int)std::round(value));
+                
+            case UnitStyle::Float:
+                return juce::String(value, numDecimals);
+                
+            case UnitStyle::Time:
+            {
+                if (value >= 1000.0f)
+                {
+                    return juce::String(value / 1000.0f, numDecimals) + " s";
+                }
+                else
+                {
+                    return juce::String(value, numDecimals) + " ms";
+                }
+            }
+            
+            case UnitStyle::Frequency:
+            {
+                if (value >= 1000.0f)
+                {
+                    return juce::String(value / 1000.0f, numDecimals) + " kHz";
+                }
+                else
+                {
+                    return juce::String(value, numDecimals) + " Hz";
+                }
+            }
+            
+            case UnitStyle::Decibel:
+                return juce::String(value, numDecimals) + " dB";
+                
+            case UnitStyle::Percent:
+                return juce::String(value, numDecimals) + " %";
+                
+            case UnitStyle::Semitone:
+                return juce::String(value, numDecimals) + " st";
+                
+            case UnitStyle::Custom:
+                return juce::String(value, numDecimals) + parameterSuffix;
+
+            default:
+                return juce::String(value, numDecimals);
+        }
+    }
+
+    
 private:
+    UnitStyle unitStyle = UnitStyle::Float;
     float initialParamValue;
     float rangeStart, rangeEnd;
     

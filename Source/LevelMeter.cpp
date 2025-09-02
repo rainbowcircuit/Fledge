@@ -12,15 +12,17 @@
 #include "LevelMeter.h"
 #include "LookAndFeel.h"
 
-LevelMeter::LevelMeter(Measurement& measurementL_, Measurement& measurementR_)
-    : measurementL(measurementL_), measurementR(measurementR_),
-      dbLevelL(clampdB), dbLevelR(clampdB)
+LevelMeter::LevelMeter(FledgeAudioProcessor& p, Measurement& measurementL_, Measurement& measurementR_)
+: measurementL(measurementL_), measurementR(measurementR_), dbLevelL(clampdB),
+dbLevelR(clampdB), audioProcessor(p)
 {
     addAndMakeVisible(gainSlider);
     gainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     gainSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     gainSlider.setLookAndFeel(&gainLAF);
     
+    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.params->apvts, "gain", gainSlider);
+
     setOpaque(true);
     startTimerHz(refreshRate);
     decay = 1.0f - std::exp(-1.0f / (float(refreshRate) * 0.2f));
@@ -39,14 +41,14 @@ void LevelMeter::paint (juce::Graphics& g)
     g.fillAll(juce::Colour(35, 37, 36));
 
     // Draw levels horizontally - top and bottom channels
-    drawLevel(g, dbLevelL, 0, bounds.getHeight() / 2 - 1);  // Top channel
-    drawLevel(g, dbLevelR, bounds.getHeight() / 2 + 1, bounds.getHeight() / 2 - 1);  // Bottom channel
+    drawLevel(g, dbLevelL, 0, bounds.getHeight() / 2 - 1);
+    drawLevel(g, dbLevelR, bounds.getHeight() / 2 + 1, bounds.getHeight() / 2 - 1);
 }
 
 void LevelMeter::resized()
 {
-    maxPos = 4.0f;  // Left margin (start position)
-    minPos = float(getWidth()) - 4.0f;  // Right margin (end position)
+    maxPos = 4.0f; 
+    minPos = float(getWidth()) - 4.0f;
     
     auto bounds = getLocalBounds();
     gainSlider.setBounds(bounds);

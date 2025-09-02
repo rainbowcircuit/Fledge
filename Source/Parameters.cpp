@@ -38,6 +38,8 @@ apvts(audioProcessor, nullptr, "Parameters", createParameterLayout())
     globalModIndex = std::make_unique<ParameterInstance>(audioProcessor, *this, "globalModIndex");
     outputRouting = std::make_unique<ParameterInstance>(audioProcessor, *this, "outputRouting");
 
+    gain = std::make_unique<ParameterInstance>(audioProcessor, *this, "gain");
+
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterLayout()
@@ -57,8 +59,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalSustain", 1 }, "Global Sustain", juce::NormalisableRange<float>(25.0f, 400.0f, 0.01f), 100.0f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "globalRelease", 1 }, "Global Release", juce::NormalisableRange<float>(25.0f, 400.0f, 0.1f), 100.0f));
+        
     
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "outputRouting", 1 }, "Output Routing", 0, 15, 1));
+    juce::StringArray opChoices {
+    "No Input",
+    "OP1",
+    "OP2",
+    "OP1, OP2",
+    "OP3",
+    "OP1, OP3",
+    "OP2, OP3",
+    "OP1, OP2, OP3",
+    "OP4",
+    "OP1, OP4",
+    "OP2, OP4",
+    "OP1, OP2, OP4",
+    "OP3, OP4",
+    "OP1, OP3, OP4",
+    "OP2, OP3, OP4",
+    "OP1, OP2, OP3, OP4" };
+
+    layout.add(std::make_unique<juce::AudioParameterChoice>( juce::ParameterID { "outputRouting", 1 }, "Output Routing", opChoices, 1));
+
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "gain", 1 }, "Output Gain", juce::NormalisableRange<float>(-72.0f, 6.0f, 0.1f), 0.0f));
+
 
     std::array<float, 4> defaultAmplitude = { 100.0f, 0.0f, 0.0f, 0.0f };
     std::array<int, 4> defaultRouting = { 2, 4, 8, 0 };
@@ -119,7 +144,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
         juce::String operatorRoutingName = "Op " + juce::String(oper) + " Routing";
         
-        layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, 0, 15, defaultRouting[oper] ));
+
+        layout.add(std::make_unique<juce::AudioParameterChoice>( juce::ParameterID { operatorRoutingID, 1 }, operatorRoutingName, opChoices, defaultRouting[oper] ));
     }
     
 

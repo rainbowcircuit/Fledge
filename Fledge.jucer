@@ -32,6 +32,10 @@
             file="Source/VoiceProcessor.h"/>
     </GROUP>
     <GROUP id="{9FE53B35-E7B3-13B7-1707-857C294EE09A}" name="Operator">
+      <FILE id="bYMDTj" name="VoiceControlsLayout.cpp" compile="1" resource="0"
+            file="Source/VoiceControlsLayout.cpp"/>
+      <FILE id="x9WTQH" name="VoiceControlsLayout.h" compile="0" resource="0"
+            file="Source/VoiceControlsLayout.h"/>
       <FILE id="PRaS1b" name="EnvelopeGraphics.cpp" compile="1" resource="0"
             file="Source/EnvelopeGraphics.cpp"/>
       <FILE id="qS19qr" name="EnvelopeGraphics.h" compile="0" resource="0"

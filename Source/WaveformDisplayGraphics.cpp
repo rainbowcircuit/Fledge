@@ -45,24 +45,19 @@ void OperatorDisplayGraphics::paint(juce::Graphics &g)
     juce::PathStrokeType strokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
     g.setColour(Colors::mainColors[index]);
     
-    juce::Path macroX, macroY;
-    float sliderWidth = width * 0.1f;
-    float sliderHeight = height * 0.05f;
-
-    
     juce::Path bgWaveform = waveformPath(g, x + width * 0.05f,
-                                       y + height * 0.1f,
+                                       y + height * 0.075f,
                                        width * 0.9f,
-                                       height * 0.8f,
+                                       height * 0.775f,
                                        1.0f, 1.0f, 0.0f);
     g.setColour(Colors::greyColor);
     g.strokePath(bgWaveform, strokeType);
 
     
     juce::Path fgWaveform = waveformPath(g, x + width * 0.05f,
-                                       y + height * 0.1f,
+                                       y + height * 0.075f,
                                        width * 0.9f,
-                                       height * 0.8f,
+                                       height * 0.775f,
                                        ratio, amplitude, phase);
     g.setColour(Colors::mainColors[index]);
     g.strokePath(fgWaveform, strokeType);

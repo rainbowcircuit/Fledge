@@ -63,7 +63,7 @@ private:
     comboBoxLAF { PresetInterfaceLAF::ComboBox };
     
     juce::TextButton saveButton, nextButton, prevButton;
-    juce::ComboBox presetComboBox;
+    juce::ComboBox presetComboBox, editorSizeComboBox;
     juce::Label rateLabel, rateValueLabel;
     
     std::unique_ptr<juce::FileChooser> fileChooser;

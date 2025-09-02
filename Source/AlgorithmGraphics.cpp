@@ -148,15 +148,7 @@ void OperatorBlock::setIsOutput(bool isOutput)
 
 void OperatorBlock::paint(juce::Graphics& g)
 {
-    auto bounds = getLocalBounds().toFloat();
-    bounds.reduce(5, 5);
-    
-    blockSize = bounds.getWidth() * 0.15f;
-    blockRectangle = { blockCenterCoords.x - blockSize/2,
-        blockCenterCoords.y - blockSize/2,
-        blockSize, blockSize };
     juce::Path frontPath, leftSidePath, rightSidePath, botSidePath, topSidePath;
-    
     calculatePerspective();
     
     if (!isOutput){
@@ -173,6 +165,17 @@ void OperatorBlock::paint(juce::Graphics& g)
         g.setFont(juce::FontOptions(12.0f));
         g.drawText("Output", blockRectangle.getX(), blockRectangle.getY() - 16.0f, blockRectangle.getWidth(), blockRectangle.getHeight(), juce::Justification::centred);
     }
+}
+
+void OperatorBlock::resized()
+{
+    auto bounds = getLocalBounds().toFloat();
+    bounds.reduce(5, 5);
+    
+    blockSize = bounds.getWidth() * 0.15f;
+    blockRectangle = { blockCenterCoords.x - blockSize/2,
+        blockCenterCoords.y - blockSize/2,
+        blockSize, blockSize };
 }
 
 juce::Point<float> OperatorBlock::interpolateToVanishing(juce::Point<float> origin)
@@ -293,18 +296,13 @@ void OperatorBlock::setBlockCenter(float x, float y)
 {
     blockCenterCoords.x = x;
     blockCenterCoords.y = y;
-    
-    // refresh source block
-    blockRectangle = { blockCenterCoords.x - blockSize/2,
-        blockCenterCoords.y - blockSize/2,
-        blockSize, blockSize };
-    
+    blockRectangle.setCentre(x, y);
     repaint();
 }
 
 juce::Point<float> OperatorBlock::getBlockCenter()
 {
-    return blockCenterCoords;
+    return blockRectangle.getCentre();
 }
 
 bool OperatorBlock::OperatorBlock::isOverBlock(juce::Point<float> mouse)
@@ -337,16 +335,20 @@ bool OperatorBlock::isOverInputPoint(juce::Point<float> mouse)
 
 juce::Point<float> OperatorBlock::getInputPoint()
 {
-    juce::Point<float> point(blockRectangle.getCentreX(), blockRectangle.getY() - 8.0f);
+    juce::Point<float> point(blockRectangle.getCentreX(),
+                             blockRectangle.getCentreY() - blockRectangle.getHeight()/2 - 8.0f);
+
+    if(operatorIndex == 0)
+    DBG("Y upon getInput: " << blockRectangle.getCentreY() - blockRectangle.getHeight()/2 - 8.0f);
     return point;
 }
 
 juce::Point<float> OperatorBlock::getOutputPoint()
 {
-    juce::Point<float> point(blockRectangle.getCentreX(), blockRectangle.getY() + blockRectangle.getHeight() + 8.0f);
+    juce::Point<float> point(blockRectangle.getCentreX(),
+                             blockRectangle.getCentreY() + blockRectangle.getHeight()/2 + 8.0f);
     return point;
 }
-
 
 void OperatorBlock::setBlockInFocus(bool focus)
 {
@@ -428,7 +430,6 @@ AlgorithmGraphics::AlgorithmGraphics(FledgeAudioProcessor& p) : audioProcessor(p
             cable[i][j].toFront(false);
         }
     }
-    setGUIFromParameter();
     addAndMakeVisible(clearCablesButton);
     clearCablesButton.addListener(this);
     
@@ -757,7 +758,6 @@ void AlgorithmGraphics::mouseUp(const juce::MouseEvent& m)
         auto mouse = m.getEventRelativeTo(&op[i]).getPosition().toFloat();
         if (currentCableIndex.has_value() && op[i].isOverInputPoint(mouse) && *dragState == 2)
         {
-            
             op[i].setInput(blk, 1.0f);
             setCable(blk, cbl, i);
             setParameterFromGUI();
@@ -771,13 +771,7 @@ void AlgorithmGraphics::mouseUp(const juce::MouseEvent& m)
         }
     }
 
-    
-    for (int i = 0; i <= 4; i++)
-    {
-        op[i].setBlockInFocus(false);
-        op[i].setPointInFocus(false);
-    }
-    
+    unfocusAllBlocks();
     currentCableIndex.reset();
     currentOutputBlockIndex.reset();
     dragState.reset();
@@ -786,13 +780,27 @@ void AlgorithmGraphics::mouseUp(const juce::MouseEvent& m)
 void AlgorithmGraphics::moveBlock(int blockToMove, juce::Point<float> newPoint)
 {
     op[blockToMove].setBlockCenter(newPoint.x, newPoint.y);
+    
+    averageVanishingPoint();
+    unfocusAllBlocks();
     saveBlockPosition();
+    followCable(blockToMove);
+}
+
+void AlgorithmGraphics::unfocusAllBlocks()
+{
+    for (int i = 0; i <= 4; i++)
+    {
+        op[i].setBlockInFocus(false);
+        op[i].setPointInFocus(false);
+    }
 }
 
 void AlgorithmGraphics::saveBlockPosition()
 {
     if (auto* processor = dynamic_cast<FledgeAudioProcessor*>(&audioProcessor))
     {
+        DBG("y upon being saved: " << op[0].getBlockCenter().y);
         processor->saveBlockPosition(op[0].getBlockCenter(),
                                      op[1].getBlockCenter(),
                                      op[2].getBlockCenter(),
@@ -890,6 +898,32 @@ void AlgorithmGraphics::disconnectCableFromBlock(int cableToDisconnect, int disc
 
 void AlgorithmGraphics::setGUIFromParameter()
 {
+    deleteAllCables();
+
+    // configure operators
+    for (int i = 0; i < 4; i++){
+        int routing = audioProcessor.params->routing[i]->get();
+        op[i].setInput(routing);
+        auto routingArray = toBinary4(routing);
+
+        for(int j = 0; j < 4; j++){
+            if (routingArray[j] == 1){
+                setCable(j, j, i);
+            }
+        }
+    }
+    
+    // refresh output
+    int outputRouting = audioProcessor.params->outputRouting->get();
+    op[4].setInput(outputRouting);
+    auto outputRoutingArray = toBinary4(outputRouting);
+    
+    for(int j = 0; j < 4; j++){
+        if (outputRoutingArray[j] == 1){
+            setCable(j, j, 4);
+            
+        }
+    }
 }
 
 void AlgorithmGraphics::setParameterFromGUI()

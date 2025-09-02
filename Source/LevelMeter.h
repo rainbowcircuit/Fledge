@@ -13,12 +13,12 @@
 #include <JuceHeader.h>
 #include "Measurement.h"
 #include "DialLookAndFeel.h"
-
+#include "PluginProcessor.h"
 
 class LevelMeter  : public juce::Component, private juce::Timer
 {
 public:
-    LevelMeter(Measurement& measurementL, Measurement& measurementR);
+    LevelMeter(FledgeAudioProcessor& p, Measurement& measurementL, Measurement& measurementR);
     ~LevelMeter() override;
 
     void paint (juce::Graphics&) override;
@@ -36,7 +36,7 @@ private:
     
     DialLookAndFeel gainLAF { DialLAF::GainSlider };
     juce::Slider gainSlider;
-    std::unique_ptr<juce::SliderParameterAttachment> gainAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
     
     void drawLevel(juce::Graphics& g, float level, int y, int height);
     void updateLevel(float newLevel, float& smoothedLevel, float& leveldB) const;
@@ -61,6 +61,7 @@ private:
     float decay = 0.0f;
     float levelL = clampLevel;
     float levelR = clampLevel;
-
+    
+    FledgeAudioProcessor& audioProcessor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeter)
 };

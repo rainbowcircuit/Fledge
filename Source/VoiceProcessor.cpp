@@ -54,13 +54,16 @@ void SynthVoice::setEnvelope(int index, float attack, float decay, float sustain
     op[index].ampEnvelope.setEnvelopeParameters(attackScaled, decayScaled, sustainScaled, releaseScaled);
 }
 
-void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex)
+void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex, float gainInDecibel)
 {
     op[index].setOperator(ratio, fixed, isFixed, amplitude, phase, globalModIndex);
+    
+    this->gainInAmp = juce::Decibels::decibelsToGain(gainInDecibel);
 }
     
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
+    
     if (op[0].ampEnvelope.isActive())
     {
         for (int sample = startSample; sample < startSample + numSamples; ++sample) {
@@ -89,7 +92,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
             op2 * outputGain[2] +
             op3 * outputGain[3];
             
-            outputSample = output * 0.25f;
+            outputSample = output * 0.25f * gainInAmp;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
                 outputBuffer.addSample(channel, sample, outputSample);
