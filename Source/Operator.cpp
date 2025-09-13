@@ -35,7 +35,11 @@ void FMOperator::setNoteNumber(float noteNumber)
 {
     noteFrequency = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
 }
-
+void FMOperator::setVelocity(float velocity)
+{
+    noteVelocity = velocity;
+    noteVelocitySmoothed.setTargetValue(noteVelocity);
+}
 void FMOperator::setOperator(float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex)
 {
     ratioSmoothed.setTargetValue(ratio);
@@ -57,7 +61,7 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     
     float modulatorPhase = phase1 + phase2 + phase3 + phase4;
     float twopi = juce::MathConstants<float>::twoPi;
-    float envelope = ampEnvelope.getNextSample();
+    float envelope = ampEnvelope.getNextSample() * noteVelocitySmoothed.getNextValue();//multiple amp envelope by velocity
     float phaseOffset = phaseSmoothed.getNextValue();
     float modIndex = std::pow(2.0f, globalModIndexSmoothed.getNextValue() / 100.0f) * 8.0f;
     float waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * modIndex)) * envelope; // 8 is the mod index

@@ -31,6 +31,7 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     {
         op[i].startNote();
         op[i].setNoteNumber(midiNoteNumber);
+        op[i].setVelocity(velocity);
     }
 }
 
