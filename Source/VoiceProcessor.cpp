@@ -32,6 +32,8 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
         op[i].startNote();
         op[i].setNoteNumber(midiNoteNumber);
         op[i].setVelocity(velocity);
+        op[i].setPitchbend(currentPitchWheelPosition);//init pitchWheel position
+        op[i].setPressure(1.0f);//init pressure value for no channel pressure
     }
 }
 
