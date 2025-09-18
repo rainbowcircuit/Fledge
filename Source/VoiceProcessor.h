@@ -121,6 +121,13 @@ private:
     std::array<float, 4> outputGain = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     std::array<FMOperator, 4> op;
+    
+    float attackScaled;
+    float decayScaled;  
+    float sustainScaled;
+    float releaseScaled;
+    float output;
+
 };
 
 class MidiProcessor : public juce::MidiMessage

@@ -37,6 +37,12 @@ private:
     float frequencySmoothingTimeMs = 100.0f;
     float frequencySmoothingCoeff = 0.0f;
     
-    
+    float modulatorPhase;
+    float twopi;
+    float envelope;//multiple amp envelope by velocity
+    float phaseOffset;
+    float modIndex;
+    float waveform; // 8 is the mod index
+
     juce::SmoothedValue<float> ratioSmoothed, fixedSmoothed, noteFrequencySmoothed, amplitudeSmoothed, phaseSmoothed, sustainSmoothed, globalModIndexSmoothed, noteVelocitySmoothed, channelPressureSmoothed;
 };

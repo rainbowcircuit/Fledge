@@ -78,12 +78,12 @@ float FMOperator::processOperator(float phase1, float phase2, float phase3, floa
     if (isFixed) frequency = fixedSmoothed.getNextValue();
     operatorAngle = frequency/sampleRate;
     
-    float modulatorPhase = phase1 + phase2 + phase3 + phase4;
-    float twopi = juce::MathConstants<float>::twoPi;
-    float envelope = ampEnvelope.getNextSample() * noteVelocitySmoothed.getNextValue() * channelPressureSmoothed.getNextValue();//multiple amp envelope by velocity
-    float phaseOffset = phaseSmoothed.getNextValue();
-    float modIndex = std::pow(2.0f, globalModIndexSmoothed.getNextValue() / 100.0f) * 8.0f;
-    float waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * modIndex)) * envelope; // 8 is the mod index
+    modulatorPhase = phase1 + phase2 + phase3 + phase4;
+    twopi = juce::MathConstants<float>::twoPi;
+    envelope = ampEnvelope.getNextSample() * noteVelocitySmoothed.getNextValue() * channelPressureSmoothed.getNextValue();//multiple amp envelope by velocity
+    phaseOffset = phaseSmoothed.getNextValue();
+    modIndex = std::pow(2.0f, globalModIndexSmoothed.getNextValue() / 100.0f) * 8.0f;
+    waveform = std::sin((operatorPhase + phaseOffset) * twopi + (modulatorPhase * modIndex)) * envelope; // 8 is the mod index
 
     // accumulate and wrap
     operatorPhase += operatorAngle;

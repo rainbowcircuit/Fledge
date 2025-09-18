@@ -1,0 +1,278 @@
+Started validating: /Users/gnat/Library/Audio/Plug-Ins/VST3/Fledge.vst3
+2025-09-16 21:02:58.298 pluginval[14739:16378040] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+Started validating: /Users/gnat/Library/Audio/Plug-Ins/VST3/Fledge.vst3
+Random seed: 0x666e268
+Validation started
+Strictness level: 5
+-----------------------------------------------------------------
+Starting tests in: pluginval / Scan for plugins located in: /Users/gnat/Library/Audio/Plug-Ins/VST3/Fledge.vst3...
+Num plugins found: 1
+
+Testing plugin: VST3-Fledge-259bf348-f599e924
+Rainbow Circuit: Fledge v1.0.0
+Completed tests in pluginval / Scan for plugins located in: /Users/gnat/Library/Audio/Plug-Ins/VST3/Fledge.vst3
+-----------------------------------------------------------------
+Starting tests in: pluginval / Open plugin (cold)...
+JUCE v8.0.9
+Completed tests in pluginval / Open plugin (cold)
+-----------------------------------------------------------------
+Starting tests in: pluginval / Open plugin (warm)...
+Running tests 1 times
+Completed tests in pluginval / Open plugin (warm)
+-----------------------------------------------------------------
+Starting tests in: pluginval / Plugin info...
+
+Plugin name: Fledge
+Alternative names: Fledge
+SupportsDoublePrecision: no
+Reported latency: 0
+Reported taillength: 0
+Completed tests in pluginval / Plugin info
+-----------------------------------------------------------------
+Starting tests in: pluginval / Plugin programs...
+Num programs: 0
+All program names checked
+Completed tests in pluginval / Plugin programs
+-----------------------------------------------------------------
+Starting tests in: pluginval / Editor...
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+Completed tests in pluginval / Editor
+-----------------------------------------------------------------
+Starting tests in: pluginval / Open editor whilst processing...
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+Completed tests in pluginval / Open editor whilst processing
+-----------------------------------------------------------------
+Starting tests in: pluginval / Audio processing...
+Testing with sample rate [44100] and block size [64]
+Testing with sample rate [44100] and block size [128]
+!!! Test 31 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 34 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 37 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 40 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 43 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 46 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 49 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 52 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 55 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 58 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+Testing with sample rate [44100] and block size [256]
+!!! Test 61 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 64 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 67 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 70 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 73 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 76 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 79 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 82 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 85 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 88 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+Testing with sample rate [44100] and block size [512]
+!!! Test 91 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 94 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 97 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 100 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 103 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 106 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 109 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 112 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 115 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 118 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+Testing with sample rate [44100] and block size [1024]
+!!! Test 121 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 124 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 127 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 130 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 133 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 136 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 139 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 142 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 145 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+!!! Test 148 failed: NaNs found in buffer -- Expected value: 0, Actual value: 6
+Testing with sample rate [48000] and block size [64]
+Testing with sample rate [48000] and block size [128]
+Testing with sample rate [48000] and block size [256]
+!!! Test 211 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 214 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 217 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 220 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 223 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 226 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 229 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 232 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 235 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+!!! Test 238 failed: NaNs found in buffer -- Expected value: 0, Actual value: 1
+Testing with sample rate [48000] and block size [512]
+!!! Test 241 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 244 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 247 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 250 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 253 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 256 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 259 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 262 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 265 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+!!! Test 268 failed: NaNs found in buffer -- Expected value: 0, Actual value: 3
+Testing with sample rate [48000] and block size [1024]
+Testing with sample rate [96000] and block size [64]
+Testing with sample rate [96000] and block size [128]
+Testing with sample rate [96000] and block size [256]
+Testing with sample rate [96000] and block size [512]
+!!! Test 391 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 394 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 397 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 400 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 403 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 406 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 409 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 412 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 415 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+!!! Test 418 failed: NaNs found in buffer -- Expected value: 0, Actual value: 57
+Testing with sample rate [96000] and block size [1024]
+!!! Test 421 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 424 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 427 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 430 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 433 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 436 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 439 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 442 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 445 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+!!! Test 448 failed: NaNs found in buffer -- Expected value: 0, Actual value: 56
+FAILED!!  80 tests failed, out of a total of 450
+-----------------------------------------------------------------
+Starting tests in: pluginval / Plugin state...
+Completed tests in pluginval / Plugin state
+-----------------------------------------------------------------
+Starting tests in: pluginval / Automation...
+Testing with sample rate [44100] and block size [64] and sub-block size [32]
+Testing with sample rate [44100] and block size [128] and sub-block size [32]
+Testing with sample rate [44100] and block size [256] and sub-block size [32]
+Testing with sample rate [44100] and block size [512] and sub-block size [32]
+Testing with sample rate [44100] and block size [1024] and sub-block size [32]
+Testing with sample rate [48000] and block size [64] and sub-block size [32]
+Testing with sample rate [48000] and block size [128] and sub-block size [32]
+Testing with sample rate [48000] and block size [256] and sub-block size [32]
+Testing with sample rate [48000] and block size [512] and sub-block size [32]
+Testing with sample rate [48000] and block size [1024] and sub-block size [32]
+Testing with sample rate [96000] and block size [64] and sub-block size [32]
+Testing with sample rate [96000] and block size [128] and sub-block size [32]
+Testing with sample rate [96000] and block size [256] and sub-block size [32]
+Testing with sample rate [96000] and block size [512] and sub-block size [32]
+Testing with sample rate [96000] and block size [1024] and sub-block size [32]
+Completed tests in pluginval / Automation
+-----------------------------------------------------------------
+Starting tests in: pluginval / Editor Automation...
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+Y upon getInput: 256.5
+y upon being retrieved284
+y upon being saved: 284
+Y upon getInput: 256.5
+y upon being saved: 284
+y upon being saved: 284
+y upon being saved: 284
+Y upon getInput: 256.5
+Y upon getInput: 256.5
+Completed tests in pluginval / Editor Automation
+-----------------------------------------------------------------
+Starting tests in: pluginval / Automatable Parameters...
+Completed tests in pluginval / Automatable Parameters
+-----------------------------------------------------------------
+Starting tests in: pluginval / auval...
+Completed tests in pluginval / auval
+-----------------------------------------------------------------
+Starting tests in: pluginval / vst3 validator...
+INFO: Skipping vst3 validator as validator path hasn't been set
+Completed tests in pluginval / vst3 validator
+-----------------------------------------------------------------
+Starting tests in: pluginval / Basic bus...
+Completed tests in pluginval / Basic bus
+-----------------------------------------------------------------
+Starting tests in: pluginval / Listing available buses...
+Inputs:
+	Named layouts: None
+	Discrete layouts: None
+Outputs:
+	Named layouts: Mono, Stereo
+	Discrete layouts: Discrete #1
+Main bus num input channels: 0
+Main bus num output channels: 2
+Completed tests in pluginval / Listing available buses
+-----------------------------------------------------------------
+Starting tests in: pluginval / Enabling all buses...
+Completed tests in pluginval / Enabling all buses
+-----------------------------------------------------------------
+Starting tests in: pluginval / Disabling non-main busses...
+Completed tests in pluginval / Disabling non-main busses
+-----------------------------------------------------------------
+Starting tests in: pluginval / Restoring default layout...
+Main bus num input channels: 0
+Main bus num output channels: 2
+Completed tests in pluginval / Restoring default layout
+FAILURE
+*** FAILED
+
+
+Finished validating: /Users/gnat/Library/Audio/Plug-Ins/VST3/Fledge.vst3
+*** FAILED WITH EXIT CODE: 1
+
+Finished batch validation
