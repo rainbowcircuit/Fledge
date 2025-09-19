@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Parameters op0XPos="135.0" op0YPos="269.8000183105469" op1XPos="135.0" op1YPos="193.9187469482422"
+            op2XPos="135.0" op2YPos="118.0374984741211" op3XPos="135.0" op3YPos="42.15625"
+            presetName="simple_sine">
+  <PARAM id="amplitude0" value="100.0"/>
+  <PARAM id="amplitude1" value="0.0"/>
+  <PARAM id="amplitude2" value="0.0"/>
+  <PARAM id="amplitude3" value="0.0"/>
+  <PARAM id="attack0" value="24.5"/>
+  <PARAM id="attack1" value="499.9999694824219"/>
+  <PARAM id="attack2" value="499.9999694824219"/>
+  <PARAM id="attack3" value="499.9999694824219"/>
+  <PARAM id="decay0" value="0.0"/>
+  <PARAM id="decay1" value="499.9999694824219"/>
+  <PARAM id="decay2" value="499.9999694824219"/>
+  <PARAM id="decay3" value="499.9999694824219"/>
+  <PARAM id="fixed0" value="20.0"/>
+  <PARAM id="fixed1" value="20.0"/>
+  <PARAM id="fixed2" value="20.0"/>
+  <PARAM id="fixed3" value="20.0"/>
+  <PARAM id="globalAttack" value="100.0"/>
+  <PARAM id="globalDecay" value="100.0"/>
+  <PARAM id="globalModIndex" value="100.0"/>
+  <PARAM id="globalRelease" value="100.0"/>
+  <PARAM id="globalSustain" value="100.0"/>
+  <PARAM id="opMode0" value="0.0"/>
+  <PARAM id="opMode1" value="0.0"/>
+  <PARAM id="opMode2" value="0.0"/>
+  <PARAM id="opMode3" value="0.0"/>
+  <PARAM id="operator0Routing" value="2.0"/>
+  <PARAM id="operator1Routing" value="4.0"/>
+  <PARAM id="operator2Routing" value="8.0"/>
+  <PARAM id="operator3Routing" value="0.0"/>
+  <PARAM id="outputRouting" value="1.0"/>
+  <PARAM id="phase0" value="0.0"/>
+  <PARAM id="phase1" value="0.0"/>
+  <PARAM id="phase2" value="0.0"/>
+  <PARAM id="phase3" value="0.0"/>
+  <PARAM id="ratio0" value="1.0"/>
+  <PARAM id="ratio1" value="0.75"/>
+  <PARAM id="ratio2" value="0.9999999403953552"/>
+  <PARAM id="ratio3" value="0.9999999403953552"/>
+  <PARAM id="release0" value="22.59000015258789"/>
+  <PARAM id="release1" value="999.9999389648438"/>
+  <PARAM id="release2" value="999.9999389648438"/>
+  <PARAM id="release3" value="999.9999389648438"/>
+  <PARAM id="sustain0" value="100.0"/>
+  <PARAM id="sustain1" value="80.0"/>
+  <PARAM id="sustain2" value="80.0"/>
+  <PARAM id="sustain3" value="80.0"/>
+  <PARAM id="voiceCount" value="1.0"/>
+  <PARAM id="voiceSlew" value="0.0"/>
+  <PARAM id="gain"/>
+  <PARAM id="globalVelocity" value="0.7977030873298645"/>
+  <PARAM id="velocity0"/>
+  <PARAM id="velocity1"/>
+  <PARAM id="velocity2"/>
+  <PARAM id="velocity3"/>
+</Parameters>
