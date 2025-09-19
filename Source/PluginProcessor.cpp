@@ -96,7 +96,7 @@ void FledgeAudioProcessor::changeProgramName (int index, const juce::String& new
 void FledgeAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
-    for (int v = 0; v < 8; v++)
+    for (int v = 0; v < 16; v++)
         synth.addVoice(new SynthVoice());
     
     synth.addSound(new SynthSound());
@@ -142,7 +142,7 @@ bool FledgeAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) c
 void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    synth.setVoiceCount(params->voiceCount->get());
+    synth.setVoiceCount(8);
     for (int oper = 0; oper < 4; oper++){
         for (int v = 0; v < synth.getNumVoices(); v++)
         {

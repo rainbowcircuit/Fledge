@@ -31,6 +31,9 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     {
         op[i].startNote();
         op[i].setNoteNumber(midiNoteNumber);
+        op[i].setVelocity(velocity);
+        op[i].setPitchbend(currentPitchWheelPosition);//init pitchWheel position
+        op[i].setPressure(1.0f);//init pressure value for no channel pressure
     }
 }
 
@@ -45,11 +48,11 @@ void SynthVoice::stopNote(float velocity, bool allowTailOff)
 
 void SynthVoice::setEnvelope(int index, float attack, float decay, float sustain, float release, float globalAttack, float globalDecay, float globalSustain, float globalRelease)
 {
-    float attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
-    float decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
+    attackScaled = std::pow(2.0f, globalAttack / 100.0f) * attack;
+    decayScaled = std::pow(2.0f, globalDecay / 100.0f) * decay;
     
-    float sustainScaled = juce::jlimit(0.0f, 1.0f, (globalSustain / 100.0f) * (sustain/100.0f));
-    float releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
+    sustainScaled = juce::jlimit(0.0f, 1.0f, (globalSustain / 100.0f) * (sustain/100.0f));
+    releaseScaled = std::pow(2.0f, globalRelease / 100.0f) * release;
 
     op[index].ampEnvelope.setEnvelopeParameters(attackScaled, decayScaled, sustainScaled, releaseScaled);
 }
@@ -87,7 +90,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
                                         op2 * op0Gain[2],
                                         op3 * op0Gain[3]);
 
-            float output = op0 * outputGain[0] +
+            output = op0 * outputGain[0] +
             op1 * outputGain[1] +
             op2 * outputGain[2] +
             op3 * outputGain[3];

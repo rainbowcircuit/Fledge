@@ -59,7 +59,7 @@ private:
     }
 
     int nextVoiceIndex = 0;
-    int voiceCount = 8;
+    int voiceCount = 16;
 };
 
 class SynthSound : public juce::SynthesiserSound
@@ -84,7 +84,21 @@ public:
     void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex, float gainInDecibel);
     
     //==============================================================================
-    void pitchWheelMoved(int newPitchWheelValue) override {}
+    void pitchWheelMoved(int newPitchWheelValue) override 
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            op[i].setPitchbend(newPitchWheelValue);
+        }
+    }
+    void channelPressureChanged (int newChannelPressureValue) override
+    {
+        channelPressureFloat = newChannelPressureValue / 127.0f;
+        for (int i = 0; i < 4; i++)
+        {
+            op[i].setPressure(channelPressureFloat);
+        }
+    }
     void controllerMoved(int controllerNumber, int newControllerValue) override {}
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
     
@@ -96,6 +110,7 @@ private:
     double sampleRate;
     juce::AudioBuffer<float> synthBuffer;
     float outputSample;
+    float channelPressureFloat;
     float gainInAmp;
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm
     
@@ -106,5 +121,20 @@ private:
     std::array<float, 4> outputGain = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     std::array<FMOperator, 4> op;
+    
+    float attackScaled;
+    float decayScaled;  
+    float sustainScaled;
+    float releaseScaled;
+    float output;
+
 };
 
+class MidiProcessor : public juce::MidiMessage
+{
+public:
+    float getMidiFrequencyCents(float midiNoteCents)
+    {
+        return std::pow(2, (midiNoteCents-6900.0f)/1200.0f) * 440.0f;
+    }
+};
