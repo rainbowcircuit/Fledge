@@ -46,7 +46,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
-    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "voiceCount", 1 }, "Voice Count", 1, 8, 0.0f));
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID { "voiceCount", 1 }, "Voice Count", 1, 8, 8));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "voiceSlew", 1 }, "Glide", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
     
@@ -81,7 +81,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
 
     layout.add(std::make_unique<juce::AudioParameterChoice>( juce::ParameterID { "outputRouting", 1 }, "Output Routing", opChoices, 1));
 
-    
     layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { "gain", 1 }, "Output Gain", juce::NormalisableRange<float>(-72.0f, 6.0f, 0.1f), 0.0f));
 
 
@@ -116,7 +115,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
         juce::String ratioID = "ratio" + juce::String(oper);
         juce::String ratioName = "Ratio " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { ratioID, 1 }, ratioName, juce::NormalisableRange<float>(0.25f, 20.0f, 0.25f), 1.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { ratioID, 1 }, ratioName, juce::NormalisableRange<float>(0.25f, 20.0f, 0.01f), 1.0f));
 
         juce::String fixedID = "fixed" + juce::String(oper);
         juce::String fixedName = "Fixed " + juce::String(oper);

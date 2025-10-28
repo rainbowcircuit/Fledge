@@ -192,6 +192,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             maxR = juce::jmax(maxR, std::abs(rightData[i]));
         }
         outputLevelR.updateIfGreater(maxR);
+        
     } else if (numChannels >= 1) {
         auto* leftData = buffer.getReadPointer(0);
         float maxL = 0.0f;

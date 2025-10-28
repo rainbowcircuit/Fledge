@@ -164,8 +164,6 @@ public:
     void setCable(int originBlock, int cableIndex, int destBlock);
     void setCableOutputCoords(int originBlock, juce::Point<float> newOutputPoint);
     void setCableInputCoords(int destinationBlock, juce::Point<float> newInputPoint);
-    void connectCableToBlock(int originBlock, int cableToConnect, int destinationBlock);
-    void disconnectCableFromBlock(int cableToDisconnect, int disconnectedBlock);
 
     //==============================================================================
     void moveBlock(int blockToMove, juce::Point<float> newPoint);

@@ -55,7 +55,6 @@ public:
     
 };
 
-
 class ParameterInstance : public juce::AudioProcessorParameter::Listener, juce::AsyncUpdater
 {
 public:

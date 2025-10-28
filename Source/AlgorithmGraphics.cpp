@@ -368,6 +368,7 @@ std::array<float, 4>& OperatorBlock::getInputIndex()
 void OperatorBlock::setInput(int index, float value) // potentially with bool
 {
     inputIndex[index] = value;
+    DBG("yup" << inputIndex[0] << inputIndex[1] << inputIndex[2] << inputIndex[3] << inputIndex[4]);
 }
 
 void OperatorBlock::setInput(std::array<float, 4> inputIndex)
@@ -668,7 +669,6 @@ void AlgorithmGraphics::buttonClicked(juce::Button* button)
 void AlgorithmGraphics::mouseDown(const juce::MouseEvent& m)
 {
     grabKeyboardFocus();
-    
     currentCableIndex.reset();
     currentOutputBlockIndex.reset();
     dragState.reset();
@@ -680,7 +680,7 @@ void AlgorithmGraphics::mouseDown(const juce::MouseEvent& m)
         
         for (int j = 0; j < 4; j++)
         {
-             cable[i][j].setIsCableSelected(cable[i][j].getIsMouseOver(mouse));
+            cable[i][j].setIsCableSelected(cable[i][j].getIsMouseOver(mouse));
             
             if (op[i].isOverOutputPoint(mouse) && !cable[i][j].getIsInUse())
             {
@@ -694,6 +694,7 @@ void AlgorithmGraphics::mouseDown(const juce::MouseEvent& m)
         }
         
         if (op[i].isOverBlock(mouse)) {
+            
             moveBlock(i, mouse);
             followCable(i);
 
@@ -702,7 +703,7 @@ void AlgorithmGraphics::mouseDown(const juce::MouseEvent& m)
             dragState = 1; // dragging block
             return;
         }
-        
+                
         if (op[i].isOverOutputPoint(mouse) || op[i].isOverInputPoint(mouse) || op[i].isOverBlock(mouse)){
             dragState = 0; // not over anything
             return;
@@ -886,16 +887,6 @@ juce::Point<float> AlgorithmGraphics::limitBlockDrag(juce::Point<float> mousePoi
     else { return bounds.getConstrainedPoint(mousePoint); }
 }
 
-void AlgorithmGraphics::connectCableToBlock(int originBlock, int cableToConnect, int destinationBlock)
-{
-    
-}
-
-void AlgorithmGraphics::disconnectCableFromBlock(int cableToDisconnect, int disconnectedBlock)
-{
-    
-}
-
 void AlgorithmGraphics::setGUIFromParameter()
 {
     deleteAllCables();
@@ -1001,7 +992,7 @@ void AlgorithmGraphics::deleteSelectedCable()
                 int outputIndex = cable[i][j].getCableOutputIndex(); // cable origin
                 int inputIndex = cable[i][j].getCableInputIndex(); // cable destination
 
-                auto blockInputIndex = op[inputIndex].getInputIndex(); // array of
+                auto blockInputIndex = op[inputIndex].getInputIndex();
                 DBG("before: " << blockInputIndex[0] << blockInputIndex[1] << blockInputIndex[2] << blockInputIndex[3]);
 
                 blockInputIndex[outputIndex] = 0.0f;
@@ -1010,7 +1001,6 @@ void AlgorithmGraphics::deleteSelectedCable()
                 int modifiedInputIndex = fromBinary4(blockInputIndex);
                 op[inputIndex].setInput(modifiedInputIndex);
                 cable[i][j].setCableOutputIndex(-1);
-                
             }
         }
     }
@@ -1045,7 +1035,6 @@ bool AlgorithmGraphics::keyPressed(const juce::KeyPress& key)
     if (key.getKeyCode() == juce::KeyPress::backspaceKey)
     {
         deleteSelectedCable();
-    //    clearAllInputs();
         setParameterFromGUI();
     }
     return true;
