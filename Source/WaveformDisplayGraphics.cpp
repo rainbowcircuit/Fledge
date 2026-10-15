@@ -58,7 +58,7 @@ void OperatorDisplayGraphics::paint(juce::Graphics &g)
                                        y + height * 0.075f,
                                        width * 0.9f,
                                        height * 0.775f,
-                                       ratio, amplitude, phase);
+                                       ratio * std::pow(2.0f, detuneCents / 1200.0f), amplitude, 0.0f);
     g.setColour(Colors::mainColors[index]);
     g.strokePath(fgWaveform, strokeType);
 }
@@ -79,14 +79,13 @@ juce::Path OperatorDisplayGraphics::waveformPath(juce::Graphics &g, float x, flo
     int domainResolution = 128;
     float widthIncrement = width/domainResolution;
     float phaseScale = domainResolution/twopi;
-    phase = (phase/100.0f) * twopi;
     
-    float sinStart = std::sin((0/phaseScale) * freq + phase);
+    float sinStart = std::sin((0/phaseScale) * freq);
     graphicPath.startNewSubPath(x + widthIncrement * 0, (y + height/2) + (height * sinStart/2) * amp);
 
     for (int i = 1; i < domainResolution; i++)
     {
-        float sin = std::sin((i/phaseScale) * freq + phase);
+        float sin = std::sin((i/phaseScale) * freq);
         graphicPath.lineTo(x + widthIncrement * i, (y + height/2) + (height * sin/2) * amp);
     }
 
@@ -95,12 +94,12 @@ juce::Path OperatorDisplayGraphics::waveformPath(juce::Graphics &g, float x, flo
 }
 
 
-void OperatorDisplayGraphics::setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio, float phase)
+void OperatorDisplayGraphics::setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio, float detuneCents)
 {
     this->ratio = ratio;
     this->fixed = fixed;
     this->amplitude = amplitude/100.0f;
-    this->phase = phase;
+    this->detuneCents = detuneCents;
     repaint();
 }
 

@@ -24,10 +24,10 @@ public:
     void setIndex(int index);
     void paint(juce::Graphics &g) override;
     void resized() override;
-    juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp, float phase);
+    juce::Path waveformPath(juce::Graphics &g, float x, float y, float width, float height, float freq, float amp, float phase = 0.0f);
 
     //==============================================================================
-    void setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio, float phase);
+    void setRatioAndAmplitude(float ratio, float fixed, float amplitude, bool isRatio, float detuneCents);
     void setParameter(float x, float y);
     void mouseDrag(const juce::MouseEvent& m) override;
 
@@ -49,7 +49,7 @@ private:
 
     
     int index;
-    float ratio, fixed, amplitude, phase;
+    float ratio, fixed, amplitude, detuneCents = 0.0f;
     
     FledgeAudioProcessor& audioProcessor;
 };

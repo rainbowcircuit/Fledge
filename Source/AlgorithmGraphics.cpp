@@ -713,8 +713,11 @@ void AlgorithmGraphics::mouseDown(const juce::MouseEvent& m)
 
 void AlgorithmGraphics::mouseDrag(const juce::MouseEvent& m)
 {
+    if (!currentOutputBlockIndex.has_value() || !dragState.has_value())
+        return;
+
     int blk = *currentOutputBlockIndex;
-    int cbl = *currentCableIndex;
+    int cbl = currentCableIndex.value_or(-1);
 
     for (int i = 0; i <= 4; i++)
     {
@@ -751,8 +754,17 @@ void AlgorithmGraphics::mouseDrag(const juce::MouseEvent& m)
 
 void AlgorithmGraphics::mouseUp(const juce::MouseEvent& m)
 {
+    if (!currentOutputBlockIndex.has_value() || !dragState.has_value())
+    {
+        unfocusAllBlocks();
+        currentCableIndex.reset();
+        currentOutputBlockIndex.reset();
+        dragState.reset();
+        return;
+    }
+
     int blk = *currentOutputBlockIndex;
-    int cbl = *currentCableIndex;
+    int cbl = currentCableIndex.value_or(-1);
 
     for (int i = 0; i <= 4; i++)
     {
@@ -778,13 +790,14 @@ void AlgorithmGraphics::mouseUp(const juce::MouseEvent& m)
     dragState.reset();
 }
 
-void AlgorithmGraphics::moveBlock(int blockToMove, juce::Point<float> newPoint)
+void AlgorithmGraphics::moveBlock(int blockToMove, juce::Point<float> newPoint, bool save)
 {
     op[blockToMove].setBlockCenter(newPoint.x, newPoint.y);
-    
+
     averageVanishingPoint();
     unfocusAllBlocks();
-    saveBlockPosition();
+    if (save)
+        saveBlockPosition();
     followCable(blockToMove);
 }
 
@@ -899,7 +912,7 @@ void AlgorithmGraphics::setGUIFromParameter()
 
         for(int j = 0; j < 4; j++){
             if (routingArray[j] == 1){
-                setCable(j, j, i);
+                setCable(j, findFreeCableSlot(j), i);
             }
         }
     }
@@ -911,10 +924,18 @@ void AlgorithmGraphics::setGUIFromParameter()
     
     for(int j = 0; j < 4; j++){
         if (outputRoutingArray[j] == 1){
-            setCable(j, j, 4);
-            
+            setCable(j, findFreeCableSlot(j), 4);
         }
     }
+}
+
+int AlgorithmGraphics::findFreeCableSlot(int originBlock)
+{
+    for (int k = 0; k < 4; k++)
+        if (!cable[originBlock][k].getIsInUse())
+            return k;
+
+    return 3; // all slots taken: reuse the last one rather than index out of range
 }
 
 void AlgorithmGraphics::setParameterFromGUI()
@@ -966,6 +987,7 @@ void AlgorithmGraphics::deleteAllCables()
         for (int j = 0; j < 4; j++) {
             cable[i][j].setIsInUse(false);
             cable[i][j].setIsConnected(false);
+            cable[i][j].setIsCableSelected(false);
             cable[i][j].setCableInputIndex(-1);
             cable[i][j].setCableOutputIndex(-1);
         }
@@ -983,14 +1005,18 @@ void AlgorithmGraphics::deleteSelectedCable()
 {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if(cable[i][j].getIsCableSelected())
+            if(cable[i][j].getIsCableSelected() && cable[i][j].getIsInUse())
             {
                 cable[i][j].setIsInUse(false);
                 cable[i][j].setIsConnected(false);
-                
+                cable[i][j].setIsCableSelected(false);
+
                 // when cable is detached, it modifies the destination
                 int outputIndex = cable[i][j].getCableOutputIndex(); // cable origin
                 int inputIndex = cable[i][j].getCableInputIndex(); // cable destination
+
+                if (outputIndex < 0 || outputIndex > 3 || inputIndex < 0 || inputIndex > 4)
+                    continue;
 
                 auto blockInputIndex = op[inputIndex].getInputIndex();
                 DBG("before: " << blockInputIndex[0] << blockInputIndex[1] << blockInputIndex[2] << blockInputIndex[3]);
@@ -1001,6 +1027,7 @@ void AlgorithmGraphics::deleteSelectedCable()
                 int modifiedInputIndex = fromBinary4(blockInputIndex);
                 op[inputIndex].setInput(modifiedInputIndex);
                 cable[i][j].setCableOutputIndex(-1);
+                cable[i][j].setCableInputIndex(-1);
             }
         }
     }

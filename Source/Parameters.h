@@ -33,7 +33,7 @@ public:
     release,
     ratio,
     amplitude,
-    phase,
+    detune,
     routing;
     
     std::unique_ptr<ParameterInstance>

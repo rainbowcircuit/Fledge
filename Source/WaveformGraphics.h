@@ -23,7 +23,7 @@ public:
 
     void setGainCoefficients(int index, int gainIndex, int outputGainIndex);
     void setEnvelope(int index, float attack, float decay, float sustain, float release);
-    void setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float phase);
+    void setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float detuneCents);
 
 private:
     void calculateEnvelopeSegments();
@@ -38,7 +38,7 @@ private:
     juce::dsp::FastMathApproximations fastSin;
     struct operatorValues
     {
-        float ratio, fixed, amplitude, phase;
+        float ratio, fixed, amplitude;
         bool isRatio;
         float attack = 3000.0f, decay = 1000.0f, sustain = 1.0f, release = 5000.0f;
         float attackSegment, decaySegment, sustainSegment = 12, releaseSegment;

@@ -32,6 +32,7 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
         op[i].startNote();
         op[i].setNoteNumber(midiNoteNumber);
     }
+    op0 = op1 = op2 = op3 = 0.0f;
 }
 
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
@@ -54,9 +55,9 @@ void SynthVoice::setEnvelope(int index, float attack, float decay, float sustain
     op[index].ampEnvelope.setEnvelopeParameters(attackScaled, decayScaled, sustainScaled, releaseScaled);
 }
 
-void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex, float gainInDecibel)
+void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float detuneCents, float globalModIndex, float gainInDecibel)
 {
-    op[index].setOperator(ratio, fixed, isFixed, amplitude, phase, globalModIndex);
+    op[index].setOperator(ratio, fixed, isFixed, amplitude, detuneCents, globalModIndex);
     
     this->gainInAmp = juce::Decibels::decibelsToGain(gainInDecibel);
 }
@@ -64,7 +65,9 @@ void SynthVoice::setFMParameters(int index, float ratio, float fixed, bool isFix
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     
-    if (op[0].ampEnvelope.isActive())
+    const bool anyActive = op[0].ampEnvelope.isActive() || op[1].ampEnvelope.isActive()
+                        || op[2].ampEnvelope.isActive() || op[3].ampEnvelope.isActive();
+    if (anyActive)
     {
         for (int sample = startSample; sample < startSample + numSamples; ++sample) {
             op3 = op[3].processOperator(op0 * op3Gain[0],

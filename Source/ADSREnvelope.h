@@ -23,10 +23,10 @@ public:
 
     void setEnvelopeParameters(float attack, float decay, float sustain, float release)
     {
-        attackInc  = 1.0f / (attack * 0.001f * sampleRate);
-        decayInc  = 1.0f / (decay * 0.001f * sampleRate);
+        attackInc  = 1.0f / juce::jmax(1.0f, (float) (attack * 0.001 * sampleRate));
+        decayInc  = 1.0f / juce::jmax(1.0f, (float) (decay * 0.001 * sampleRate));
         this->sustain = sustain;
-        releaseInc  = 1.0f / (release * 0.001f * sampleRate);
+        releaseSamples = juce::jmax(1.0f, (float) (release * 0.001 * sampleRate));
     }
     
     bool isActive()
@@ -41,6 +41,11 @@ public:
     }
     void noteOff()
     {
+        if (state == EnvState::Idle || state == EnvState::Release)
+            return;
+
+        // Recalculate the slope from the level at the moment of gate release
+        releaseInc = envelopeValue / releaseSamples;
         state = EnvState::Release;
     }
 
@@ -87,9 +92,9 @@ public:
     }
     
 private:
-    double sampleRate;
-    bool gate;
+    double sampleRate = 44100.0;
     float envelopeValue = 0.0f;
     float attackInc = 0.0f, decayInc = 0.0f, sustain = 0.5f, releaseInc = 0.0f;
+    float releaseSamples = 1.0f;
     EnvState state = EnvState::Idle;
 };

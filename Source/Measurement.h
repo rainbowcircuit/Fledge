@@ -29,5 +29,5 @@ struct Measurement
         return value.exchange(0.0f);
     }
 
-    std::atomic<float> value;
+    std::atomic<float> value{0.0f};
 };

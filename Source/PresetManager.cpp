@@ -53,7 +53,10 @@ void PresetManager::loadPreset(const juce::String& presetName)
     }
     
     juce::XmlDocument xmlDocument { presetFile };
-    const auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
+    const auto rootElement = xmlDocument.getDocumentElement();
+    if (rootElement == nullptr)
+        return;
+    const auto valueTreeToLoad = juce::ValueTree::fromXml(*rootElement);
     
     apvts.replaceState(valueTreeToLoad);
     currentPreset.setValue(presetName);

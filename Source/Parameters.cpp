@@ -22,7 +22,7 @@ apvts(audioProcessor, nullptr, "Parameters", createParameterLayout())
         release[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, "release" + incr);
         amplitude[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, "amplitude" + incr);
         ratio[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, "ratio" + incr);
-        phase[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, "phase" + incr);
+        detune[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, "detune" + incr);
         
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";
         routing[oper] = std::make_unique<ParameterInstance>(audioProcessor, *this, operatorRoutingID);
@@ -134,10 +134,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createParameterL
         
         layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { amplitudeID, 1 }, amplitudeName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.1f, 0.5f), defaultAmplitude[oper]));
         
-        juce::String phaseID = "phase" + juce::String(oper);
-        juce::String phaseName = "Phase " + juce::String(oper);
+        juce::String detuneID = "detune" + juce::String(oper);
+        juce::String detuneName = "Detune " + juce::String(oper);
         
-        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { phaseID, 1 }, phaseName, juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f, 0.5f), 0.0f));
+        layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID { detuneID, 1 }, detuneName, juce::NormalisableRange<float>(-100.0f, 100.0f, 1.0f), 0.0f));
         
         //******** Operator Input ********//
         juce::String operatorRoutingID = "operator" + juce::String(oper) + "Routing";

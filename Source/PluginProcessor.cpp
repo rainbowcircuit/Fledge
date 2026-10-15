@@ -95,10 +95,12 @@ void FledgeAudioProcessor::changeProgramName (int index, const juce::String& new
 //==============================================================================
 void FledgeAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    synth.clearVoices();
+    synth.clearSounds();
 
     for (int v = 0; v < 8; v++)
         synth.addVoice(new SynthVoice());
-    
+
     synth.addSound(new SynthSound());
     synth.setNoteStealingEnabled(true);
     synth.setCurrentPlaybackSampleRate(sampleRate);
@@ -163,7 +165,7 @@ void FledgeAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
                                        fixed[oper],
                                        false,
                                        params->amplitude[oper]->get(),
-                                       params->phase[oper]->get(),
+                                       params->detune[oper]->get(),
                                        params->globalModIndex->get(),
                                        params->gain->get());
                 
@@ -223,7 +225,7 @@ void FledgeAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 void FledgeAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     const auto xmlState = getXmlFromBinary(data, sizeInBytes);
-       if (xmlState == nullptr)
+       if (xmlState == nullptr || ! xmlState->hasTagName(params->apvts.state.getType()))
            return;
        const auto newTree = juce::ValueTree::fromXml(*xmlState);
     params->apvts.replaceState(newTree);

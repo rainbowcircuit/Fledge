@@ -111,19 +111,19 @@ public:
     }
     
 private:
-    float width, x, y;
-    
+    float width = 0.0f, x = 0.0f, y = 0.0f;
+
     float opacity = 0.0f;
     int numCableAvailable = 4;
-    int operatorIndex;
-    std::array<float, 4> inputIndex;
-    
+    int operatorIndex = 0;
+    std::array<float, 4> inputIndex{};
+
     // drawing state
-    bool blockInFocus;
-    bool pointInFocus;
-    bool isOutput;
-    
-    float blockSize;
+    bool blockInFocus = false;
+    bool pointInFocus = false;
+    bool isOutput = false;
+
+    float blockSize = 0.0f;
     float perspective = 0.5f;
     
     juce::Rectangle<float> blockRectangle;
@@ -166,7 +166,7 @@ public:
     void setCableInputCoords(int destinationBlock, juce::Point<float> newInputPoint);
 
     //==============================================================================
-    void moveBlock(int blockToMove, juce::Point<float> newPoint);
+    void moveBlock(int blockToMove, juce::Point<float> newPoint, bool save = true);
     void unfocusAllBlocks();
     void saveBlockPosition();
     void followCable(int blockToMove);
@@ -174,6 +174,8 @@ public:
     
     //==============================================================================
     void setGUIFromParameter();
+    int findFreeCableSlot(int originBlock);
+    bool isInteracting() const { return dragState.has_value() || isUpdatePending(); }
     void setParameterFromGUI();
     void handleAsyncUpdate() override;
 
@@ -198,7 +200,7 @@ private:
     std::optional<int> currentCableIndex, currentOutputBlockIndex;
     std::optional<int> dragState; // 0 = out of bounds, 1 = dragging block, 2 = dragging cable
     
-    std::array<std::atomic<int>, 5> routingAtomic;
+    std::array<std::atomic<int>, 5> routingAtomic{};
     
     FledgeAudioProcessor& audioProcessor;
     

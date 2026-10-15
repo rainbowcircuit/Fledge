@@ -81,7 +81,7 @@ public:
     
     //==============================================================================
     void setEnvelope(int index, float attack, float decay, float sustain, float release, float globalAttack, float globalDecay, float globalSustain, float globalRelease);
-    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float phase, float globalModIndex, float gainInDecibel);
+    void setFMParameters(int index, float ratio, float fixed, bool isFixed, float amplitude, float detuneCents, float globalModIndex, float gainInDecibel);
     
     //==============================================================================
     void pitchWheelMoved(int newPitchWheelValue) override {}
@@ -93,10 +93,10 @@ public:
     float getOutputSample();
     
 private:
-    double sampleRate;
+    double sampleRate = 44100.0;
     juce::AudioBuffer<float> synthBuffer;
-    float outputSample;
-    float gainInAmp;
+    float outputSample = 0.0f;
+    float gainInAmp = 1.0f;
     float op0 = 0.0f, op1 = 0.0f, op2 = 0.0f, op3 = 0.0f, feedback = 0.0f; // unit delays for algorithm
     
     std::array<float, 4> op3Gain = { 0.0f, 0.0f, 0.0f, 0.0f };

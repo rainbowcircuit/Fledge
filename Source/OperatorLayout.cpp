@@ -33,11 +33,13 @@ OperatorInterface::OperatorInterface(FledgeAudioProcessor& p, int index) : audio
     amplitudeSlider->setUnitStyle(UnitStyle::Percent);
     amplitudeSlider->setFontSize(12.0f);
 
-    setLabel(phaseLabel, "P", 12.0f);
-    phaseSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "phase" + juce::String(index));
-    addAndMakeVisible(*phaseSlider);
-    phaseSlider->setUnitStyle(UnitStyle::Percent);
-    phaseSlider->setFontSize(12.0f);
+    setLabel(detuneLabel, "D", 12.0f);
+    detuneSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "detune" + juce::String(index));
+    addAndMakeVisible(*detuneSlider);
+    detuneSlider->setUnitStyle(UnitStyle::Custom);
+    detuneSlider->setSuffix(" ct");
+    detuneSlider->setNumDecimals(0);
+    detuneSlider->setFontSize(12.0f);
 
     setLabel(attackLabel, "A", 12.0f);
     attackSlider = std::make_unique<EditableTextBoxSlider>(audioProcessor, "attack" + juce::String(index));
@@ -108,8 +110,8 @@ void OperatorInterface::resized()
     ratioLabel.setBounds(x + width * 0.175f, height * 0.025f, width * 0.15f, height * 0.2f);
     ratioSlider->setBounds(x + width * 0.245f, height * 0.025f, width * 0.175f, height * 0.2f);
 
-    phaseLabel.setBounds(x + width * 0.325f,  height * 0.025f, width * 0.15f, height * 0.2f);
-    phaseSlider->setBounds(x + width * 0.35f, height * 0.025f, width * 0.15f, height * 0.2f);
+    detuneLabel.setBounds(x + width * 0.325f,  height * 0.025f, width * 0.15f, height * 0.2f);
+    detuneSlider->setBounds(x + width * 0.35f, height * 0.025f, width * 0.15f, height * 0.2f);
     
     opGraphics->setBounds(x + width * 0.0125f,
                           y + height * 0.2f,
@@ -189,9 +191,9 @@ void OperatorInterface::timerCallback()
     float fixed = audioProcessor.params->apvts.getRawParameterValue("fixed" + juce::String(index))->load();
     float modIndex = audioProcessor.params->apvts.getRawParameterValue("amplitude" + juce::String(index))->load();
     bool opMode = audioProcessor.params->apvts.getRawParameterValue("opMode" + juce::String(index))->load();
-    float phase = audioProcessor.params->apvts.getRawParameterValue("phase" + juce::String(index))->load();
+    float detune = audioProcessor.params->apvts.getRawParameterValue("detune" + juce::String(index))->load();
 
-    opGraphics->setRatioAndAmplitude(ratio, fixed, modIndex, opMode, phase);
+    opGraphics->setRatioAndAmplitude(ratio, fixed, modIndex, opMode, detune);
     
     float attack = audioProcessor.params->apvts.getRawParameterValue("attack" + juce::String(index))->load();
     float decay = audioProcessor.params->apvts.getRawParameterValue("decay" + juce::String(index))->load();

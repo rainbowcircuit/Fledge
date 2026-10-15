@@ -18,7 +18,6 @@
 #include "OperatorLayout.h"
 #include "AlgorithmGraphics.h"
 #include "AlgorithmSelector.h"
-#include "PresetLayout.h"
 #include "WaveformGraphics.h"
 
 class FledgeAudioProcessorEditor : public juce::AudioProcessorEditor, juce::Timer, juce::Button::Listener, GraphicsHelper
@@ -35,19 +34,20 @@ public:
     void buttonClicked(juce::Button* buttonClicked) override;
 
     void retrieveAlgorithmGraphics();
+    void syncRoutingSnapshot();
+    bool routingChangedExternally();
 
-    
+
 private:
     int tabSelection = 0;
+    std::array<int, 5> appliedRouting{};
     juce::Rectangle<float> mainPanelBounds;
     
-    ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 }, showMacroLAF { 5 };
+    ButtonLookAndFeel showWaveLAF { 3 }, showAlgoLAF { 4 };
     
     std::array<std::unique_ptr<OperatorInterface>, 4>  opInterface;
-    std::unique_ptr<PresetInterface>  presetInterface;
-    std::unique_ptr<MacroControlsInterface> macroInterface;
     
-    juce::TextButton showWaveformButton, showAlgorithmButton, showMacrosButton;
+    juce::TextButton showWaveformButton, showAlgorithmButton;
     WaveformDisplayGraphics waveformDisplay;
     std::unique_ptr<AlgorithmGraphics> algorithmGraphics;
     std::unique_ptr<AlgorithmSelectInterface> algorithmSelector;

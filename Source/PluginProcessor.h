@@ -70,13 +70,13 @@ public:
     std::unique_ptr<Parameters> params;
 
 private:
-    float globalAttack, globalDecay, globalSustain, globalRelease, globalModIndex, outputRouting;
-    bool isFixed;
-    std::array<float, 4> attack, decay, sustain, release, ratio, fixed, amplitude, phase, routing;
-    
-    
-    float outputLevel;
-    std::atomic<float> levelAtomic;
+    float globalAttack = 0.0f, globalDecay = 0.0f, globalSustain = 0.0f, globalRelease = 0.0f, globalModIndex = 0.0f, outputRouting = 0.0f;
+    bool isFixed = false;
+    std::array<float, 4> attack{}, decay{}, sustain{}, release{}, ratio{}, fixed{}, amplitude{}, detune{}, routing{};
+
+
+    float outputLevel = 0.0f;
+    std::atomic<float> levelAtomic{0.0f};
     
     Measurement outputLevelL;
     Measurement outputLevelR;

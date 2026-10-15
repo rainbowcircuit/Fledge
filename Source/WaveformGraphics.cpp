@@ -49,14 +49,13 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
             
             float heightScaled = y + heightMargin + heightIncrement * j;
             
-            float sin0Phase = fmodf(((0/phaseScale) * op[0].ratio * 2.0f) + op[0].phase * twopi, twopi);
+            float sin0Phase = fmodf(((0/phaseScale) * op[0].ratio * 2.0f), twopi);
             float sin = amp0 * fastSin.sin(sin0Phase);
 
             graphicLines.startNewSubPath(x + widthMargin, (heightScaled + height/envelopeSegments) + sin * height * 0.005f);
             for (int i = 1; i <= domainResolution; i++)
             {
                 float op3Sin = fastSin.sin(fmodf(((i/phaseScale) * op[3].ratio)
-                                                 + (op[3].phase * twopi)
                                                  + ((op0Phase * op[3].gain[0])
                                                     + (op1Phase * op[3].gain[1])
                                                     + (op2Phase * op[3].gain[2])
@@ -64,7 +63,6 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
                 op3Phase = amp3 * op[3].amplitude * op3Sin;
                 
                 float op2Sin = fastSin.sin(fmodf(((i/phaseScale) * op[2].ratio)
-                                                 + (op[2].phase * twopi)
                                                  + ((op0Phase * op[2].gain[0])
                                                     + (op1Phase * op[2].gain[1])
                                                     + (op2Phase * op[2].gain[2])
@@ -72,7 +70,6 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
                 op2Phase = amp2 * op[2].amplitude * op2Sin;
                 
                 float op1Sin = fastSin.sin(fmodf(((i/phaseScale) * op[1].ratio)
-                                                 + (op[1].phase * twopi)
                                                  + ((op0Phase * op[1].gain[0])
                                                     + (op1Phase * op[1].gain[1])
                                                     + (op2Phase * op[1].gain[2])
@@ -80,7 +77,6 @@ void WaveformDisplayGraphics::paint(juce::Graphics &g)
                 op1Phase = amp1 * op[1].amplitude * op1Sin;
                 
                 float op0Sin = fastSin.sin(fmodf(((i/phaseScale) * op[0].ratio)
-                                                 + (op[0].phase * twopi)
                                                  + ((op0Phase * op[0].gain[0])
                                                     + (op1Phase * op[0].gain[1])
                                                     + (op2Phase * op[0].gain[2])
@@ -138,13 +134,12 @@ void WaveformDisplayGraphics::setEnvelope(int index, float attack, float decay, 
     repaint();
 }
 
-void WaveformDisplayGraphics::setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float phase)
+void WaveformDisplayGraphics::setFMParameter(int index, float ratio, float fixed, bool isRatio, float amplitude, float detuneCents)
 {
-    op[index].ratio = ratio;
     op[index].fixed = fixed;
     op[index].amplitude = amplitude/100.0f;
     op[index].isRatio = isRatio;
-    op[index].phase = phase/100.0f;
+    op[index].ratio = ratio * std::pow(2.0f, detuneCents / 1200.0f);
     calculateAmplutude();
     repaint();
 }
