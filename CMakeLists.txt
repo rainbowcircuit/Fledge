@@ -9,13 +9,34 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version")
 endif()
 
-# Path to the JUCE checkout (the .jucer used ~/JUCE). Override with -DJUCE_DIR=...
-set(JUCE_DIR "$ENV{HOME}/JUCE" CACHE PATH "Path to the JUCE source tree")
+# Path to the JUCE checkout. Defaults to ~/JUCE on macOS and %USERPROFILE%\JUCE
+# on Windows. Override with -DJUCE_DIR=... (use forward slashes on Windows).
+if(WIN32)
+    file(TO_CMAKE_PATH "$ENV{USERPROFILE}/JUCE" _juce_default)
+else()
+    set(_juce_default "$ENV{HOME}/JUCE")
+endif()
+set(JUCE_DIR "${_juce_default}" CACHE PATH "Path to the JUCE source tree")
+
+if(NOT EXISTS "${JUCE_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR
+        "JUCE not found at '${JUCE_DIR}'.\n"
+        "Clone it there (git clone https://github.com/juce-framework/JUCE.git) "
+        "or pass -DJUCE_DIR=/path/to/JUCE. Delete the build folder after changing it.")
+endif()
 add_subdirectory(${JUCE_DIR} JUCE EXCLUDE_FROM_ALL)
 
 set(FLEDGE_FORMATS VST3 Standalone)
 if(APPLE)
     list(APPEND FLEDGE_FORMATS AU)
+endif()
+
+# Copying to the system plugin folder needs admin rights on Windows
+# (C:/Program Files/Common Files/VST3), so it's off there by default.
+if(WIN32)
+    option(FLEDGE_COPY_PLUGIN "Copy built plugins to the system plugin folder" OFF)
+else()
+    option(FLEDGE_COPY_PLUGIN "Copy built plugins to the system plugin folder" ON)
 endif()
 
 juce_add_plugin(Fledge
@@ -31,7 +52,7 @@ juce_add_plugin(Fledge
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD ${FLEDGE_COPY_PLUGIN}
     VST3_CATEGORIES Instrument Synth
     AU_MAIN_TYPE kAudioUnitType_MusicDevice)
 
